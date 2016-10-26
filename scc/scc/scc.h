@@ -36,12 +36,27 @@ typedef struct DynArray
 	void** data;
 }DynArray;
 /************动态数组函数*****/
-void Dyarray_init(DynArray* parr, int size);
+void Dynarray_init(DynArray* parr, int size);
 void Dynarray_realloc(DynArray* parr, int newsize);
 void Dynarray_add(DynArray* parr, void* data);
 void Dynarray_free(DynArray* parr);
-void Dynarray_find(DynArray* parr, void* data);
+int Dynarray_find(DynArray* parr, int data);
 
+
+/***********单词表***********/
+typedef struct TkWord
+{
+	int tkcode;
+	struct TkWord* next;
+	char* spelling;
+	struct Symol* sym_struct;
+	struct Symol* sym_id;
+}TkWord;
+
+
+#define MAXKEY 2048 
+s
+int elf_hash(char* key);
 
 #endif // !SCC_H_
 
