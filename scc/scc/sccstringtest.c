@@ -13,6 +13,5 @@ int main()
 	Dynarray_add(p, &num);
 	printf("%d", Dynarray_find(p, 10));
 	Dynarray_free(p);
-	
 	return 0;
 }

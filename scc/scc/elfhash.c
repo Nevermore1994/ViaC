@@ -1,5 +1,5 @@
 #include"scc.h"
-/******************************/
+
 
 
 int elf_hash(char* key)
