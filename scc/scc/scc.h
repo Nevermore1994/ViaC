@@ -133,5 +133,7 @@ TkWord* tkword_find(char* p, int key);
 
 
 void* mallocz(int size);
+char is_nogiht(char* c);
+void init_lex();
 #endif // !SCC_H_
 

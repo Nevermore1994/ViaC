@@ -131,5 +131,8 @@ void init_lex()
 		{ KW_CDECL,		NULL,		"__cdecl",			NULL,	NULL },
 		{ KW_STDCALL,	NULL,		"__stdcall",		NULL,	NULL },
 		{0,				NULL,		NULL,				NULL,	NULL}
-	};													
+	};			
+	Dynarray_init(&tktable, 8);
+	for (tp = &keywords[0]; tp->spelling != NULL; tp++)
+		tkword_direct_insert(tp);
 }
