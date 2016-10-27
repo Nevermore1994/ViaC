@@ -1,31 +1,32 @@
 #include"scc.h"
 
-typedef TkWord* pTkWord; 
+typedef TkWord* pTkWord;
 
 DynArray tktable;
-TkWord* tk_hashtable[MAXKEY];
+TkWord* tk_hashtable [MAXKEY];
 DynString sourcestr;
 DynString tkstr;
 char ch;
 int token;
 int tkvalue;
 
+
 TkWord* tkword_direct_insert(TkWord* pword)
 {
 	int keyno;
 	Dynarray_add(&tktable, pword);
 	keyno = elf_hash(pword->spelling);
-	pword->next = tk_hashtable[keyno];
-	tk_hashtable[keyno] = pword;
+	pword->next = tk_hashtable [keyno];
+	tk_hashtable [keyno] = pword;
 	return pword;
-} 
+}
 
 TkWord* tkword_find(char* p, int key)
 {
 	pTkWord res = NULL, tp;
-	for (tp = tk_hashtable[key]; tp ; tp = tp->next)
+	for (tp = tk_hashtable [key]; tp; tp = tp->next)
 	{
-		if ( ! strcmp(p ,tp->spelling))
+		if (!strcmp(p, tp->spelling))
 		{
 			token = tp->tkcode;
 			res = tp;
@@ -41,44 +42,32 @@ TkWord* tkword_insert(char* p)
 	char* s;
 	char* end;
 	int length;
-	
+
 	keyno = elf_hash(p);
 	tp = tkword_find(p, keyno);
 
 	if (tp == NULL)
 	{
-		length = strlen(p); 
-		tp = (pTkWord)mallocz(sizeof(TkWord) + length + 1);
-		tp->next = tk_hashtable[keyno];
-		tk_hashtable[keyno] = tp;
+		length = strlen(p);
+		tp = ( pTkWord ) mallocz(sizeof(TkWord) + length + 1);
+		tp->next = tk_hashtable [keyno];
+		tk_hashtable [keyno] = tp;
 		Dynarray_add(&tktable, tp);
 		tp->tkcode = tktable.count - 1;
-		s = (char*)tp + sizeof(TkWord);
-		tp->spelling = (char*)s;
+		s = ( char* ) tp + sizeof(TkWord);
+		tp->spelling = ( char* ) s;
 		for (end = p + length; p < end; )
 		{
 			*s++ = *p++;
-		} 
+		}
 		*s = (char) '\0';
 	}
 	return tp;
 }
 
-void* mallocz(int size)
+void getch()
 {
-	void* ptr = NULL;
-	ptr = malloc(size);
-	if (!ptr && size)
-	{
-		error("内存分配错误!");
-	}
-	memset(ptr, 0, size);
-	return ptr;
-}
-
-char is_nogiht(char* c)
-{
-	return (c > 'A' && c < 'Z') || (c > 'a' && c < 'z') || c == '_';
+	ch = getc(fin);
 }
 
 void init_lex()
@@ -110,17 +99,17 @@ void init_lex()
 		{ TK_COMMA,		NULL,		 ",",				NULL,	NULL },
 		{ TK_ELLIPSIS,	NULL,		 "...",				NULL,	NULL },
 		{ TK_EOF,		NULL,		 "End_Of_File",		NULL,	NULL },
-														
+
 		{ TK_CINT,		NULL,	 	"整型常量",			NULL,	NULL },
 		{ TK_CCHAR,		NULL,		"字符常量",			NULL,	NULL },
 		{ TK_CSTR,		NULL,		"字符串常量",		NULL,	NULL },
-														
+
 		{ KW_CHAR,		NULL,		"char",				NULL,	NULL },
 		{ KW_SHORT,		NULL,		"short",			NULL,	NULL },
 		{ KW_INT,		NULL,		"int",				NULL,	NULL },
 		{ KW_VOID,		NULL,		"void",				NULL,	NULL },
 		{ KW_STRUCT,	NULL,		"struct",			NULL,	NULL },
-														
+
 		{ KW_IF,		NULL,		"if",				NULL,	NULL },
 		{ KW_ELSE,		NULL,		"else",				NULL,	NULL },
 		{ KW_FOR,		NULL,		"for",				NULL,	NULL },
@@ -132,9 +121,9 @@ void init_lex()
 		{ KW_CDECL,		NULL,		"__cdecl",			NULL,	NULL },
 		{ KW_STDCALL,	NULL,		"__stdcall",		NULL,	NULL },
 		{0,				NULL,		NULL,				NULL,	NULL}
-	};			
+	};
 	Dynarray_init(&tktable, 8);
-	for (tp = &keywords[0]; tp->spelling != NULL; tp++)
+	for (tp = &keywords [0]; tp->spelling != NULL; tp++)
 		tkword_direct_insert(tp);
 }
 
@@ -158,9 +147,55 @@ char* get_tkstr(int c)
 	else if (c >= TK_CINT && c <= TK_CSTR)
 		return sourcestr.data;
 	else
-		return ((TkWord*)tktable.data[c])->spelling;
+		return (( TkWord* ) tktable.data [c])->spelling;
 }
 
+int is_nogiht(char* c)
+{
+	return (c > 'A' && c < 'Z') || (c > 'a' && c < 'z') || c == '_';
+}
+
+int is_digit(char c)
+{
+	return c >= '0' && c <= '9';
+}
+
+TkWord* parse_identifiler()
+{
+	Dynstring_reset(&tkstr);
+	Dynstring_chcat(&tkstr, ch);
+	getch();
+	while (is_nogiht(ch) || is_digit(ch))
+	{
+		Dynstring_chcat(&tkstr, ch);
+		getch(); 
+	} 
+	Dynstring_chcat(&tkstr, '\0');
+	return tkword_insert(tkstr.data);
+}
+
+void parse_num()
+{
+	Dynstring_reset(&tkstr);
+	Dynstring_reset(&sourcestr);
+	do
+	{
+		Dynstring_chcat(&tkstr, ch);
+		Dynstring_chcat(&sourcestr, ch);
+		getch();
+	} while (is_digit(ch));
+	if (ch == '.')
+	{
+		do
+		{
+			Dynstring_chcat(&tkstr, ch); 
+			Dynstring_chcat(&sourcestr, ch);
+		} while (is_digit(ch));
+	}
+	Dynstring_chcat(&tkstr, '\0');
+	Dynstring_chcat(&sourcestr, '\0');
+	tkvalue = atoi(tkstr.data);
+}
 void get_token()
 {
 	preprocess();
@@ -179,10 +214,236 @@ void get_token()
 		case 'M':	case 'N':	case 'O':	case 'P':
 		case 'Q':	case 'R':	case 'S':	case 'T':
 		case 'U':	case 'V':	case 'W':	case 'X':
-		case 'Y':	case 'Z':	
+		case 'Y':	case 'Z':
 		case '_':
 		{
 			TkWord* tp;
+			parse_identifiler();
+			tp = tkword_direct_insert(tkstr.data);
+			token = tp->tkcode;
+			break;
+		}
+		case '0':	case '1':	case '2':	case'3':
+		case '4':   case '5':	case '6':	case '7':
+		case '8':	case '9':
+		{
+			parse_num();
+			token = TK_CINT;
+			break;
+		}
+		case '+':
+		{
+			getch();
+			token = TK_PLUS;
+			break;
+		}
+		case '-':
+		{
+			getch();
+			if (ch == '>')
+			{
+				token = TK_POINTSTO;
+				getch();
+			}
+			else
+				token = TK_MINUS;
+			break;
+		}
+		case '%':
+		{
+			getch();
+			token = TK_MOD;
+			break;
+		}
+		case '/':
+		{
+			getch();
+			token = TK_DIVIDE;
+			break;
+		}
+		case '=':
+		{
+			getch();
+			if (ch == '=')
+			{
+				token = TK_EQ;
+				getch();
+			}
+			else
+			{
+				token = TK_ASSIGN;
+			}
+			break;
+		}
+		case '!':
+		{
+			getch();
+			if (ch == '=')
+			{
+				token = TK_NEQ;
+			}
+			else
+			{
+				error("不能识别,非法操作符");
+				//TODO:逻辑取反
+			}
+			break;
+		}
+		case '<':
+		{
+			getch();
+			if (ch == '<')
+			{
+				error("非法操作符");
+				//TODO:左移位操作符
+			}
+			else if (ch == '=')
+			{
+				token = TK_LEQ;
+				getch();
+			}
+			else
+			{
+				token = TK_LT;
+				getch();
+			}
+			break;
+		}
+		case '>':
+		{
+			getch();
+			if (ch == '>')
+			{
+				error("非法操作符");
+				//TODO:右移位操作符
+			}
+			else if (ch == '=')
+			{
+				token = TK_GEQ;
+				getch();
+			}
+			else
+			{
+				token = TK_GT;
+				getch();
+			}
+			break;
+		}
+		case '.':
+		{
+			getch();
+			if (ch == '.')
+			{
+				getch();
+				if (ch == '.')
+				{
+					token = TK_ELLIPSIS;
+				}
+				else
+				{
+					error("拼写错误");
+				}
+			}
+			else
+			{
+				token = TK_DOT;
+			}
+			break;
+		}
+		case '&':
+		{
+			getch();
+			if (ch == '&')
+			{
+				error("不能识别的操作符");
+				//TODO:与逻辑操作符
+			}
+			else
+			{
+				token = TK_AND;
+			}
+			break;
+		}
+		case '|':
+		{
+			getch();
+			if (ch == '|')
+			{
+				error("不能识别的操作符");
+				//TODO:或逻辑操作符
+			}
+			else
+			{
+				error("不能识别的操作符");
+				//TODO:或的逻辑操作符
+			}
+			break;
+		}
+		case '(':
+		{
+			token = TK_OPENPA;
+			getch();
+			break;
+		}
+		case ')':
+		{
+			token = TK_CLOSEPA;
+			getch();
+			break;
+		}
+		case '[':
+		{
+			getch();
+			token = TK_OPENBR;
+			break;
+		}
+		case ']':
+		{
+			getch();
+			token = TK_CLOSEBR;
+			break;
+		}
+		case ';':
+		{
+			getch();
+			token = TK_SEMICOLON;
+			break;
+		}
+		case ',':
+		{ 
+			getch();
+			token = TK_COMMA;
+			break;
+		}
+		case '*' :
+		{
+			token = TK_STAR;
+			getch();
+			break;
+		}
+		case '\"':
+		{
+			parse_string(ch);
+			token = TK_CSTR;
+			break;
+		}
+		case '\'':
+		{
+			parse_string(ch); 
+			token = TK_CCHAR;
+			break;
+		}
+		case EOF:
+		{
+			token = TK_EOF;
+			break;
+		}
+		default:
+		{
+			error("未能识别的操作符");
+			getch();
+			break;
 		}
 	}
 }
+

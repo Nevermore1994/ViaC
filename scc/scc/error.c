@@ -1,8 +1,6 @@
 #include"scc.h"
 
 DynString tkstr;
-FILE* fin;
-int line_num;
 
  
 void handle_exception(int stage, int level, char* fmt, va_list ap)

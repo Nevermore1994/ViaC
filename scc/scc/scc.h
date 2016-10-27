@@ -124,13 +124,19 @@ TkWord* tkword_direct_insert(TkWord* pWord);
 TkWord* tkword_find(char* p, int key);
 
 
+void getch();
 void preprocess();
-char is_nogiht(char* c);
+TkWord* parse_identifiler();
+void parse_num();
+void parse_string();
 void init_lex();
 void get_token();
+int is_digit(char c);
+int is_nogiht(char* c);
 
 char* get_tkstr(int v);
-/****************附加变量****************************/
+
+/***************引用变量****************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
 extern DynArray tktable;				//单词动态数组
 extern DynString tkstr;
