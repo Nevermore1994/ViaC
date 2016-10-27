@@ -17,4 +17,3 @@ void* mallocz(int size)
 	memset(ptr, 0, size);
 	return ptr;
 }
-s
