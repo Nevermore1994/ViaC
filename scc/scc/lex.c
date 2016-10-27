@@ -4,7 +4,8 @@ typedef TkWord* pTkWord;
 
 DynArray tktable;
 TkWord* tk_hashtable[MAXKEY];
-
+DynString sourcestr;
+DynString tkstr;
 char ch;
 int token;
 int tkvalue;
@@ -135,4 +136,27 @@ void init_lex()
 	Dynarray_init(&tktable, 8);
 	for (tp = &keywords[0]; tp->spelling != NULL; tp++)
 		tkword_direct_insert(tp);
+}
+
+/****************************************************
+*函数功能：跳过c这个单词，如果当前单词不是c,提示错误
+*c:需要跳过的单词
+****************************************************/
+void skip(int c)
+{
+	if (token != c)
+	{
+		error("缺少'%s'", get_tkstr(c));
+	}
+	get_token();
+}
+
+char* get_tkstr(int c)
+{
+	if (c > tktable.count)
+		return NULL;
+	else if (c >= TK_CINT && c <= TK_CSTR)
+		return sourcestr.data;
+	else
+		return ((TkWord*)tktable.data[c])->spelling;
 }

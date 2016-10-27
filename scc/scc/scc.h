@@ -125,9 +125,10 @@ TkWord* tkword_find(char* p, int key);
 
 
 
-char is_nogiht(char* c);
-void init_lex();
-
+char  is_nogiht(char* c);
+void  init_lex();
+void  get_token();
+char* get_tkstr(int v);
 /********************************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
 extern DynArray tktable;				//单词动态数组
@@ -157,8 +158,6 @@ enum e_WorkStage
 void  warning(char* fmt, ...);
 void  error(char* fmt,...);
 void  expect(char* msg);
-void  get_token();
-char* get_tkstr(int v);
 void  skip(int c);
 /*****************附加函数****************/
 void* mallocz(int size);
