@@ -1,13 +1,13 @@
 #include"scc.h"
 
 typedef TkWord* pTkWord; 
+
 DynArray tktable;
 TkWord* tk_hashtable[MAXKEY];
 
 char ch;
 int token;
 int tkvalue;
-int line_num;
 
 TkWord* tkword_direct_insert(TkWord* pword)
 {
@@ -69,7 +69,7 @@ void* mallocz(int size)
 	ptr = malloc(size);
 	if (!ptr && size)
 	{
-		//TODO:
+		error("ÄÚ´æ·ÖÅä´íÎó!");
 	}
 	memset(ptr, 0, size);
 	return ptr;

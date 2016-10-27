@@ -1,8 +1,6 @@
 /******************************************
 *author:Away
 *date:2016-10-25
-*	说		明
-*函数名采用单词大写，函数名仅是首字母大写
 *******************************************/
 
 #ifndef SCC_H_
@@ -40,7 +38,7 @@ void Dynarray_init(DynArray* parr, int size);
 void Dynarray_realloc(DynArray* parr, int newsize);
 void Dynarray_add(DynArray* parr, void* data);
 void Dynarray_free(DynArray* parr);
-int Dynarray_find(DynArray* parr, int data);
+int  Dynarray_find(DynArray* parr, int data);
 
 /************单词编码**********/
 enum e_TokenCode
@@ -98,7 +96,7 @@ enum e_TokenCode
 	/* 标识符 */
 	TK_IDENT
 };
-
+/*****************词法分析**************************/
 /**********词法状态***********/
 enum e_LexState
 {
@@ -117,23 +115,53 @@ typedef struct TkWord
 }TkWord;
 
 
-
-int elf_hash(char* key);				// 字符哈希函数
-
 #define MAXKEY 2048    
 
 #define CH_EOF (-1)						//文件尾部标识
-extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
-extern DynArray tktable;				//单词动态数组
-
 
 TkWord* tkword_insert(char* p);
 TkWord* tkword_direct_insert(TkWord* pWord);
 TkWord* tkword_find(char* p, int key);
 
 
-void* mallocz(int size);
+
 char is_nogiht(char* c);
 void init_lex();
+
+/********************************************/
+extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
+extern DynArray tktable;				//单词动态数组
+extern DynString tkstr;
+extern FILE* fin;
+extern char ch;
+extern char* filename;
+extern int token;
+extern int line_num;
+
+
+
+/***************错误处理*****************************/
+
+enum e_ErrorLevel
+{
+	LEVEL_WARNING,
+	LEVEL_ERROR
+};
+
+enum e_WorkStage
+{
+	STAGE_COMPILE,
+	SRAGE_LINK
+};
+
+void  warning(char* fmt, ...);
+void  error(char* fmt,...);
+void  expect(char* msg);
+void  get_token();
+char* get_tkstr(int v);
+void  skip(int c);
+/*****************附加函数****************/
+void* mallocz(int size);
+int elf_hash(char* key);				// 字符哈希函数
 #endif // !SCC_H_
 
