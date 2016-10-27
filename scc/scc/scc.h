@@ -124,12 +124,13 @@ TkWord* tkword_direct_insert(TkWord* pWord);
 TkWord* tkword_find(char* p, int key);
 
 
+void preprocess();
+char is_nogiht(char* c);
+void init_lex();
+void get_token();
 
-char  is_nogiht(char* c);
-void  init_lex();
-void  get_token();
 char* get_tkstr(int v);
-/********************************************/
+/****************附加变量****************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
 extern DynArray tktable;				//单词动态数组
 extern DynString tkstr;
@@ -138,8 +139,7 @@ extern char ch;
 extern char* filename;
 extern int token;
 extern int line_num;
-
-
+extern int tkvalue;
 
 /***************错误处理*****************************/
 
@@ -159,8 +159,11 @@ void  warning(char* fmt, ...);
 void  error(char* fmt,...);
 void  expect(char* msg);
 void  skip(int c);
+void  link_error(char* fmt, ...);
+
 /*****************附加函数****************/
 void* mallocz(int size);
 int elf_hash(char* key);				// 字符哈希函数
+
 #endif // !SCC_H_
 

@@ -42,7 +42,19 @@ void error(char* fmt, ...)
 	va_end(ap);
 }
  
+/*******************************************
+*函数功能:提示缺少的成分
+*msg:需要什么语法成分
+*******************************************/
 void expect(char* msg)
 {
 	error("缺少%s", msg);
+}
+
+void link_error(char* fmt,...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	handle_exception(SRAGE_LINK, LEVEL_ERROR, fmt, ap);
+	va_end(ap);
 }
