@@ -2,8 +2,8 @@
 
 int main(int argc, char ** argv)
 {
-
-	errno_t err = fopen_s(&fin, "C:\\Users\\Away\\Documents\\scc\\scc\\Debug\\1.c", "rb");
+	filename = "C:\\Users\\Away\\Documents\\scc\\scc\\Debug\\1.c";
+	errno_t err = fopen_s(&fin, filename, "rb");
 	if (err)
 	{
 		printf("不能打开文件!\n");
@@ -14,6 +14,6 @@ int main(int argc, char ** argv)
 	test_lex();
 	cleanup();
 	fclose(fin);
-	printf("%s 词法分析成功!", argv [1]);
+	printf("%s 词法分析成功!", filename);
 	return 1;
 }
