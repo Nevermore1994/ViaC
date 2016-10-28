@@ -1,9 +1,10 @@
 #include"scc.h"
 
-FILE* fin;
+FILE* fin=NULL;
 char* filename;
 char* outname;
-int line_num; 
+int line_num;
+
 
 /****************内存初始化函数***************/
 void* mallocz(int size)
@@ -16,4 +17,27 @@ void* mallocz(int size)
 	}
 	memset(ptr, 0, size);
 	return ptr;
+}
+
+void init()
+{
+	line_num = 1;
+	init_lex();
+}
+
+void  cleanup()
+{
+	int i;
+	for (i = TK_IDENT; i < tktable.count; ++i)
+	{
+		free(tktable.data [i]);
+	}
+	free(tktable.data);
+}
+
+void* get_file_text(char* fname)
+{
+	char* p;
+	p = strchr(fname, '.');
+	return p + 1;
 }

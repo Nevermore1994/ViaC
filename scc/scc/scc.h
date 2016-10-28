@@ -39,7 +39,7 @@ void Dynarray_realloc(DynArray* parr, int newsize);
 void Dynarray_add(DynArray* parr, void* data);
 void Dynarray_free(DynArray* parr);
 int  Dynarray_find(DynArray* parr, int data);
-
+void Dynarray_delete(DynArray* parr, int i);
 /************单词编码**********/
 enum e_TokenCode
 {
@@ -133,8 +133,11 @@ void init_lex();
 void get_token();
 int is_digit(char c);
 int is_nogiht(char* c);
-
+void skip_white_space();
+void parse_comment();
 char* get_tkstr(int v);
+void test_lex();
+
 
 /***************引用变量****************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
@@ -148,7 +151,6 @@ extern int line_num;
 extern int tkvalue;
 
 /***************错误处理*****************************/
-
 enum e_ErrorLevel
 {
 	LEVEL_WARNING,
@@ -158,7 +160,7 @@ enum e_ErrorLevel
 enum e_WorkStage
 {
 	STAGE_COMPILE,
-	SRAGE_LINK
+	STAGE_LINK
 };
 
 void  warning(char* fmt, ...);
@@ -167,9 +169,18 @@ void  expect(char* msg);
 void  skip(int c);
 void  link_error(char* fmt, ...);
 
+/***************词法处理函数********************/
+void color_token(int lex_state);
+void init(); 
+void cleanup();
+void* get_file_text();
+
 /*****************附加函数****************/
 void* mallocz(int size);
 int elf_hash(char* key);				// 字符哈希函数
 
 #endif // !SCC_H_
+
+
+
 
