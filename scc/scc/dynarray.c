@@ -11,25 +11,26 @@ void Dynarray_init(DynArray* parr, int size)
 	{
 		parr->count = 0;
 		parr->capacity = size;
-		parr->data = (void**)malloc(sizeof(int) * size);
+		parr->data = (void**)malloc(sizeof(void*) * size);
 		if (parr->data == NULL)
 		{
 			error("内存分配错误!");
 		}
 	}
 }
+
 void Dynarray_realloc(DynArray* parr, int newsize)
 {
 	if (parr != NULL)
 	{
 		int capacity = parr->capacity;
-		void** data;
+		void* data;
 
 		while (capacity < newsize)
 		{
 			capacity *= 2;
 		}
-		data = realloc(parr, capacity);
+		data = realloc(parr->data, capacity);
 		if (data == NULL)
 		{
 			error("内存分配错误!");
@@ -43,11 +44,11 @@ void Dynarray_add(DynArray* parr, void* data)
 	if (parr != NULL)
 	{
 		int count = parr->count + 1;
-		if (count > parr->capacity)
+		if (count*sizeof(void*) > parr->capacity)
 		{
-			Dynarray_realloc(parr, count);
+			Dynarray_realloc(parr, count * sizeof(void*) );
 		}
-		((void**)parr->data)[count - 1] = data;
+		parr->data[count - 1] = data;
 		parr->count = count;
 	}
 }
@@ -55,8 +56,13 @@ void Dynarray_free(DynArray* parr)
 {
 	if (parr != NULL)
 	{
-		if (parr->data)
-			free(parr->data);
+		void** p;
+		for (p = parr->data; parr->data; ++p, --parr->count)
+		{
+			if (*p)
+				free(*p);
+		}
+		free(parr->data);
 		parr->data = NULL;
 		parr->count = 0;
 		parr->capacity = 0;
@@ -78,3 +84,11 @@ int Dynarray_find(DynArray* parr, int data)
 	return -1;
 }
 
+void Dynarray_delete(DynArray* parr, int i)
+{
+	if (parr->data [i])
+	{
+		free(parr->data [i]);
+	}
+	memcpy(parr->data + i, parr->data + i + 1, sizeof(void*) * (parr->count - i - 1)); //i为下标
+}

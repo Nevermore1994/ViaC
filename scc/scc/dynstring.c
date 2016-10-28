@@ -9,13 +9,13 @@ void Dynstring_init(DynString* pstr, int initsize)
 {
 	if (pstr != NULL)
 	{
-		pstr->count = 0;
-		pstr->capacity = initsize;
 		pstr->data = (char*)malloc(sizeof(char) * initsize);
 		if (pstr->data == NULL)
 		{
 			error("内存分配错误!");
 		}
+		pstr->count = 0;
+		pstr->capacity = initsize;
 	}
 }
 
@@ -52,7 +52,7 @@ void Dynstring_realloc(DynString* pstr, int newsize)
 		{
 			capacity *= 2;
 		}
-		data = (char*) realloc(pstr, capacity);
+		data = (char*) realloc(pstr->data, capacity);
 		if (data == NULL)
 		{
 			error("内存分配错误!");
