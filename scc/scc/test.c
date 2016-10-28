@@ -6,7 +6,7 @@ int main(int argc, char ** argv)
 	errno_t err = fopen_s(&fin, "C:\\Users\\Away\\Documents\\scc\\scc\\Debug\\1.c", "rb");
 	if (err)
 	{
-		printf("不能打开SC源文件!\n");
+		printf("不能打开文件!\n");
 		return 0;
 	}
 	init();
