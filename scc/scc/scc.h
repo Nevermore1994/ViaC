@@ -19,11 +19,11 @@ typedef struct DynString
 
 }DynString;
 /******动态字符串函数***********/
-void Dynstring_init(DynString* pstr, int initsize);		//初始化动态字符串
+void Dynstring_init(DynString* pstr, const int initsize);		//初始化动态字符串
 void Dynstring_free(DynString* pstr);					//释放动态字符串
 void Dynstring_reset(DynString* pstr);
-void Dynstring_chcat(DynString* pstr, int ch);
-void Dynstring_realloc(DynString* pstr, int newsize);
+void Dynstring_chcat(DynString* pstr, const int ch);
+void Dynstring_realloc(DynString* pstr, const int newsize);
 
 
 /************定义动态数组*******/
@@ -34,12 +34,12 @@ typedef struct DynArray
 	void** data;
 }DynArray;
 /************动态数组函数*****/
-void Dynarray_init(DynArray* parr, int size);
-void Dynarray_realloc(DynArray* parr, int newsize);
+void Dynarray_init(DynArray* parr, const int size);
+void Dynarray_realloc(DynArray* parr, const int newsize);
 void Dynarray_add(DynArray* parr, void* data);
 void Dynarray_free(DynArray* parr);
-int  Dynarray_find(DynArray* parr, int data);
-void Dynarray_delete(DynArray* parr, int i);
+int  Dynarray_find(DynArray* parr, const int data);
+void Dynarray_delete(DynArray* parr, const int i);
 /************单词编码**********/
 enum e_TokenCode
 {
@@ -121,7 +121,7 @@ typedef struct TkWord
 
 TkWord* tkword_insert(char* p);
 TkWord* tkword_direct_insert(TkWord* pWord);
-TkWord* tkword_find(char* p, int key);
+TkWord* tkword_find(char* p, const int key);
 
 
 void getch();
@@ -135,7 +135,7 @@ int is_digit(char c);
 int is_nogiht(char* c);
 void skip_white_space();
 void parse_comment();
-char* get_tkstr(int v);
+char* get_tkstr(const int v);
 void test_lex();
 
 
@@ -166,17 +166,17 @@ enum e_WorkStage
 void  warning(char* fmt, ...);
 void  error(char* fmt,...);
 void  expect(char* msg);
-void  skip(int c);
+void  skip(const int c);
 void  link_error(char* fmt, ...);
 
 /***************词法处理函数********************/
-void color_token(int lex_state);
+void color_token(const int lex_state);
 void init(); 
 void cleanup();
 void* get_file_text();
 
 /*****************附加函数****************/
-void* mallocz(int size);
+void* mallocz(const int size);
 int elf_hash(char* key);				// 字符哈希函数
 
 /********************end*******************/

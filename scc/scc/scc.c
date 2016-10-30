@@ -7,7 +7,7 @@ int line_num;
 
 
 /****************内存初始化函数***************/
-void* mallocz(int size)
+void* mallocz(const int size)
 {
 	void* ptr = NULL;
 	ptr = malloc(size);

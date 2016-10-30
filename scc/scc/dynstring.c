@@ -5,7 +5,7 @@
 *参数：pstr为初始化的指针, initsize初始化的空间大小
 *功能：初始化动态字符串
 *****************************************************/
-void Dynstring_init(DynString* pstr, int initsize)
+void Dynstring_init(DynString* pstr, const int initsize)
 {
 	if (pstr != NULL)
 	{
@@ -41,7 +41,7 @@ void Dynstring_free(DynString* pstr)
 *参数：
 *功能：
 **************************************************/
-void Dynstring_realloc(DynString* pstr, int newsize)
+void Dynstring_realloc(DynString* pstr, const int newsize)
 {
 	if (pstr != NULL)
 	{
@@ -66,7 +66,7 @@ void Dynstring_realloc(DynString* pstr, int newsize)
 *参数：pstr为字符指针，ch为添加的字符
 *功能：为动态字符串添加字符
 **************************************************/
-void Dynstring_chcat(DynString* pstr, int ch)
+void Dynstring_chcat(DynString* pstr, const int ch)
 {
 	if (pstr != NULL)
 	{

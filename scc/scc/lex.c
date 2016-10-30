@@ -27,7 +27,7 @@ TkWord* tkword_direct_insert(TkWord* tp)
 
 
 
-TkWord* tkword_find(char *p, int keyno)
+TkWord* tkword_find(char *p, const int keyno)
 {
 	TkWord *tp = NULL, *tp1;
 	for (tp1 = tk_hashtable [keyno]; tp1; tp1 = tp1->next)
@@ -143,7 +143,7 @@ void init_lex()
 *c:需要跳过的单词
 ****************************************************/
 
-char* get_tkstr(int c)
+char* get_tkstr(const int c)
 {
 	if (c > tktable.count)
 		return NULL;
@@ -625,7 +625,7 @@ void get_token()
 }
 
 
-void color_token(int lex_state)
+void color_token(const int lex_state)
 {
 	HANDLE had = GetStdHandle(STD_OUTPUT_HANDLE);
 	char* p;
