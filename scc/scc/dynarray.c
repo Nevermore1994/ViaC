@@ -1,7 +1,7 @@
 #include"scc.h"
 
 /*****************************************************
-*函数名：Dysting_init(DynString* pstr, int initsize)
+*函数名：DystingInit(DynString* pstr, int initsize)
 *参数：pstr为初始化的指针, initsize初始化的空间大小
 *功能：初始化
 *****************************************************/

@@ -111,7 +111,7 @@ void external_declaration(int level)
 		{
 			if (level == SC_LOCAL)
 				error("不允许嵌套定义");
-			funcbody();
+			Funcbody();
 			break;
 		}
 		else
@@ -257,13 +257,74 @@ void struct_member_aligment()
 		skip(TK_CLOSEPA);
 	}
 }
- 
-void funcbody()
+
+void CompoundSataement()
 {
-	compound_statement();
+	syntax_state = SNTX_LF_HT;
+	syntax_level++;
+	
+	get_token(); 
+	while (IsTypeSpecifier(token))
+	{
+		external_declaration(SC_LOCAL);
+	}
+	while (token != TK_END)
+	{
+		Statement();
+	}
+	syntax_state = SNTX_LF_HT;
+	get_token();
+} 
+
+
+void Funcbody()
+{
+	CompoundStatement();
 }
 
-void  statement(int *bsym, int *csym)
+
+void  Statement()
+{
+	switch (token)
+	{
+		case TK_BEGIN:
+		{
+			compound_statement();
+			break;
+		}
+		case KW_IF:
+		{
+			if_statement();
+			break;
+		}
+		case KW_RETURN:
+		{
+			return_statement();
+			break;
+		}
+		case KW_BREAK:
+		{
+			break_statement();
+			break;
+		}
+		case KW_CONTINUE:
+		{
+			continue_statement();
+			break;
+		}
+		case KW_FOR:
+		{
+			for_statement();
+			break;
+		}
+		default:
+		{
+			assignment_expression();
+			break;
+		}
+	}
+}
+/*void  Statement(int *bsym, int *csym)
 {
 	switch (token)
 	{
@@ -300,6 +361,202 @@ void  statement(int *bsym, int *csym)
 		default:
 		{
 			assignment_expression();
+			break;
+		}
+	}
+}*/
+
+
+int IsTypeSpecifier(int id)
+{
+	switch (id)
+	{
+		case KW_CHAR:
+		case KW_SHORT:
+		case KW_INT:
+		case KW_VOID:
+		case KW_STRUCT:
+			return 1;
+		default:
+			break;
+	}
+	return 0;
+}
+
+void ExpressionStatement()
+{
+	if (token == TK_SEMICOLON)
+	{
+		Expression();
+	}
+	syntax_state = SNTX_LF_HT;
+	skip(TK_SEMICOLON);
+}
+
+void IfStatement()
+{
+	syntax_state = SNTX_SP;
+	get_token();
+	skip(TK_OPENPA);
+	syntax_state = SNTX_LF_HT;
+	skip(TK_CLOSEPA);
+	Statement();
+	if (token == KW_ELSE)
+	{
+		syntax_state = SNTX_LF_HT; 
+		get_token();
+		Statement();
+	}
+}
+
+
+void ForStatement()
+{
+	get_token();
+	skip(TK_OPENPA);
+	if (token != TK_SEMICOLON)
+	{
+		Expression();
+	} 
+	skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+	{
+		Expression();
+	}
+	skip(TK_SEMICOLON);
+	if (token == TK_CLOSEPA)
+	{
+		Expression();
+	}
+	syntax_state = SNTX_LF_HT;
+	skip(TK_CLOSEPA);
+	Statement();
+}
+
+void ContinueStatement()
+{
+	get_token();
+	syntax_state = SNTX_LF_HT;
+	skip(TK_SEMICOLON);
+}
+
+void BreakStatement()
+{
+	get_toekn(); 
+	syntax_state = SNTX_LF_HT;
+	skip(TK_SEMICOLON);
+}
+
+
+void ReturnStatement()
+{
+	syntax_state = SNTX_DELAY;
+	get_token();
+	if (token == TK_SEMICOLON)
+	{
+		syntax_state = SNTX_NUL;
+	}
+	else
+	{
+		syntax_state = SNTX_SP;
+	}
+	
+	syntax_indent();
+	
+	if (token != TK_SEMICOLON)
+	{
+		Expression();
+	}
+	syntax_state = SNTX_LF_HT;
+	skip(TK_SEMICOLON);
+}
+
+void Expression()
+{
+	while (1)
+	{
+		AssigementExpression();
+		if (token != TK_COMMA)
+			break;
+		get_token();
+	}
+}
+
+void AssigmentExpression()
+{
+	EquaityExpression();
+	if (token == TK_ASSIGN)
+	{
+		get_toekn();
+		AssigmentExpression();
+	}
+}
+
+void RealtionalExpression()
+{ 
+	AdditivExpression();
+	while(token == TK_LT || token == TK_LEQ ||
+		  token == TK_GT || token == TK_GEQ)
+	{
+		get_toekn(); 
+		AdditiveExpression();
+	}
+}
+
+void AdditiveExpression()
+{
+	MultiplicativeExpression();
+	while (token == TK_PLUS || token == TK_MINUS)
+	{
+		get_toekn(); 
+		MultiplicativeExpression();
+	}
+}
+
+void MultiplicativeExpression()
+{
+	UnaryExpression(); 
+	while (token == TK_STAR || token == TK_DIVIDE || token == TK_MOD)
+	{
+		get_token();
+		UnaryExpression();
+	}
+}
+void  UnaryExpression()
+{
+	switch (token)
+	{
+		case TK_AND:
+		{
+			get_toekn();
+			UnaryExpression();
+			break;
+		}
+		case TK_STAR:
+		{
+			get_token();
+			UnaryExpression();
+			break;
+		}
+		case TK_PLUS:
+		{
+			get_token();
+			UnaryExpression();
+		}
+		case TK_MINUS:
+		{
+			get_token(); 
+			UnaryExpression();
+			break;
+		}
+		case KW_SIZEOF:
+		{
+			SizeofExpression();
+			break;
+		}
+		default:
+		{
+			PostfixExpression();
 			break;
 		}
 	}
