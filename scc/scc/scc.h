@@ -179,6 +179,48 @@ void* get_file_text();
 void* mallocz(int size);
 int elf_hash(char* key);				// ×Ö·û¹þÏ£º¯Êý
 
+/********************end*******************/
+/*****************Óï·¨·ÖÎö*********************/
+enum e_SynTaxState
+{
+	SNTX_NUL,
+	SNTX_SP, 
+	SNTX_LF_HT, 
+	SNTX_DELAY
+};
+
+enum  e_StorageClass
+{
+	SC_GLOBAL  = 0x00f0, 
+	SC_LOCAL   = 0x00f1, 
+	SC_LLOACL  = 0x00f2, 
+	SC_CMP     = 0x00f3,
+	SC_VALMASK = 0x00ff,
+	SC_LAVL    = 0x1000,
+	SC_SYM     = 0x2000
+};
+
+enum  e_TypeCode
+{
+	T_INT    = 0,
+	T_CHAR   = 1, 
+	T_SHORT  = 2,
+	T_VOID   = 3, 
+	T_PTR    = 4, 
+	T_FUNC   = 5, 
+	T_STRUCT = 6, 
+
+	T_BTYPE  = 0x000f, 
+	T_ARRAY  = 0x0010,
+};
+
+#define ALIGH_SET 0x100
+
+extern int syntax_state;
+extern int syntax_level;
+
+
+/*******************end*************************/
 #endif // !SCC_H_
 
 
