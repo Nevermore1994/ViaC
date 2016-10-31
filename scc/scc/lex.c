@@ -13,13 +13,13 @@ int tkvalue;
 
 
 
-TkWord* tkword_direct_insert(TkWord* tp)
+TkWord* TkwordDirectInsert(TkWord* tp)
 {
 	int keyno;
 	tp->sym_id = NULL;
 	tp->sym_struct = NULL;
 	Dynarray_add(&tktable, tp);
-	keyno = elf_hash(tp->spelling);
+	keyno = ElfHash(tp->spelling);
 	tp->next = tk_hashtable [keyno];
 	tk_hashtable [keyno] = tp;
 	return tp;
@@ -27,7 +27,7 @@ TkWord* tkword_direct_insert(TkWord* tp)
 
 
 
-TkWord* tkword_find(char *p, const int keyno)
+TkWord* TkwordFind(char *p, const int keyno)
 {
 	TkWord *tp = NULL, *tp1;
 	for (tp1 = tk_hashtable [keyno]; tp1; tp1 = tp1->next)
@@ -42,7 +42,7 @@ TkWord* tkword_find(char *p, const int keyno)
 }
 
 
-TkWord* tkword_insert(char *p)
+TkWord* TkwordInsert(char *p)
 {
 	TkWord*  tp;
 	int keyno;
@@ -50,8 +50,8 @@ TkWord* tkword_insert(char *p)
 	char *end;
 	int length;
 
-	keyno = elf_hash(p);
-	tp = tkword_find(p, keyno);
+	keyno = ElfHash(p);
+	tp = TkwordFind(p, keyno);
 	if (tp == NULL)
 	{
 		length = strlen(p);
@@ -73,13 +73,13 @@ TkWord* tkword_insert(char *p)
 	}
 	return tp;
 }
-void getch()
+void Getch()
 {
 	ch = getc(fin);
 }
 
 
-void init_lex()
+void InitLex()
 {
 	TkWord* tp;
 	static TkWord keywords[] = {
@@ -134,7 +134,7 @@ void init_lex()
 
 	Dynarray_init(&tktable, 8);
 	for (tp = &keywords [0]; tp->spelling != NULL; tp++)
-		tkword_direct_insert(tp);
+		TkwordDirectInsert(tp);
 
 }
 
@@ -143,7 +143,7 @@ void init_lex()
 *c:需要跳过的单词
 ****************************************************/
 
-char* get_tkstr(const int c)
+char* GetTkstr(const int c)
 {
 	if (c > tktable.count)
 		return NULL;
@@ -153,20 +153,20 @@ char* get_tkstr(const int c)
 		return (( TkWord* ) tktable.data [c])->spelling;
 }
 
-void preprocess()
+void Preprocess()
 {
 	while (1)
 	{
 		if (ch == ' ' || ch == '\t' || ch == '\r')
 		{
-			skip_white_space();
+			SkipWhiteSpace();
 		}
 		else if (ch == '/')
 		{
-			getch();
+			Getch();
 			if (ch == '*')
 			{
-				parse_comment();
+				ParseComment();
 			}
 			else
 			{
@@ -180,9 +180,9 @@ void preprocess()
 	}
 }
 
-void parse_comment()
+void ParseComment()
 {
-	getch();
+	Getch();
 	do
 	{
 		do
@@ -190,19 +190,19 @@ void parse_comment()
 			if (ch == '\n' || ch == '*' || ch == CH_EOF)
 				break;
 			else
-				getch();
+				Getch();
 		} while (1);
 		if (ch == '\n')
 		{
 			line_num++;
-			getch();
+			Getch();
 		}
 		else if (ch == '*')
 		{
-			getch();
+			Getch();
 			if (ch == '/')
 			{
-				getch();
+				Getch();
 				return;                              //注释完成		
 			}
 		}
@@ -214,52 +214,52 @@ void parse_comment()
 	} while (1);
 }
 
-void skip_white_space()
+void SkipWhiteSpace()
 {
 	while (ch == ' ' || ch == '\t' || ch == '\r')
 	{
 		if (ch == '\r')
 		{
-			getch();
+			Getch();
 			if (ch != '\n')
 				return;
 			line_num++;
 		}
 		printf("%c", ch);
-		getch();
+		Getch();
 	}
 }
 
 
-int is_nogiht(char* c)
+int IsNodigit(char* c)
 {
 	return (c >= 'A' && c <= 'Z') || 
 		   (c >= 'a' && c <= 'z') ||
 		    c == '_';
 }
 
-int is_digit(char c)
+int IsDigit(char c)
 {
 	return c >= '0' && c <= '9';
 }
 
 
-TkWord* parse_identifier()
+TkWord* ParseIdentifier()
 {
 	Dynstring_reset(&tkstr);
 	Dynstring_chcat(&tkstr, ch);
-	getch();
-	while (is_nogiht(ch) || is_digit(ch))
+	Getch();
+	while (IsNodigit(ch) || IsDigit(ch))
 	{
 		Dynstring_chcat(&tkstr, ch);
-		getch();
+		Getch();
 	}
 	Dynstring_chcat(&tkstr, '\0');
-	return tkword_insert(tkstr.data);
+	return TkwordInsert(tkstr.data);
 }
 
 
-void parse_num()
+void ParseNum()
 {
 	Dynstring_reset(&tkstr);
 	Dynstring_reset(&sourcestr);
@@ -267,28 +267,28 @@ void parse_num()
 	{
 		Dynstring_chcat(&tkstr, ch);
 		Dynstring_chcat(&sourcestr, ch);
-		getch();
-	} while (is_digit(ch));
+		Getch();
+	} while (IsDigit(ch));
 	if (ch == '.')
 	{
 		do
 		{
 			Dynstring_chcat(&tkstr, ch);
 			Dynstring_chcat(&sourcestr, ch);
-		} while (is_digit(ch));
+		} while (IsDigit(ch));
 	}
 	Dynstring_chcat(&tkstr, '\0');
 	Dynstring_chcat(&sourcestr, '\0');
 	tkvalue = atoi(tkstr.data);
 }
 
-void parse_string(char sep)
+void ParseString(char sep)
 {
 	char c;
 	Dynstring_reset(&tkstr);
 	Dynstring_reset(&sourcestr);
 	Dynstring_chcat(&sourcestr, sep);
-	getch();
+	Getch();
 	for (;;)
 	{
 		if (ch == sep)
@@ -296,7 +296,7 @@ void parse_string(char sep)
 		else if (ch == '\\')
 		{
 			Dynstring_chcat(&sourcestr, ch);
-			getch();
+			Getch();
 			switch (ch)
 			{
 				case '0':
@@ -346,26 +346,26 @@ void parse_string(char sep)
 			}
 			Dynstring_chcat(&tkstr, c);
 			Dynstring_chcat(&sourcestr, ch);
-			getch();
+			Getch();
 		}
 		else
 		{
 			Dynstring_chcat(&tkstr, ch);
 			Dynstring_chcat(&sourcestr, ch);
-			getch();
+			Getch();
 		}
 	}
 	Dynstring_chcat(&tkstr, '\0');
 	Dynstring_chcat(&sourcestr, sep);
 	Dynstring_chcat(&sourcestr, '\0');
-	getch();
+	Getch();
 }
 
 
 
-void get_token()
+void GetToken()
 {
-	preprocess();
+	Preprocess();
 	switch (ch)
 	{
 		case 'a':	case 'b':	case 'c':	case 'd':
@@ -385,7 +385,7 @@ void get_token()
 		case '_':
 		{
 			TkWord* tp;
-			tp = parse_identifier();
+			tp = ParseIdentifier();
 			token = tp->tkcode;
 			break;
 		}
@@ -393,23 +393,23 @@ void get_token()
 		case '4':   case '5':	case '6':	case '7':
 		case '8':	case '9':
 		{
-			parse_num();
+			ParseNum();
 			token = TK_CINT;
 			break;
 		}
 		case '+':
 		{
-			getch();
+			Getch();
 			token = TK_PLUS;
 			break;
 		}
 		case '-':
 		{
-			getch();
+			Getch();
 			if (ch == '>')
 			{
 				token = TK_POINTSTO;
-				getch();
+				Getch();
 			}
 			else
 				token = TK_MINUS;
@@ -417,23 +417,23 @@ void get_token()
 		}
 		case '%':
 		{
-			getch();
+			Getch();
 			token = TK_MOD;
 			break;
 		}
 		case '/':
 		{
-			getch();
+			Getch();
 			token = TK_DIVIDE;
 			break;
 		}
 		case '=':
 		{
-			getch();
+			Getch();
 			if (ch == '=')
 			{
 				token = TK_EQ;
-				getch();
+				Getch();
 			}
 			else
 			{
@@ -443,11 +443,11 @@ void get_token()
 		}
 		case '!':
 		{
-			getch();
+			Getch();
 			if (ch == '=')
 			{
 				token = TK_NEQ;
-				getch();
+				Getch();
 			}
 			else
 			{
@@ -458,7 +458,7 @@ void get_token()
 		}
 		case '<':
 		{
-			getch();
+			Getch();
 			if (ch == '<')
 			{
 				Error("非法操作符");
@@ -467,7 +467,7 @@ void get_token()
 			else if (ch == '=')
 			{
 				token = TK_LEQ;
-				getch();
+				Getch();
 			}
 			else
 				token = TK_LT;
@@ -475,7 +475,7 @@ void get_token()
 		}
 		case '>':
 		{
-			getch();
+			Getch();
 			if (ch == '>')
 			{
 				Error("非法操作符");
@@ -484,7 +484,7 @@ void get_token()
 			else if (ch == '=')
 			{
 				token = TK_GEQ;
-				getch();
+				Getch();
 			}
 			else
 				token = TK_GT;
@@ -493,10 +493,10 @@ void get_token()
 		}
 		case '.':
 		{
-			getch();
+			Getch();
 			if (ch == '.')
 			{
-				getch();
+				Getch();
 				if (ch == '.')
 				{
 					token = TK_ELLIPSIS;
@@ -505,7 +505,7 @@ void get_token()
 				{
 					Error("拼写错误");
 				}
-				getch();
+				Getch();
 			}
 			else
 			{
@@ -524,12 +524,12 @@ void get_token()
 			{
 				token = TK_AND;
 			}
-			getch();
+			Getch();
 			break;
 		}
 		case '|':
 		{
-			getch();
+			Getch();
 			if (ch == '|')
 			{
 				Error("不能识别的操作符");
@@ -545,67 +545,67 @@ void get_token()
 		case '(':
 		{
 			token = TK_OPENPA;
-			getch();
+			Getch();
 			break;
 		}
 		case ')':
 		{
 			token = TK_CLOSEPA;
-			getch();
+			Getch();
 			break;
 		}
 		case '[':
 		{
 			token = TK_OPENBR;
-			getch();
+			Getch();
 			break;
 		}
 		case ']':
 		{
 			token = TK_CLOSEBR;
-			getch();
+			Getch();
 			break;
 		}
 		case '{':
 		{
 			token = TK_BEGIN;
-			getch();
+			Getch();
 			break;
 		}
 		case '}':
 		{
 			token = TK_END;
-			getch();
+			Getch();
 			break;
 		}
 		case ';':
 		{
 			token = TK_SEMICOLON;
-			getch();
+			Getch();
 			break;
 		}
 		case ',':
 		{
 			
 			token = TK_COMMA;
-			getch();
+			Getch();
 			break;
 		}
 		case '*':
 		{
 			token = TK_STAR;
-			getch();
+			Getch();
 			break;
 		}
 		case '\"':
 		{
-			parse_string(ch);
+			ParseString(ch);
 			token = TK_CSTR;
 			break;
 		}
 		case '\'':
 		{
-			parse_string(ch);
+			ParseString(ch);
 			token = TK_CCHAR;
 			tkvalue = *( char* ) tkstr.data;
 			break;
@@ -618,14 +618,14 @@ void get_token()
 		default:
 		{
 			Error("未能识别的操作符%c", ch);
-			getch();
+			Getch();
 			break;
 		}
 	}
 }
 
 
-void color_token(const int lex_state)
+void ColorToken(const int lex_state)
 {
 	HANDLE had = GetStdHandle(STD_OUTPUT_HANDLE);
 	char* p;
@@ -641,7 +641,7 @@ void color_token(const int lex_state)
 				SetConsoleTextAttribute(had, FOREGROUND_RED | FOREGROUND_GREEN);
 			else
 				SetConsoleTextAttribute(had, FOREGROUND_RED | FOREGROUND_INTENSITY);
-			p = get_tkstr(token);
+			p = GetTkstr(token);
 			printf("%s", p);
 			break;
 		}
@@ -654,12 +654,12 @@ void color_token(const int lex_state)
 }
 
 
-void test_lex()
+void TestLex()
 {
 	do
 	{
-		get_token();
-		color_token(LEX_NORMAL);
+		GetToken();
+		ColorToken(LEX_NORMAL);
 	} while (token != TK_EOF);
 	printf("\n代码行数:%d行\n", line_num);
 }

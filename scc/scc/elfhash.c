@@ -2,7 +2,7 @@
 
 
 
-int elf_hash(char* key)
+int ElfHash(char* key)
 {
 	int h = 0, g;
 	while (*key)

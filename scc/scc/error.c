@@ -44,9 +44,9 @@ void Skip(int c)
 {
 	if (token != c)
 	{
-		Error("缺少'%s'", get_tkstr(c));
+		Error("缺少'%s'", GetTkstr(c));
 	}
-	get_token();
+	GetToken();
 }
 /*******************************************
 *函数功能:提示缺少的成分

@@ -119,24 +119,24 @@ typedef struct TkWord
 
 #define CH_EOF (-1)						//文件尾部标识
 
-TkWord* tkword_insert(char* p);
-TkWord* tkword_direct_insert(TkWord* pWord);
-TkWord* tkword_find(char* p, const int key);
+TkWord* TkwordInsert(char* p);
+TkWord* TkwordDirectInsert(TkWord* pWord);
+TkWord* TkwordFind(char* p, const int key);
 
 
-void getch();
-void preprocess();
+void Getch();
+void Preprocess();
 TkWord* parse_identifiler();
-void parse_num();
-void parse_string();
-void init_lex();
-void get_token();
-int is_digit(char c);
-int is_nogiht(char* c);
-void skip_white_space();
-void parse_comment();
-char* get_tkstr(const int v);
-void test_lex();
+void ParseNum();
+void ParseString();
+void InitLex();
+void GetToken();
+int IsDigit(char c);
+int IsNodigit(char* c);
+void SkipWhiteSpace();
+void ParseComment();
+char* GetTkstr(const int v);
+void TestLex();
 
 
 /***************引用变量****************************/
@@ -170,14 +170,14 @@ void  Skip(const int c);
 void  LinkError(char* fmt, ...);
 
 /***************词法处理函数********************/
-void color_token(const int lex_state);
+void ColorToken(const int lex_state);
 void init(); 
 void cleanup();
 void* get_file_text();
 
 /*****************附加函数****************/
 void* mallocz(const int size);
-int elf_hash(char* key);				// 字符哈希函数
+int ElfHash(char* key);				// 字符哈希函数
 
 /********************end*******************/
 /*****************语法分析*********************/

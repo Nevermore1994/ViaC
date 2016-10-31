@@ -10,8 +10,8 @@ int main(int argc, char ** argv)
 		return 0;
 	}
 	init();
-	getch();
-	test_lex();
+	Getch();
+	TestLex();
 	cleanup();
 	fclose(fin);
 	printf("%s 词法分析成功!", filename);

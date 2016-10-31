@@ -22,7 +22,7 @@ void* mallocz(const int size)
 void init()
 {
 	line_num = 1;
-	init_lex();
+	InitLex();
 }
 
 void  cleanup()
