@@ -55,7 +55,7 @@ TkWord* TkwordInsert(char *p)
 	if (tp == NULL)
 	{
 		length = strlen(p);
-		tp = ( TkWord* ) mallocz(sizeof(TkWord) + length + 1);
+		tp = ( TkWord* ) MallocInit(sizeof(TkWord) + length + 1);
 		tp->next = tk_hashtable [keyno];
 		tk_hashtable [keyno] = tp;
 		Dynarray_add(&tktable, tp);
@@ -231,7 +231,7 @@ void SkipWhiteSpace()
 }
 
 
-int IsNodigit(char* c)
+int IsNoDigit(char* c)
 {
 	return (c >= 'A' && c <= 'Z') || 
 		   (c >= 'a' && c <= 'z') ||
@@ -249,7 +249,7 @@ TkWord* ParseIdentifier()
 	Dynstring_reset(&tkstr);
 	Dynstring_chcat(&tkstr, ch);
 	Getch();
-	while (IsNodigit(ch) || IsDigit(ch))
+	while (IsNoDigit(ch) || IsDigit(ch))
 	{
 		Dynstring_chcat(&tkstr, ch);
 		Getch();

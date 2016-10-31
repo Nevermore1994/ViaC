@@ -7,7 +7,7 @@ int line_num;
 
 
 /****************内存初始化函数***************/
-void* mallocz(const int size)
+void* MallocInit(const int size)
 {
 	void* ptr = NULL;
 	ptr = malloc(size);
@@ -19,13 +19,13 @@ void* mallocz(const int size)
 	return ptr;
 }
 
-void init()
+void Init()
 {
 	line_num = 1;
 	InitLex();
 }
 
-void  cleanup()
+void Cleanup()
 {
 	int i;
 	for (i = TK_IDENT; i < tktable.count; ++i)
@@ -35,7 +35,7 @@ void  cleanup()
 	free(tktable.data);
 }
 
-void* get_file_text(char* fname)
+void* GetFileText(char* fname)
 {
 	char* p;
 	p = strchr(fname, '.');

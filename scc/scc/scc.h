@@ -132,7 +132,7 @@ void ParseString();
 void InitLex();
 void GetToken();
 int IsDigit(char c);
-int IsNodigit(char* c);
+int IsNoDigit(char* c);
 void SkipWhiteSpace();
 void ParseComment();
 char* GetTkstr(const int v);
@@ -171,12 +171,12 @@ void  LinkError(char* fmt, ...);
 
 /***************词法处理函数********************/
 void ColorToken(const int lex_state);
-void init(); 
-void cleanup();
-void* get_file_text();
+void Init(); 
+void Cleanup();
+void* GetFileText();
 
 /*****************附加函数****************/
-void* mallocz(const int size);
+void* MallocInit(const int size);
 int ElfHash(char* key);				// 字符哈希函数
 
 /********************end*******************/

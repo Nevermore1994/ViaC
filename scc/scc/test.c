@@ -9,10 +9,10 @@ int main(int argc, char ** argv)
 		printf("不能打开文件!\n");
 		return 0;
 	}
-	init();
+	Init();
 	Getch();
 	TestLex();
-	cleanup();
+	Cleanup();
 	fclose(fin);
 	printf("%s 词法分析成功!", filename);
 	return 1;
