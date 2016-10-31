@@ -11,25 +11,26 @@
 int syntax_state;
 int syntax_level;
 
-void parameter_type_list(int func_call) //解析形参类型表
+
+void ParameterTypeList(int func_call) //解析形参类型表
 {
-	get_token(); 
+	GetToken(); 
 	while (token == TK_CLOSEPA)
 	{
-		if (!type_specifier())
+		if (!TypeSpecifier())
 		{
-			error("标识符无效");
+			Error("标识符无效");
 		}
-		declarator();
+		Declarator();
 		if (token == TK_ELLIPSIS)
 		{
 			func_call = KW_CDECL;
-			get_token();
+			GetToken();
 			break;
 		}
 	}
 	syntax_state = SNTX_DELAY;
-	skip(TK_CLOSEPA);
+	Skip(TK_CLOSEPA);
 	if (token == TK_BEGIN)
 	{
 		syntax_state = SNTX_LF_HT;
@@ -38,79 +39,90 @@ void parameter_type_list(int func_call) //解析形参类型表
 	{
 		syntax_state = SNTX_NUL;
 	}
-	syntax_indent();
+	SyntaxIndent();
 }
-void direct_declarator_postfix() // 直接声明符后缀
+
+
+void DirectDeclaratorPostfix() // 直接声明符后缀
 {
 	int m;
 	if (token == TK_OPENPA) //括号开始
 	{
-		parameter_type_list ();
+		//ParameterTypeList ();
 	}
 	else if (token == TK_OPENBR)  // 中括号
 	{
-		get_token();
+		GetToken();
 		if (token == TK_OPENBR)
 		{
-			get_token(); 
+			GetToken(); 
 			m = tkvalue;
 		}
-		skip(TK_CLOSEBR);
-		direct_declarator_postfix();//递归调用
+		Skip(TK_CLOSEBR);
+		DirectDeclaratorPostfix();//递归调用
 	}
 }
-void direct_declarator()
+
+
+void DirectDeclarator()
 {
 	if (token >= TK_IDENT)
 	{
-		get_token();
+		GetToken();
 	}
 	else
 	{
-		expect("表示符");
+		Expect("表示符");
 	}
-	direct_declarator_postfix();
+	DirectDeclaratorPostfix();
 }
-void declarator()
+
+
+void Declarator()
 {
 	int fc; 
 	while (token == TK_STAR)
 	{ 
-		get_token();
+		GetToken();
 	}
-	function_calling_convention(&fc);
-	struct_member_aligment();
-	direct_declarator();
-}
-void translation_unit()
-{
-	
-}
-void Initializer() // 初值符
-{
-	assignment_expression();
+	FunctionCallingConvention(&fc);
+	StructMemberAligment();
+	DirectDeclarator();
 }
 
-void external_declaration(int level)
+void TranslationUnit()
 {
-	if (!type_specifier())
+	while (token != TK_EOF)
 	{
-		expect("<类型区分符>");
+		ExternalDeclaration(SC_GLOBAL);
+	}
+}
+
+void Initializer() // 初值符
+{
+	AssignmentExpression();
+}
+
+void ExternalDeclaration(int level)
+{
+	if (!TypeSpecifier())
+	{
+		Expect("<类型区分符>");
 	}
 
 	if (token == TK_SEMICOLON)
 	{
-		get_token();
+		GetToken();
 		return;
 	}
 
 	while (1)
 	{
-		declarator();
+		Declarator();
 		if (token == TK_BEGIN)
 		{
 			if (level == SC_LOCAL)
-				error("不允许嵌套定义");
+				Error("不允许嵌套定义");
 			Funcbody();
 			break;
 		}
@@ -118,24 +130,24 @@ void external_declaration(int level)
 		{
 			if (token == TK_ASSIGN)
 			{
-				get_token();
+				GetToken();
 				Initializer();
 			}
 			if (token == TK_COMMA)
 			{
-				get_token();
+				GetToken();
 			} 
 			else
 			{
 				syntax_state = SNTX_LF_HT; 
-				skip(TK_SEMICOLON);
+				Skip(TK_SEMICOLON);
 				break;
 			}
 		}
 	}
 }
 
-int type_specifier()
+int TypeSpecifier()
 {
 	int type_found = 0;
 	switch (token)
@@ -174,197 +186,156 @@ int type_specifier()
 	}
 	return type_found;
 }
-void struct_declaration()
+void StructDeclaration()
 { 
-	type_specifier(); 
+	TypeSpecifier(); 
 	while (1)
 	{
-		declarator();
+		Declarator();
 		
 		if (token == TK_SEMICOLON)
 			break;
-		skip(TK_COMMA);
+		Skip(TK_COMMA);
 	}
 	syntax_state = SNTX_LF_HT;
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 }
-void struct_declaration_list()
+
+void StructDeclarationList()
 {
 	int  maxalign, offset;
 	
 	syntax_state = SNTX_LF_HT;
 	++syntax_level;
 	
-	get_token();
+	GetToken();
 
 	while (token == TK_END)
 	{
-		struct_declaration(&maxalign, &offset);
+		StructDeclaration(&maxalign, &offset);
 	}
-	skip(TK_END); 
-
-	syntax_state = SNTX_LF_HT;
-	
+	Skip(TK_END); 
+	syntax_state = SNTX_LF_HT;	
 }
 
-void struct_specifier()
+void StructSpecifier()
 {
 	int t;
-	get_token();
+	GetToken();
 	t = token;
 	
 	syntax_state = SNTX_DELAY;
-	get_token();
+	GetToken();
 	if (token == TK_BEGIN)
 		syntax_state = SNTX_LF_HT;
 	else if (token == TK_CLOSEPA)
 		syntax_state = SNTX_NUL;
 	else
 		syntax_state = SNTX_SP; 
-	syntax_indent();
+	SyntaxIndent();
 
 	if (t < TK_IDENT)
-		expect("结构体名称");
+		Expect("结构体名称");
 	if (token == TK_BEGIN)
 	{
-		struct_declaration_list();
+		StructDeclarationList();
 	}
 }
 
-void function_calling_convention(int* fc)
+void FunctionCallingConvention(int* fc)
 { 
 	*fc = KW_CDECL;
 	if (token == -KW_CDECL || token == KW_STDCALL)
 	{
 		*fc = token;
 		syntax_state = SNTX_SP;
-		get_token();
+		GetToken();
 	}
 }
 
-void struct_member_aligment()
+void StructMemberAligment()
 {
 	if (token == KW_ALIGN)
 	{
-		get_token();
-		skip(TK_OPENPA);
+		GetToken();
+		Skip(TK_OPENPA);
 		if (token == TK_CINT)
 		{
-			get_token();
+			GetToken();
 		}
 		else
-			expect("整数常量");
-		skip(TK_CLOSEPA);
+			Expect("整数常量");
+		Skip(TK_CLOSEPA);
 	}
 }
 
-void CompoundSataement()
+void CompoundStatement()
 {
 	syntax_state = SNTX_LF_HT;
 	syntax_level++;
 	
-	get_token(); 
+	GetToken(); 
 	while (IsTypeSpecifier(token))
 	{
-		external_declaration(SC_LOCAL);
+		ExternalDeclaration(SC_LOCAL);
 	}
 	while (token != TK_END)
 	{
 		Statement();
 	}
 	syntax_state = SNTX_LF_HT;
-	get_token();
+	GetToken();
 } 
 
 
 void Funcbody()
 {
 	CompoundStatement();
+	
 }
 
 
-void  Statement()
+void Statement()
 {
 	switch (token)
 	{
 		case TK_BEGIN:
 		{
-			compound_statement();
+			CompoundStatement();
 			break;
 		}
 		case KW_IF:
 		{
-			if_statement();
+			IfStatement();
 			break;
 		}
 		case KW_RETURN:
 		{
-			return_statement();
+			ReturnStatement();
 			break;
 		}
 		case KW_BREAK:
 		{
-			break_statement();
+			BreakStatement();
 			break;
 		}
 		case KW_CONTINUE:
 		{
-			continue_statement();
+			ContinueStatement();
 			break;
 		}
 		case KW_FOR:
 		{
-			for_statement();
+			ForStatement();
 			break;
 		}
 		default:
 		{
-			assignment_expression();
+			AssignmentExpression();
 			break;
 		}
 	}
 }
-/*void  Statement(int *bsym, int *csym)
-{
-	switch (token)
-	{
-		case TK_BEGIN:
-		{
-			compound_statement(bsym, csym);
-			break;
-		}
-		case KW_IF:
-		{ 
-			if_statement(bsym, csym);
-			break;
-		}
-		case KW_RETURN:
-		{
-			return_statement();
-			break;
-		}
-		case KW_BREAK:
-		{
-			break_statement(bsym);
-			break;
-		}
-		case KW_CONTINUE:
-		{
-			continue_statement(csym);
-			break;
-		}
-		case KW_FOR:
-		{
-			for_statement(bsym, csym);
-			break;
-		}
-		default:
-		{
-			assignment_expression();
-			break;
-		}
-	}
-}*/
 
 
 int IsTypeSpecifier(int id)
@@ -390,21 +361,21 @@ void ExpressionStatement()
 		Expression();
 	}
 	syntax_state = SNTX_LF_HT;
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 }
 
 void IfStatement()
 {
 	syntax_state = SNTX_SP;
-	get_token();
-	skip(TK_OPENPA);
+	GetToken();
+	Skip(TK_OPENPA);
 	syntax_state = SNTX_LF_HT;
-	skip(TK_CLOSEPA);
+	Skip(TK_CLOSEPA);
 	Statement();
 	if (token == KW_ELSE)
 	{
 		syntax_state = SNTX_LF_HT; 
-		get_token();
+		GetToken();
 		Statement();
 	}
 }
@@ -412,46 +383,46 @@ void IfStatement()
 
 void ForStatement()
 {
-	get_token();
-	skip(TK_OPENPA);
+	GetToken();
+	Skip(TK_OPENPA);
 	if (token != TK_SEMICOLON)
 	{
 		Expression();
 	} 
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 	if (token == TK_SEMICOLON)
 	{
 		Expression();
 	}
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 	if (token == TK_CLOSEPA)
 	{
 		Expression();
 	}
 	syntax_state = SNTX_LF_HT;
-	skip(TK_CLOSEPA);
+	Skip(TK_CLOSEPA);
 	Statement();
 }
 
 void ContinueStatement()
 {
-	get_token();
+	GetToken();
 	syntax_state = SNTX_LF_HT;
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 }
 
 void BreakStatement()
 {
-	get_toekn(); 
+	GetToken();
 	syntax_state = SNTX_LF_HT;
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 }
 
 
 void ReturnStatement()
 {
 	syntax_state = SNTX_DELAY;
-	get_token();
+	GetToken();
 	if (token == TK_SEMICOLON)
 	{
 		syntax_state = SNTX_NUL;
@@ -461,44 +432,52 @@ void ReturnStatement()
 		syntax_state = SNTX_SP;
 	}
 	
-	syntax_indent();
+	SyntaxIndent();
 	
 	if (token != TK_SEMICOLON)
 	{
 		Expression();
 	}
 	syntax_state = SNTX_LF_HT;
-	skip(TK_SEMICOLON);
+	Skip(TK_SEMICOLON);
 }
 
 void Expression()
 {
 	while (1)
 	{
-		AssigementExpression();
+		AssignmentExpression();
 		if (token != TK_COMMA)
 			break;
-		get_token();
+		GetToken();
 	}
 }
 
-void AssigmentExpression()
+void AssignmentExpression()
 {
 	EquaityExpression();
 	if (token == TK_ASSIGN)
 	{
-		get_toekn();
-		AssigmentExpression();
+		GetToken();
+		AssignmentExpression();
 	}
 }
-
+void EquaityExpression()
+{
+	RealtionalExpression();
+	while (token == TK_EQ || token == TK_NEQ)
+	{
+		GetToken(); 
+		RealtionalExpression();
+	}
+}
 void RealtionalExpression()
 { 
-	AdditivExpression();
+	AdditiveExpression();
 	while(token == TK_LT || token == TK_LEQ ||
 		  token == TK_GT || token == TK_GEQ)
 	{
-		get_toekn(); 
+		GetToken(); 
 		AdditiveExpression();
 	}
 }
@@ -508,7 +487,7 @@ void AdditiveExpression()
 	MultiplicativeExpression();
 	while (token == TK_PLUS || token == TK_MINUS)
 	{
-		get_toekn(); 
+		GetToken(); 
 		MultiplicativeExpression();
 	}
 }
@@ -518,7 +497,7 @@ void MultiplicativeExpression()
 	UnaryExpression(); 
 	while (token == TK_STAR || token == TK_DIVIDE || token == TK_MOD)
 	{
-		get_token();
+		GetToken();
 		UnaryExpression();
 	}
 }
@@ -528,24 +507,24 @@ void  UnaryExpression()
 	{
 		case TK_AND:
 		{
-			get_toekn();
+			GetToken();
 			UnaryExpression();
 			break;
 		}
 		case TK_STAR:
 		{
-			get_token();
+			GetToken();
 			UnaryExpression();
 			break;
 		}
 		case TK_PLUS:
 		{
-			get_token();
+			GetToken();
 			UnaryExpression();
 		}
 		case TK_MINUS:
 		{
-			get_token(); 
+			GetToken(); 
 			UnaryExpression();
 			break;
 		}
@@ -559,5 +538,135 @@ void  UnaryExpression()
 			PostfixExpression();
 			break;
 		}
+	}
+}
+
+
+void SizeofExpression()
+{
+	GetToken();
+	Skip(TK_OPENPA);
+	TypeSpecifier();
+	Skip(TK_CLOSEPA);
+}
+ 
+void  PostfixExpression()
+{
+	PrimaryExpression();
+	while (1)
+	{
+		if (token == TK_DOT || token == TK_POINTSTO)
+		{
+			GetToken();
+			token |= SC_MEMBER;
+			GetToken();
+	 	} 
+		else if (token == TK_OPENBR)
+		{
+			GetToken();
+			Expression();
+			Skip(TK_CLOSEBR);
+		} 
+		else if (token == TK_OPENPA)
+		{
+			ArgumentExpressionList();
+		}
+		else
+			break;
+	}
+}
+
+
+void PrimaryExpression()
+{
+	int id;
+	switch (token)
+	{
+		case TK_CINT:
+		case TK_CCHAR:
+		{
+			GetToken();
+			break;
+		}
+		case TK_CSTR:
+		{
+			GetToken();
+			break;
+		}
+		case TK_OPENPA:
+		{
+			GetToken(); 
+			Expression();
+			Skip(TK_CLOSEPA);
+			break;
+		}
+		default:
+		{
+			id = token;
+			GetToken();
+			if (id < TK_IDENT)
+			{
+				Expect("常量或者是标识符");
+			}
+			break;
+		}
+	}
+}
+
+void  ArgumentExpressionList()
+{
+	GetToken();
+	if (token != TK_CLOSEPA)
+	{
+		while (1)
+		{
+			AssignmentExpression();
+			if (token == TK_CLOSEPA)
+				break;
+			Skip(TK_COMMA);
+		}
+	}
+	Skip(TK_CLOSEPA);
+}
+
+void SyntaxIndent()
+{
+	switch (syntax_state)
+	{
+		case  SNTX_NUL:
+		{
+			ColorToken(LEX_NORMAL);
+			break;
+		}
+		case  SNTX_SP:
+		{
+			printf(" ");
+			ColorToken(LEX_NORMAL);
+			break;
+		}
+		case SNTX_LF_HT:
+		{
+			if (token == TK_END)
+			{
+				if (token == TK_END)
+					syntax_level--;
+				printf("\n");
+				PrintTab(syntax_level);
+			}
+			ColorToken(LEX_NORMAL);
+			break;
+		}
+		case SNTX_DELAY:
+			break;
+	}
+	syntax_state = SNTX_NUL;
+}
+
+void PrintTab(int num)
+{
+	int  count = 0;
+	for (; count < num; ++count)
+	{
+		printf("\t");
 	}
 }

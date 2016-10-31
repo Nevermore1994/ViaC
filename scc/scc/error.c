@@ -3,7 +3,7 @@
 DynString tkstr;
 
  
-void handle_exception(int stage, int level, char* fmt, va_list ap)
+void HandleException(int stage, int level, char* fmt, va_list ap)
 {
 	char buf[1024];
 	vsprintf_s(buf, 1024,fmt, ap);
@@ -24,27 +24,27 @@ void handle_exception(int stage, int level, char* fmt, va_list ap)
 	}
 }
 
-void warning(char* fmt, ...)
+void Warning(char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	handle_exception(STAGE_COMPILE, LEVEL_WARNING, fmt, ap);
+	HandleException(STAGE_COMPILE, LEVEL_WARNING, fmt, ap);
 	va_end(ap);
 }
 
-void error(char* fmt, ...)
+void Error(char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	handle_exception(STAGE_COMPILE, LEVEL_ERROR, fmt, ap);
+	HandleException(STAGE_COMPILE, LEVEL_ERROR, fmt, ap);
 	va_end(ap);
 }
  
-void skip(int c)
+void Skip(int c)
 {
 	if (token != c)
 	{
-		error("缺少'%s'", get_tkstr(c));
+		Error("缺少'%s'", get_tkstr(c));
 	}
 	get_token();
 }
@@ -52,15 +52,15 @@ void skip(int c)
 *函数功能:提示缺少的成分
 *msg:需要什么语法成分
 *******************************************/
-void expect(char* msg)
+void Expect(char* msg)
 {
-	error("缺少%s", msg);
+	Error("缺少%s", msg);
 }
 
-void link_error(char* fmt,...)
+void LinkError(char* fmt,...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	handle_exception(STAGE_LINK, LEVEL_ERROR, fmt, ap);
+	HandleException(STAGE_LINK, LEVEL_ERROR, fmt, ap);
 	va_end(ap);
 }

@@ -13,7 +13,7 @@ void* mallocz(const int size)
 	ptr = malloc(size);
 	if (!ptr && size)
 	{
-		error("内存分配错误!");
+		Error("内存分配错误!");
 	}
 	memset(ptr, 0, size);
 	return ptr;

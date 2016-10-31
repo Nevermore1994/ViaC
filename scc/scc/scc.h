@@ -163,11 +163,11 @@ enum e_WorkStage
 	STAGE_LINK
 };
 
-void  warning(char* fmt, ...);
-void  error(char* fmt,...);
-void  expect(char* msg);
-void  skip(const int c);
-void  link_error(char* fmt, ...);
+void  Warning(char* fmt, ...);
+void  Error(char* fmt,...);
+void  Expect(char* msg);
+void  Skip(const int c);
+void  LinkError(char* fmt, ...);
 
 /***************词法处理函数********************/
 void color_token(const int lex_state);

@@ -14,7 +14,7 @@ void Dynarray_init(DynArray* parr, const int size)
 		parr->data = (void**)malloc(sizeof(void*) * size);
 		if (parr->data == NULL)
 		{
-			error("ÄÚ´æ·ÖÅä´íÎó!");
+			Error("ÄÚ´æ·ÖÅä´íÎó!");
 		}
 	}
 }
@@ -33,7 +33,7 @@ void Dynarray_realloc(DynArray* parr, const int newsize)
 		data = realloc(parr->data, capacity);
 		if (data == NULL)
 		{
-			error("ÄÚ´æ·ÖÅä´íÎó!");
+			Error("ÄÚ´æ·ÖÅä´íÎó!");
 		}
 		parr->data = data;
 		parr->capacity = capacity;

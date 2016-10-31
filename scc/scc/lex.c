@@ -208,7 +208,7 @@ void parse_comment()
 		}
 		else
 		{
-			error("缺少注释符");
+			Error("缺少注释符");
 			return;
 		}
 	} while (1);
@@ -336,11 +336,11 @@ void parse_string(char sep)
 					c = ch;
 					if (c >= '!' && c <= '~')
 					{
-						warning("非法转义字符:\' \\ %c \'", c);
+						Warning("非法转义字符:\' \\ %c \'", c);
 					}
 					else
 					{
-						warning("非法转义字符:\' \\ 0x%x \'", c);
+						Warning("非法转义字符:\' \\ 0x%x \'", c);
 					}
 					break;
 			}
@@ -451,7 +451,7 @@ void get_token()
 			}
 			else
 			{
-				error("不能识别,非法操作符");
+				Error("不能识别,非法操作符");
 				//TODO:逻辑取反
 			}
 			break;
@@ -461,7 +461,7 @@ void get_token()
 			getch();
 			if (ch == '<')
 			{
-				error("非法操作符");
+				Error("非法操作符");
 				//TODO:左移位操作符
 			}
 			else if (ch == '=')
@@ -478,7 +478,7 @@ void get_token()
 			getch();
 			if (ch == '>')
 			{
-				error("非法操作符");
+				Error("非法操作符");
 				//TODO:右移位操作符
 			}
 			else if (ch == '=')
@@ -503,7 +503,7 @@ void get_token()
 				}
 				else
 				{
-					error("拼写错误");
+					Error("拼写错误");
 				}
 				getch();
 			}
@@ -517,7 +517,7 @@ void get_token()
 		{
 			if (ch == '&')
 			{
-				error("不能识别的操作符");
+				Error("不能识别的操作符");
 				//TODO:与逻辑操作符
 			}
 			else
@@ -532,12 +532,12 @@ void get_token()
 			getch();
 			if (ch == '|')
 			{
-				error("不能识别的操作符");
+				Error("不能识别的操作符");
 				//TODO:或逻辑操作符
 			}
 			else
 			{
-				error("不能识别的操作符");
+				Error("不能识别的操作符");
 				//TODO:或的逻辑操作符
 			}
 			break;
@@ -617,7 +617,7 @@ void get_token()
 		}
 		default:
 		{
-			error("未能识别的操作符%c", ch);
+			Error("未能识别的操作符%c", ch);
 			getch();
 			break;
 		}

@@ -12,7 +12,7 @@ void Dynstring_init(DynString* pstr, const int initsize)
 		pstr->data = (char*)malloc(sizeof(char) * initsize);
 		if (pstr->data == NULL)
 		{
-			error("ÄÚ´æ·ÖÅä´íÎó!");
+			Error("ÄÚ´æ·ÖÅä´íÎó!");
 		}
 		pstr->count = 0;
 		pstr->capacity = initsize;
@@ -55,7 +55,7 @@ void Dynstring_realloc(DynString* pstr, const int newsize)
 		data = (char*) realloc(pstr->data, capacity);
 		if (data == NULL)
 		{
-			error("ÄÚ´æ·ÖÅä´íÎó!");
+			Error("ÄÚ´æ·ÖÅä´íÎó!");
 		}
 		pstr->data = data;
 		pstr->capacity = capacity;
