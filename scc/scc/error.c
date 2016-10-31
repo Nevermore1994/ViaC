@@ -3,7 +3,7 @@
 DynString tkstr;
 
  
-void HandleException(int stage, int level, char* fmt, va_list ap)
+void HandleException(const int stage, const int level, char* fmt, va_list ap)
 {
 	char buf[1024];
 	vsprintf_s(buf, 1024,fmt, ap);
@@ -40,7 +40,7 @@ void Error(char* fmt, ...)
 	va_end(ap);
 }
  
-void Skip(int c)
+void Skip( const int c)
 {
 	if (token != c)
 	{

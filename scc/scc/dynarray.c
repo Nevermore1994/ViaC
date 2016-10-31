@@ -1,7 +1,7 @@
 #include"scc.h"
 
 /*****************************************************
-*函数名：DystingInit(DynString* pstr, int initsize)
+*函数名：DystingInit(DynString* pstr, const int initsize)
 *参数：pstr为初始化的指针, initsize初始化的空间大小
 *功能：初始化
 *****************************************************/
@@ -43,7 +43,7 @@ void Dynarray_add(DynArray* parr, void* data)
 {
 	if (parr != NULL)
 	{
-		int count = parr->count + 1;
+		const int count = parr->count + 1;
 		if (count*sizeof(void*) > parr->capacity)
 		{
 			Dynarray_realloc(parr, count * sizeof(void*) );
@@ -72,7 +72,7 @@ int Dynarray_find(DynArray* parr, const int data)
 {
 	if (parr != NULL)
 	{
-		int** p = (int**)parr->data;
+		const int** p = (const int**)parr->data;
 		for (size_t i = 0; i < parr->count; ++i,++p)
 		{
 			if (  **p == data)

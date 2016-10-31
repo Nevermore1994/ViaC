@@ -45,7 +45,7 @@ void ParameterTypeList(int func_call) //解析形参类型表
 
 void DirectDeclaratorPostfix() // 直接声明符后缀
 {
-	int m;
+	 int m;
 	if (token == TK_OPENPA) //括号开始
 	{
 		//ParameterTypeList ();
@@ -80,7 +80,7 @@ void DirectDeclarator()
 
 void Declarator()
 {
-	int fc; 
+	const int fc; 
 	while (token == TK_STAR)
 	{ 
 		GetToken();
@@ -103,7 +103,7 @@ void Initializer() // 初值符
 	AssignmentExpression();
 }
 
-void ExternalDeclaration(int level)
+void ExternalDeclaration(const int level)
 {
 	if (!TypeSpecifier())
 	{
@@ -149,7 +149,7 @@ void ExternalDeclaration(int level)
 
 int TypeSpecifier()
 {
-	int type_found = 0;
+	 int type_found = 0;
 	switch (token)
 	{
 		case KW_CHAR:
@@ -338,7 +338,7 @@ void Statement()
 }
 
 
-int IsTypeSpecifier(int id)
+int IsTypeSpecifier(const int id)
 {
 	switch (id)
 	{
@@ -662,7 +662,7 @@ void SyntaxIndent()
 	syntax_state = SNTX_NUL;
 }
 
-void PrintTab(int num)
+void PrintTab(const int num)
 {
 	int  count = 0;
 	for (; count < num; ++count)

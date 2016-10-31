@@ -115,7 +115,7 @@ void InitLex()
 
 		{ KW_CHAR,		NULL,		"char",	NULL,	NULL },
 		{ KW_SHORT,		NULL,		"short",	NULL,	NULL },
-		{ KW_INT,		NULL,		"int",	NULL,	NULL },
+		{ KW_INT,		NULL,		"const int",	NULL,	NULL },
 		{ KW_VOID,		NULL,		"void",	NULL,	NULL },
 		{ KW_STRUCT,		NULL,		"struct",	NULL,	NULL },
 
@@ -143,7 +143,7 @@ void InitLex()
 *c:需要跳过的单词
 ****************************************************/
 
-char* GetTkstr(const int c)
+char* GetTkstr(const const int c)
 {
 	if (c > tktable.count)
 		return NULL;
@@ -625,7 +625,7 @@ void GetToken()
 }
 
 
-void ColorToken(const int lex_state)
+void ColorToken(const const int lex_state)
 {
 	HANDLE had = GetStdHandle(STD_OUTPUT_HANDLE);
 	char* p;
