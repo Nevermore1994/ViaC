@@ -197,7 +197,12 @@ enum  e_StorageClass
 	SC_CMP     = 0x00f3,
 	SC_VALMASK = 0x00ff,
 	SC_LAVL    = 0x1000,
-	SC_SYM     = 0x2000
+	SC_SYM     = 0x2000,
+	 
+	SC_ANOM    = 0x10000000,
+	SC_STRUCT  = 0x20000000,
+	SC_MEMBER  = 0x40000000,
+	SC_PARAMS  = 0x80000000,
 };
 
 enum  e_TypeCode
@@ -219,7 +224,42 @@ enum  e_TypeCode
 extern int syntax_state;
 extern int syntax_level;
 
-
+void ParameterTypeList(int func_call); //解析形参类型表
+void DirectDeclaratorPostfix();
+void DirectDeclarator();
+void Declarator();
+void TranslationUnit();
+void Initializer();
+void ExternalDeclaration(int level);
+int TypeSpecifier();
+void StructDeclaration();
+void StructDeclarationList();
+void StructSpecifier();
+void FunctionCallingConvention(int* fc);
+void StructMemberAligment();
+void CompoundStatement();
+void Funcbody();
+void Statement();
+int IsTypeSpecifier(int id);
+void ExpressionStatement();
+void IfStatement();
+void ForStatement();
+void ContinueStatement();
+void BreakStatement();
+void ReturnStatement();
+void Expression();
+void AssignmentExpression();
+void EquaityExpression();
+void RealtionalExpression();
+void AdditiveExpression();
+void MultiplicativeExpression();
+void UnaryExpression();
+void SizeofExpression();
+void PostfixExpression();
+void PrimaryExpression();
+void ArgumentExpressionList();
+void SyntaxIndent();
+void PrintTab(int num);
 /*******************end*************************/
 #endif // !SCC_H_
 

@@ -501,7 +501,7 @@ void MultiplicativeExpression()
 		UnaryExpression();
 	}
 }
-void  UnaryExpression()
+void UnaryExpression()
 {
 	switch (token)
 	{
@@ -550,7 +550,7 @@ void SizeofExpression()
 	Skip(TK_CLOSEPA);
 }
  
-void  PostfixExpression()
+void PostfixExpression()
 {
 	PrimaryExpression();
 	while (1)
@@ -613,7 +613,7 @@ void PrimaryExpression()
 	}
 }
 
-void  ArgumentExpressionList()
+void ArgumentExpressionList()
 {
 	GetToken();
 	if (token != TK_CLOSEPA)

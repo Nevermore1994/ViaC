@@ -12,8 +12,9 @@ int main(int argc, char ** argv)
 	Init();
 	Getch();
 	TestLex();
+	TranslationUnit();
 	Cleanup();
 	fclose(fin);
-	printf("%s 词法分析成功!", filename);
+	printf("%s 语法分析成功!", filename);
 	return 1;
 }
