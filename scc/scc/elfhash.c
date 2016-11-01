@@ -4,7 +4,8 @@
 
 int ElfHash(char* key)
 {
-	int h = 0, g;
+	int h = 0;
+	int g;
 	while (*key)
 	{
 		h = (h << 4) + *key++;

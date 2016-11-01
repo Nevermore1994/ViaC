@@ -2,7 +2,7 @@
 
 typedef TkWord* pTkWord;
 
-DynArray tktable;
+Dynarray tktable;
 TkWord* tk_hashtable [MAXKEY];
 DynString sourcestr;
 DynString tkstr;
@@ -115,7 +115,7 @@ void InitLex()
 
 		{ KW_CHAR,		NULL,		"char",	NULL,	NULL },
 		{ KW_SHORT,		NULL,		"short",	NULL,	NULL },
-		{ KW_INT,		NULL,		"const int",	NULL,	NULL },
+		{ KW_INT,		NULL,		"int",	NULL,	NULL },
 		{ KW_VOID,		NULL,		"void",	NULL,	NULL },
 		{ KW_STRUCT,		NULL,		"struct",	NULL,	NULL },
 
@@ -143,7 +143,7 @@ void InitLex()
 *c:需要跳过的单词
 ****************************************************/
 
-char* GetTkstr(const const int c)
+char* GetTkstr(const int c)
 {
 	if (c > tktable.count)
 		return NULL;
@@ -233,9 +233,9 @@ void SkipWhiteSpace()
 
 int IsNoDigit(char* c)
 {
-	return (c >= 'A' && c <= 'Z') || 
-		   (c >= 'a' && c <= 'z') ||
-		    c == '_';
+	return (c >= 'A' && c <= 'Z') ||
+		(c >= 'a' && c <= 'z') ||
+		c == '_';
 }
 
 int IsDigit(char c)
@@ -244,7 +244,7 @@ int IsDigit(char c)
 }
 
 
-TkWord* ParseIdentifier()
+void ParseIdentifier()
 {
 	Dynstring_reset(&tkstr);
 	Dynstring_chcat(&tkstr, ch);
@@ -385,7 +385,8 @@ void GetToken()
 		case '_':
 		{
 			TkWord* tp;
-			tp = ParseIdentifier();
+			ParseIdentifier();
+			tp = TkwordInsert(tkstr.data);
 			token = tp->tkcode;
 			break;
 		}
@@ -488,7 +489,7 @@ void GetToken()
 			}
 			else
 				token = TK_GT;
-		
+
 			break;
 		}
 		case '.':
@@ -586,7 +587,7 @@ void GetToken()
 		}
 		case ',':
 		{
-			
+
 			token = TK_COMMA;
 			Getch();
 			break;
@@ -622,10 +623,11 @@ void GetToken()
 			break;
 		}
 	}
+	SyntaxIndent();
 }
 
 
-void ColorToken(const const int lex_state)
+void ColorToken(const int lex_state)
 {
 	HANDLE had = GetStdHandle(STD_OUTPUT_HANDLE);
 	char* p;

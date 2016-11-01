@@ -1,5 +1,5 @@
 /******************************************
-* Author：Away 
+* Author：Away
 * Date: 2016-10-30
 * SCC语法分析:
 * 递归自顶向下分析法，由于是上下文无关，有些
@@ -12,19 +12,22 @@ int syntax_state;
 int syntax_level;
 
 
-void ParameterTypeList(int func_call) //解析形参类型表
+void ParameterTypeList() //解析形参类型表
 {
-	GetToken(); 
-	while (token == TK_CLOSEPA)
+	GetToken();
+	while (token != TK_CLOSEPA)
 	{
 		if (!TypeSpecifier())
 		{
 			Error("标识符无效");
 		}
 		Declarator();
+		if (token == TK_CLOSEPA)
+			break;
+		Skip(TK_COMMA);
 		if (token == TK_ELLIPSIS)
 		{
-			func_call = KW_CDECL;
+			//func_call = KW_CDECL;
 			GetToken();
 			break;
 		}
@@ -34,7 +37,7 @@ void ParameterTypeList(int func_call) //解析形参类型表
 	if (token == TK_BEGIN)
 	{
 		syntax_state = SNTX_LF_HT;
-	} 
+	}
 	else
 	{
 		syntax_state = SNTX_NUL;
@@ -45,17 +48,17 @@ void ParameterTypeList(int func_call) //解析形参类型表
 
 void DirectDeclaratorPostfix() // 直接声明符后缀
 {
-	 int m;
+	int m;
 	if (token == TK_OPENPA) //括号开始
 	{
-		//ParameterTypeList ();
+		ParameterTypeList();
 	}
 	else if (token == TK_OPENBR)  // 中括号
 	{
 		GetToken();
-		if (token == TK_OPENBR)
+		if (token == TK_CINT)
 		{
-			GetToken(); 
+			GetToken();
 			m = tkvalue;
 		}
 		Skip(TK_CLOSEBR);
@@ -72,7 +75,7 @@ void DirectDeclarator()
 	}
 	else
 	{
-		Expect("表示符");
+		Expect("标识符");
 	}
 	DirectDeclaratorPostfix();
 }
@@ -80,13 +83,13 @@ void DirectDeclarator()
 
 void Declarator()
 {
-	const int fc; 
+	//int fc; 
 	while (token == TK_STAR)
-	{ 
+	{
 		GetToken();
 	}
-	FunctionCallingConvention(&fc);
-	StructMemberAligment();
+	FunctionCallingConvention();
+	StructMemberAlignment();
 	DirectDeclarator();
 }
 
@@ -136,10 +139,10 @@ void ExternalDeclaration(const int level)
 			if (token == TK_COMMA)
 			{
 				GetToken();
-			} 
+			}
 			else
 			{
-				syntax_state = SNTX_LF_HT; 
+				syntax_state = SNTX_LF_HT;
 				Skip(TK_SEMICOLON);
 				break;
 			}
@@ -149,37 +152,42 @@ void ExternalDeclaration(const int level)
 
 int TypeSpecifier()
 {
-	 int type_found = 0;
+	int type_found = 0;
 	switch (token)
 	{
 		case KW_CHAR:
 		{
 			type_found = 1;
 			syntax_state = SNTX_SP;
+			GetToken();
 			break;
 		}
 		case KW_INT:
 		{
-			type_found = 1; 
+			type_found = 1;
 			syntax_state = SNTX_SP;
-			break;
-		}
-		case KW_VOID:
-		{
-			type_found = 1; 
-			syntax_state = SNTX_SP; 
-			break;
-		}
-		case KW_STRUCT:
-		{
-			type_found = 1; 
-			syntax_state = SNTX_SP;
+			GetToken();
 			break;
 		}
 		case KW_SHORT:
 		{
-			type_found = 1; 
+			type_found = 1;
 			syntax_state = SNTX_SP;
+			GetToken();
+		}
+		case KW_VOID:
+		{
+			type_found = 1;
+			syntax_state = SNTX_SP;
+			GetToken();
+			break;
+		}
+		case KW_STRUCT:
+		{
+			syntax_state = SNTX_SP;
+			StructSpecifier();
+			type_found = 1;
+			break;
 		}
 		default:
 			break;
@@ -187,13 +195,13 @@ int TypeSpecifier()
 	return type_found;
 }
 void StructDeclaration()
-{ 
-	TypeSpecifier(); 
+{
+	TypeSpecifier();
 	while (1)
 	{
 		Declarator();
-		
-		if (token == TK_SEMICOLON)
+
+		if (token == TK_SEMICOLON || token == TK_EOF)
 			break;
 		Skip(TK_COMMA);
 	}
@@ -204,18 +212,18 @@ void StructDeclaration()
 void StructDeclarationList()
 {
 	int  maxalign, offset;
-	
-	syntax_state = SNTX_LF_HT;
-	++syntax_level;
-	
+
+	syntax_state = SNTX_LF_HT; //第一个结构体的成员和"{"不在同一行
+	++syntax_level;            //缩进进一行
+
 	GetToken();
 
-	while (token == TK_END)
+	while (token != TK_END)
 	{
 		StructDeclaration(&maxalign, &offset);
 	}
-	Skip(TK_END); 
-	syntax_state = SNTX_LF_HT;	
+	Skip(TK_END);
+	syntax_state = SNTX_LF_HT;
 }
 
 void StructSpecifier()
@@ -223,37 +231,39 @@ void StructSpecifier()
 	int t;
 	GetToken();
 	t = token;
-	
+
 	syntax_state = SNTX_DELAY;
 	GetToken();
+
 	if (token == TK_BEGIN)
 		syntax_state = SNTX_LF_HT;
 	else if (token == TK_CLOSEPA)
 		syntax_state = SNTX_NUL;
 	else
-		syntax_state = SNTX_SP; 
+		syntax_state = SNTX_SP;
 	SyntaxIndent();
 
 	if (t < TK_IDENT)
 		Expect("结构体名称");
+
 	if (token == TK_BEGIN)
 	{
 		StructDeclarationList();
 	}
 }
 
-void FunctionCallingConvention(int* fc)
-{ 
-	*fc = KW_CDECL;
+void FunctionCallingConvention()
+{
+	//*fc = KW_CDECL;
 	if (token == -KW_CDECL || token == KW_STDCALL)
 	{
-		*fc = token;
+		//*fc = token;
 		syntax_state = SNTX_SP;
 		GetToken();
 	}
 }
 
-void StructMemberAligment()
+void StructMemberAlignment()
 {
 	if (token == KW_ALIGN)
 	{
@@ -273,8 +283,8 @@ void CompoundStatement()
 {
 	syntax_state = SNTX_LF_HT;
 	syntax_level++;
-	
-	GetToken(); 
+
+	GetToken();
 	while (IsTypeSpecifier(token))
 	{
 		ExternalDeclaration(SC_LOCAL);
@@ -285,13 +295,13 @@ void CompoundStatement()
 	}
 	syntax_state = SNTX_LF_HT;
 	GetToken();
-} 
+}
 
 
 void Funcbody()
 {
 	CompoundStatement();
-	
+
 }
 
 
@@ -331,7 +341,7 @@ void Statement()
 		}
 		default:
 		{
-			AssignmentExpression();
+			ExpressionStatement();
 			break;
 		}
 	}
@@ -356,7 +366,7 @@ int IsTypeSpecifier(const int id)
 
 void ExpressionStatement()
 {
-	if (token == TK_SEMICOLON)
+	if (token != TK_SEMICOLON)
 	{
 		Expression();
 	}
@@ -369,12 +379,13 @@ void IfStatement()
 	syntax_state = SNTX_SP;
 	GetToken();
 	Skip(TK_OPENPA);
+	Expression();
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_CLOSEPA);
 	Statement();
 	if (token == KW_ELSE)
 	{
-		syntax_state = SNTX_LF_HT; 
+		syntax_state = SNTX_LF_HT;
 		GetToken();
 		Statement();
 	}
@@ -388,20 +399,22 @@ void ForStatement()
 	if (token != TK_SEMICOLON)
 	{
 		Expression();
-	} 
+	}
 	Skip(TK_SEMICOLON);
-	if (token == TK_SEMICOLON)
+
+	if (token != TK_SEMICOLON)
 	{
 		Expression();
 	}
 	Skip(TK_SEMICOLON);
-	if (token == TK_CLOSEPA)
+
+	if (token != TK_CLOSEPA)
 	{
 		Expression();
 	}
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_CLOSEPA);
-	Statement();
+	Statement();  //只有此处用到break,continue可能有多个break或者是continue，需要拉链反填
 }
 
 void ContinueStatement()
@@ -424,16 +437,12 @@ void ReturnStatement()
 	syntax_state = SNTX_DELAY;
 	GetToken();
 	if (token == TK_SEMICOLON)
-	{
 		syntax_state = SNTX_NUL;
-	}
 	else
-	{
 		syntax_state = SNTX_SP;
-	}
-	
+
 	SyntaxIndent();
-	
+
 	if (token != TK_SEMICOLON)
 	{
 		Expression();
@@ -455,29 +464,31 @@ void Expression()
 
 void AssignmentExpression()
 {
-	EquaityExpression();
+	EqualityExpression();
 	if (token == TK_ASSIGN)
 	{
 		GetToken();
 		AssignmentExpression();
 	}
 }
-void EquaityExpression()
+void EqualityExpression()
 {
-	RealtionalExpression();
+	int t;
+	RelationalExpression();
 	while (token == TK_EQ || token == TK_NEQ)
 	{
-		GetToken(); 
-		RealtionalExpression();
+		t = token;
+		GetToken();
+		RelationalExpression();
 	}
 }
-void RealtionalExpression()
-{ 
+void RelationalExpression()
+{
 	AdditiveExpression();
-	while(token == TK_LT || token == TK_LEQ ||
-		  token == TK_GT || token == TK_GEQ)
+	while (token == TK_LT || token == TK_LEQ ||
+		token == TK_GT || token == TK_GEQ)
 	{
-		GetToken(); 
+		GetToken();
 		AdditiveExpression();
 	}
 }
@@ -487,16 +498,18 @@ void AdditiveExpression()
 	MultiplicativeExpression();
 	while (token == TK_PLUS || token == TK_MINUS)
 	{
-		GetToken(); 
+		GetToken();
 		MultiplicativeExpression();
 	}
 }
 
 void MultiplicativeExpression()
 {
-	UnaryExpression(); 
+	int t;
+	UnaryExpression();
 	while (token == TK_STAR || token == TK_DIVIDE || token == TK_MOD)
 	{
+		t = token;
 		GetToken();
 		UnaryExpression();
 	}
@@ -524,7 +537,7 @@ void UnaryExpression()
 		}
 		case TK_MINUS:
 		{
-			GetToken(); 
+			GetToken();
 			UnaryExpression();
 			break;
 		}
@@ -549,7 +562,7 @@ void SizeofExpression()
 	TypeSpecifier();
 	Skip(TK_CLOSEPA);
 }
- 
+
 void PostfixExpression()
 {
 	PrimaryExpression();
@@ -560,13 +573,13 @@ void PostfixExpression()
 			GetToken();
 			token |= SC_MEMBER;
 			GetToken();
-	 	} 
+		}
 		else if (token == TK_OPENBR)
 		{
 			GetToken();
 			Expression();
 			Skip(TK_CLOSEBR);
-		} 
+		}
 		else if (token == TK_OPENPA)
 		{
 			ArgumentExpressionList();
@@ -595,7 +608,7 @@ void PrimaryExpression()
 		}
 		case TK_OPENPA:
 		{
-			GetToken(); 
+			GetToken();
 			Expression();
 			Skip(TK_CLOSEPA);
 			break;
@@ -647,12 +660,9 @@ void SyntaxIndent()
 		case SNTX_LF_HT:
 		{
 			if (token == TK_END)
-			{
-				if (token == TK_END)
-					syntax_level--;
-				printf("\n");
-				PrintTab(syntax_level);
-			}
+				--syntax_level;
+			printf("\n");
+			PrintTab(syntax_level);
 			ColorToken(LEX_NORMAL);
 			break;
 		}
@@ -664,8 +674,8 @@ void SyntaxIndent()
 
 void PrintTab(const int num)
 {
-	int  count = 0;
-	for (; count < num; ++count)
+	int  count;
+	for (count = 0; count < num; ++count)
 	{
 		printf("\t");
 	}

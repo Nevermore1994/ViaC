@@ -11,10 +11,11 @@ int main(const int argc, char ** argv)
 	}
 	Init();
 	Getch();
-	TestLex();
+	GetToken();
+	//TestLex();
 	TranslationUnit();
 	Cleanup();
 	fclose(fin);
-	printf("%s 语法分析成功!", filename);
+	printf("%s语法分析成功!",filename);
 	return 1;
 }

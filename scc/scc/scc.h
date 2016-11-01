@@ -27,19 +27,19 @@ void Dynstring_realloc(DynString* pstr, const int newsize);
 
 
 /************定义动态数组*******/
-typedef struct DynArray
+typedef struct Dynarray
 {
 	int count;
 	int capacity;
 	void** data;
-}DynArray;
+}Dynarray;
 /************动态数组函数*****/
-void Dynarray_init(DynArray* parr, const int size);
-void Dynarray_realloc(DynArray* parr, const int newsize);
-void Dynarray_add(DynArray* parr, void* data);
-void Dynarray_free(DynArray* parr);
-int  Dynarray_find(DynArray* parr, const int data);
-void Dynarray_delete(DynArray* parr, const int i);
+void Dynarray_init(Dynarray* parr, const int size);
+void Dynarray_realloc(Dynarray* parr, const int newsize);
+void Dynarray_add(Dynarray* parr, void* data);
+void Dynarray_free(Dynarray* parr);
+int  Dynarray_find(Dynarray* parr, const int data);
+void Dynarray_delete(Dynarray* parr, const int i);
 /************单词编码**********/
 enum e_TokenCode
 {
@@ -126,7 +126,7 @@ TkWord* TkwordFind(char* p, const int key);
 
 void Getch();
 void Preprocess();
-TkWord* parse_identifiler();
+void ParseIdentifier();
 void ParseNum();
 void ParseString();
 void InitLex();
@@ -141,7 +141,7 @@ void TestLex();
 
 /***************引用变量****************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
-extern DynArray tktable;				//单词动态数组
+extern Dynarray tktable;				//单词动态数组
 extern DynString tkstr;
 extern FILE* fin;
 extern char ch;
@@ -153,7 +153,7 @@ extern int tkvalue;
 /***************错误处理*****************************/
 enum e_ErrorLevel
 {
-	LEVEL_WARNING,
+	LEVEL_Warning,
 	LEVEL_ERROR
 };
 
@@ -224,7 +224,7 @@ enum  e_TypeCode
 extern int syntax_state;
 extern int syntax_level;
 
-void ParameterTypeList(int func_call); //解析形参类型表
+void ParameterTypeList(); //解析形参类型表
 void DirectDeclaratorPostfix();
 void DirectDeclarator();
 void Declarator();
@@ -235,8 +235,8 @@ int TypeSpecifier();
 void StructDeclaration();
 void StructDeclarationList();
 void StructSpecifier();
-void FunctionCallingConvention(int* fc);
-void StructMemberAligment();
+void FunctionCallingConvention();
+void StructMemberAlignment();
 void CompoundStatement();
 void Funcbody();
 void Statement();
@@ -249,8 +249,8 @@ void BreakStatement();
 void ReturnStatement();
 void Expression();
 void AssignmentExpression();
-void EquaityExpression();
-void RealtionalExpression();
+void EqualityExpression();
+void RelationalExpression();
 void AdditiveExpression();
 void MultiplicativeExpression();
 void UnaryExpression();
