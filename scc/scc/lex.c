@@ -11,15 +11,15 @@ int token;
 int tkvalue;
 
 
-
-
 TkWord* TkwordDirectInsert(TkWord* tp)
 {
 	int keyno;
 	tp->sym_id = NULL;
 	tp->sym_struct = NULL;
+
 	DynArrayAdd(&tktable, tp);
 	keyno = ElfHash(tp->spelling);
+
 	tp->next = tk_hashtable [keyno];
 	tk_hashtable [keyno] = tp;
 	return tp;
@@ -73,69 +73,68 @@ TkWord* TkwordInsert(char *p)
 	}
 	return tp;
 }
+
 void Getch()
 {
 	ch = getc(fin);
 }
 
-
 void InitLex()
 {
 	TkWord* tp;
-	static TkWord keywords[] = {
-		{ TK_PLUS,		NULL,	  "+",	NULL,	NULL },
-		{ TK_MINUS,		NULL,	  "-",	NULL,	NULL },
-		{ TK_STAR,		NULL,	  "*",	NULL,	NULL },
-		{ TK_DIVIDE,		NULL,	  "/",	NULL,	NULL },
-		{ TK_MOD,		NULL,	  "%",	NULL,	NULL },
-		{ TK_EQ,			NULL,	  "==",	NULL,	NULL },
-		{ TK_NEQ,		NULL,	  "!=",	NULL,	NULL },
-		{ TK_LT,			NULL,	  "<",	NULL,	NULL },
-		{ TK_LEQ,		NULL,	  "<=",	NULL,	NULL },
-		{ TK_GT,			NULL,	  ">",	NULL,	NULL },
-		{ TK_GEQ,		NULL,	  ">=",	NULL,	NULL },
-		{ TK_ASSIGN,		NULL,	  "=",	NULL,	NULL },
-		{ TK_POINTSTO,	NULL,	  "->",	NULL,	NULL },
-		{ TK_DOT,		NULL,	  ".",	NULL,	NULL },
-		{ TK_AND,		NULL,	  "&",	NULL,	NULL },
-		{ TK_OPENPA,		NULL,	  "(",	NULL,	NULL },
-		{ TK_CLOSEPA,	NULL,	  ")",	NULL,	NULL },
-		{ TK_OPENBR,		NULL,	  "[",	NULL,	NULL },
-		{ TK_CLOSEBR,	NULL,	  "]",	NULL,	NULL },
-		{ TK_BEGIN,		NULL,	  "{",	NULL,	NULL },
-		{ TK_END,		NULL,	  "}",	NULL,	NULL },
-		{ TK_SEMICOLON,	NULL,	  ";",	NULL,	NULL },
-		{ TK_COMMA,		NULL,	  ",",	NULL,	NULL },
-		{ TK_ELLIPSIS,	NULL,	"...",	NULL,	NULL },
-		{ TK_EOF,		NULL,	 "End_Of_File",	NULL,	NULL },
+	static TkWord keywords[] = {	    
+		{ TK_PLUS,		NULL,	  "+",	            NULL,	NULL },
+		{ TK_MINUS,		NULL,	  "-",	            NULL,	NULL },
+		{ TK_STAR,		NULL,	  "*",	            NULL,	NULL },
+		{ TK_DIVIDE,	NULL,	  "/",	            NULL,	NULL },
+		{ TK_MOD,		NULL,	  "%",	            NULL,	NULL },
+		{ TK_EQ,		NULL,	  "==",             NULL,	NULL },
+		{ TK_NEQ,		NULL,	  "!=",             NULL,	NULL },
+		{ TK_LT,		NULL,	  "<",	            NULL,	NULL },
+		{ TK_LEQ,		NULL,	  "<=",             NULL,	NULL },
+		{ TK_GT,		NULL,	  ">",	            NULL,	NULL },
+		{ TK_GEQ,		NULL,	  ">=",             NULL,	NULL },
+		{ TK_ASSIGN,	NULL,	  "=",	            NULL,	NULL },
+		{ TK_POINTSTO,	NULL,	  "->",             NULL,	NULL },
+		{ TK_DOT,		NULL,	  ".",	            NULL,	NULL },
+		{ TK_AND,		NULL,	  "&",	            NULL,	NULL },
+		{ TK_OPENPA,	NULL,	  "(",	            NULL,	NULL },
+		{ TK_CLOSEPA,	NULL,	  ")",	            NULL,	NULL },
+		{ TK_OPENBR,	NULL,	  "[",	            NULL,	NULL },
+		{ TK_CLOSEBR,	NULL,	  "]",	            NULL,	NULL },
+		{ TK_BEGIN,		NULL,	  "{",	            NULL,	NULL },
+		{ TK_END,		NULL,	  "}",	            NULL,	NULL },
+		{ TK_SEMICOLON,	NULL,	  ";",	            NULL,	NULL },
+		{ TK_COMMA,		NULL,	  ",",	            NULL,	NULL },
+		{ TK_ELLIPSIS,	NULL,	  "...",            NULL,	NULL },
+		{ TK_EOF,		NULL,	 "End_Of_File\n",	NULL,	NULL },
 
-		{ TK_CINT,		NULL,	 	"整型常量",	     NULL,	NULL },
-		{ TK_CCHAR,		NULL,		"字符常量",	     NULL,	NULL },
-		{ TK_CSTR,		NULL,		"字符串常量",	 NULL,	NULL },
+		{ TK_CINT,		NULL,	 	"整型常量",	    NULL,	NULL },
+		{ TK_CCHAR,		NULL,		"字符常量",	    NULL,	NULL },
+		{ TK_CSTR,		NULL,		"字符串常量",	NULL,	NULL },
 
-		{ KW_CHAR,		NULL,		"char",	    NULL,	NULL },
-		{ KW_SHORT,		NULL,		"short",	NULL,	NULL },
-		{ KW_INT,		NULL,		"int",	    NULL,	NULL },
-		{ KW_VOID,		NULL,		"void",	    NULL,	NULL },
-		{ KW_STRUCT,	NULL,		"struct",	NULL,	NULL },
-
-		{ KW_IF,			NULL,		"if"	,	NULL,	NULL },
-		{ KW_ELSE,		NULL,		"else",	NULL,	NULL },
-		{ KW_FOR,		NULL,		"for",	NULL,	NULL },
-		{ KW_CONTINUE,	NULL,		"continue",	NULL,	NULL },
-		{ KW_BREAK,		NULL,		"break",	NULL,	NULL },
-		{ KW_RETURN,		NULL,		"return",	NULL,	NULL },
-		{ KW_SIZEOF,		NULL,		"sizeof",	NULL,	NULL },
-		{ KW_ALIGN,		NULL,		"__align",	NULL,	NULL },
-		{ KW_CDECL,		NULL,		"__cdecl",	NULL,	NULL },
-		{ KW_STDCALL,	NULL,		"__stdcall",	NULL,	NULL },
-		{ 0,				NULL,	NULL,	NULL,		NULL }
+		{ KW_CHAR,		NULL,		"char",	        NULL,	NULL },
+		{ KW_SHORT,		NULL,		"short",        NULL,	NULL },
+		{ KW_INT,		NULL,		"int",	        NULL,	NULL },
+		{ KW_VOID,		NULL,		"void",	        NULL,	NULL },
+		{ KW_STRUCT,	NULL,		"struct",       NULL,	NULL },
+											       
+		{ KW_IF,		NULL,		"if",           NULL,	NULL },
+		{ KW_ELSE,		NULL,		"else",	        NULL,	NULL },
+		{ KW_FOR,		NULL,		"for",	        NULL,	NULL },
+		{ KW_CONTINUE,	NULL,		"continue",     NULL,	NULL },
+		{ KW_BREAK,		NULL,		"break",        NULL,	NULL },
+		{ KW_RETURN,	NULL,		"return",       NULL,	NULL },
+		{ KW_SIZEOF,	NULL,		"sizeof",       NULL,	NULL },
+		{ KW_ALIGN,		NULL,		"__align",      NULL,	NULL },
+		{ KW_CDECL,		NULL,		"__cdecl",      NULL,	NULL },
+		{ KW_STDCALL,	NULL,		"__stdcall",    NULL,	NULL },
+		{ 0,			NULL,	    NULL,	        NULL,	NULL }
 	};
 
 	DynArrayInit(&tktable, 8);
 	for (tp = &keywords [0]; tp->spelling != NULL; tp++)
-		TkwordDirectInsert(tp);
-
+		 TkwordDirectInsert(tp);
 }
 
 /****************************************************
@@ -183,15 +182,15 @@ void Preprocess()
 void ParseComment()
 {
 	Getch();
-	do
+	while (1)
 	{
-		do
+		while(1)
 		{
 			if (ch == '\n' || ch == '*' || ch == CH_EOF)
 				break;
 			else
 				Getch();
-		} while (1);
+		};
 		if (ch == '\n')
 		{
 			line_num++;
@@ -211,7 +210,7 @@ void ParseComment()
 			Error("缺少注释符");
 			return;
 		}
-	} while (1);
+	}
 }
 
 void SkipWhiteSpace()
@@ -235,8 +234,8 @@ void SkipWhiteSpace()
 int IsNoDigit(char* c)
 {
 	return (c >= 'A' && c <= 'Z') ||
-		(c >= 'a' && c <= 'z') ||
-		c == '_';
+		   (c >= 'a' && c <= 'z') ||
+		    c == '_';
 }
 
 int IsDigit(char c)
@@ -256,7 +255,6 @@ void ParseIdentifier()
 		Getch();
 	}
 	DynStringChcat(&tkstr, '\0');
-	return TkwordInsert(tkstr.data);
 }
 
 
@@ -290,7 +288,7 @@ void ParseString(char sep)
 	DynStringReset(&sourcestr);
 	DynStringChcat(&sourcestr, sep);
 	Getch();
-	for (;;)
+	while(1)
 	{
 		if (ch == sep)
 			break;
@@ -636,8 +634,8 @@ void ColorToken(const int lex_state)
 	{
 		case LEX_NORMAL:
 		{
-			if (token >= TK_IDENT)   //标配符为蓝色
-				SetConsoleTextAttribute(had, FOREGROUND_INTENSITY);
+			if (token >= TK_IDENT)   
+				SetConsoleTextAttribute(had, FOREGROUND_INTENSITY | FOREGROUND_BLUE | FOREGROUND_GREEN );
 			else if (token >= KW_CHAR)
 				SetConsoleTextAttribute(had, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 			else if (token >= TK_CINT)
