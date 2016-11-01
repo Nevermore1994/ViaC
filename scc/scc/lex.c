@@ -2,7 +2,7 @@
 
 typedef TkWord* pTkWord;
 
-Dynarray tktable;
+DynArray tktable;
 TkWord* tk_hashtable [MAXKEY];
 DynString sourcestr;
 DynString tkstr;
@@ -18,7 +18,7 @@ TkWord* TkwordDirectInsert(TkWord* tp)
 	int keyno;
 	tp->sym_id = NULL;
 	tp->sym_struct = NULL;
-	Dynarray_add(&tktable, tp);
+	DynArrayAdd(&tktable, tp);
 	keyno = ElfHash(tp->spelling);
 	tp->next = tk_hashtable [keyno];
 	tk_hashtable [keyno] = tp;
@@ -58,7 +58,7 @@ TkWord* TkwordInsert(char *p)
 		tp = ( TkWord* ) MallocInit(sizeof(TkWord) + length + 1);
 		tp->next = tk_hashtable [keyno];
 		tk_hashtable [keyno] = tp;
-		Dynarray_add(&tktable, tp);
+		DynArrayAdd(&tktable, tp);
 		tp->tkcode = tktable.count - 1;
 		s = ( char * ) tp + sizeof(TkWord);
 		tp->spelling = ( char * ) s;
@@ -132,7 +132,7 @@ void InitLex()
 		{ 0,				NULL,	NULL,	NULL,		NULL }
 	};
 
-	Dynarray_init(&tktable, 8);
+	DynArrayInit(&tktable, 8);
 	for (tp = &keywords [0]; tp->spelling != NULL; tp++)
 		TkwordDirectInsert(tp);
 
@@ -246,48 +246,48 @@ int IsDigit(char c)
 
 void ParseIdentifier()
 {
-	Dynstring_reset(&tkstr);
-	Dynstring_chcat(&tkstr, ch);
+	DynStringReset(&tkstr);
+	DynStringChcat(&tkstr, ch);
 	Getch();
 	while (IsNoDigit(ch) || IsDigit(ch))
 	{
-		Dynstring_chcat(&tkstr, ch);
+		DynStringChcat(&tkstr, ch);
 		Getch();
 	}
-	Dynstring_chcat(&tkstr, '\0');
+	DynStringChcat(&tkstr, '\0');
 	return TkwordInsert(tkstr.data);
 }
 
 
 void ParseNum()
 {
-	Dynstring_reset(&tkstr);
-	Dynstring_reset(&sourcestr);
+	DynStringReset(&tkstr);
+	DynStringReset(&sourcestr);
 	do
 	{
-		Dynstring_chcat(&tkstr, ch);
-		Dynstring_chcat(&sourcestr, ch);
+		DynStringChcat(&tkstr, ch);
+		DynStringChcat(&sourcestr, ch);
 		Getch();
 	} while (IsDigit(ch));
 	if (ch == '.')
 	{
 		do
 		{
-			Dynstring_chcat(&tkstr, ch);
-			Dynstring_chcat(&sourcestr, ch);
+			DynStringChcat(&tkstr, ch);
+			DynStringChcat(&sourcestr, ch);
 		} while (IsDigit(ch));
 	}
-	Dynstring_chcat(&tkstr, '\0');
-	Dynstring_chcat(&sourcestr, '\0');
+	DynStringChcat(&tkstr, '\0');
+	DynStringChcat(&sourcestr, '\0');
 	tkvalue = atoi(tkstr.data);
 }
 
 void ParseString(char sep)
 {
 	char c;
-	Dynstring_reset(&tkstr);
-	Dynstring_reset(&sourcestr);
-	Dynstring_chcat(&sourcestr, sep);
+	DynStringReset(&tkstr);
+	DynStringReset(&sourcestr);
+	DynStringChcat(&sourcestr, sep);
 	Getch();
 	for (;;)
 	{
@@ -295,7 +295,7 @@ void ParseString(char sep)
 			break;
 		else if (ch == '\\')
 		{
-			Dynstring_chcat(&sourcestr, ch);
+			DynStringChcat(&sourcestr, ch);
 			Getch();
 			switch (ch)
 			{
@@ -344,20 +344,20 @@ void ParseString(char sep)
 					}
 					break;
 			}
-			Dynstring_chcat(&tkstr, c);
-			Dynstring_chcat(&sourcestr, ch);
+			DynStringChcat(&tkstr, c);
+			DynStringChcat(&sourcestr, ch);
 			Getch();
 		}
 		else
 		{
-			Dynstring_chcat(&tkstr, ch);
-			Dynstring_chcat(&sourcestr, ch);
+			DynStringChcat(&tkstr, ch);
+			DynStringChcat(&sourcestr, ch);
 			Getch();
 		}
 	}
-	Dynstring_chcat(&tkstr, '\0');
-	Dynstring_chcat(&sourcestr, sep);
-	Dynstring_chcat(&sourcestr, '\0');
+	DynStringChcat(&tkstr, '\0');
+	DynStringChcat(&sourcestr, sep);
+	DynStringChcat(&sourcestr, '\0');
 	Getch();
 }
 

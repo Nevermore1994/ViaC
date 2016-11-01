@@ -9,7 +9,7 @@ void HandleException(const int stage, const int level, char* fmt, va_list ap)
 	vsprintf_s(buf, 1024,fmt, ap);
 	if (stage == STAGE_COMPILE)
 	{
-		if (level == LEVEL_Warning)
+		if (level == LEVEL_WARNING)
 			printf("%s(µÚ%dÐÐ):±àÒë¾¯¸æ£º%s\n:", filename, line_num, buf);
 		else
 		{
@@ -28,7 +28,7 @@ void Warning(char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	HandleException(STAGE_COMPILE, LEVEL_Warning, fmt, ap);
+	HandleException(STAGE_COMPILE, LEVEL_WARNING, fmt, ap);
 	va_end(ap);
 }
 

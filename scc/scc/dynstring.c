@@ -5,7 +5,7 @@
 *参数：pstr为初始化的指针, initsize初始化的空间大小
 *功能：初始化动态字符串
 *****************************************************/
-void Dynstring_init(DynString* pstr, const int initsize)
+void DynStringInit(DynString* pstr, const int initsize)
 {
 	if (pstr != NULL)
 	{
@@ -20,11 +20,11 @@ void Dynstring_init(DynString* pstr, const int initsize)
 }
 
 /****************************************************
-*函数名：Dynstring_free(DynString* pstr)
+*函数名：DynStringFree(DynString* pstr)
 *参数：pstr释放指针
 *功能：将动态字符串空间释放
 ****************************************************/
-void Dynstring_free(DynString* pstr)
+void DynStringFree(DynString* pstr)
 {
 	if (pstr != NULL)
 	{
@@ -41,7 +41,7 @@ void Dynstring_free(DynString* pstr)
 *参数：
 *功能：
 **************************************************/
-void Dynstring_realloc(DynString* pstr, const int newsize)
+void DynStringRealloc(DynString* pstr, const int newsize)
 {
 	if (pstr != NULL)
 	{
@@ -62,18 +62,18 @@ void Dynstring_realloc(DynString* pstr, const int newsize)
 	}
 }
 /*************************************************
-*函数名：Dynstring_chcat(DynString* pstr, int ch)
+*函数名：DynStringChcat(DynString* pstr, int ch)
 *参数：pstr为字符指针，ch为添加的字符
 *功能：为动态字符串添加字符
 **************************************************/
-void Dynstring_chcat(DynString* pstr, const int ch)
+void DynStringChcat(DynString* pstr, const int ch)
 {
 	if (pstr != NULL)
 	{
 		int count = pstr->count + 1;
 		if (count > pstr->capacity)
 		{
-			Dynstring_realloc(pstr, count);
+			DynStringRealloc(pstr, count);
 		}
 		((char*) pstr->data)[count - 1] = ch;
 		pstr->count = count;
@@ -81,15 +81,15 @@ void Dynstring_chcat(DynString* pstr, const int ch)
 }
 
 /*************************************************
-*函数名：Dynstring_reset(DynString* pstr)
+*函数名：DynStringReset(DynString* pstr)
 *参数：pstr为字符指针
 *功能：重置字符指针
 **************************************************/
-void Dynstring_reset(DynString* pstr)
+void DynStringReset(DynString* pstr)
 {
 	if (pstr != NULL)
 	{
-		Dynstring_free(pstr);
-		Dynstring_init(pstr, 8);
+		DynStringFree(pstr);
+		DynStringInit(pstr, 8);
 	}
 }

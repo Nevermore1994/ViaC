@@ -282,7 +282,7 @@ void StructMemberAlignment()
 void CompoundStatement()
 {
 	syntax_state = SNTX_LF_HT;
-	syntax_level++;
+	++syntax_level;
 
 	GetToken();
 	while (IsTypeSpecifier(token))
@@ -554,7 +554,6 @@ void UnaryExpression()
 	}
 }
 
-
 void SizeofExpression()
 {
 	GetToken();
@@ -677,6 +676,6 @@ void PrintTab(const int num)
 	int  count;
 	for (count = 0; count < num; ++count)
 	{
-		printf("\t");
+		printf("  ");
 	}
 }

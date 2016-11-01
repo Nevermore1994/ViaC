@@ -19,27 +19,27 @@ typedef struct DynString
 
 }DynString;
 /******动态字符串函数***********/
-void Dynstring_init(DynString* pstr, const int initsize);		//初始化动态字符串
-void Dynstring_free(DynString* pstr);					//释放动态字符串
-void Dynstring_reset(DynString* pstr);
-void Dynstring_chcat(DynString* pstr, const int ch);
-void Dynstring_realloc(DynString* pstr, const int newsize);
+void DynStringInit(DynString* pstr, const int initsize);		//初始化动态字符串
+void DynStringFree(DynString* pstr);					//释放动态字符串
+void DynStringReset(DynString* pstr);
+void DynStringChcat(DynString* pstr, const int ch);
+void DynStringRealloc(DynString* pstr, const int newsize);
 
 
 /************定义动态数组*******/
-typedef struct Dynarray
+typedef struct DynArray
 {
 	int count;
 	int capacity;
 	void** data;
-}Dynarray;
+}DynArray;
 /************动态数组函数*****/
-void Dynarray_init(Dynarray* parr, const int size);
-void Dynarray_realloc(Dynarray* parr, const int newsize);
-void Dynarray_add(Dynarray* parr, void* data);
-void Dynarray_free(Dynarray* parr);
-int  Dynarray_find(Dynarray* parr, const int data);
-void Dynarray_delete(Dynarray* parr, const int i);
+void DynArrayInit(DynArray* parr, const int size);
+void DynArrayRealloc(DynArray* parr, const int newsize);
+void DynArrayAdd(DynArray* parr, void* data);
+void DynArrayFree(DynArray* parr);
+int  DynArrayFind(DynArray* parr, const int data);
+void DynArrayDelete(DynArray* parr, const int i);
 /************单词编码**********/
 enum e_TokenCode
 {
@@ -141,7 +141,7 @@ void TestLex();
 
 /***************引用变量****************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
-extern Dynarray tktable;				//单词动态数组
+extern DynArray tktable;				//单词动态数组
 extern DynString tkstr;
 extern FILE* fin;
 extern char ch;
@@ -153,7 +153,7 @@ extern int tkvalue;
 /***************错误处理*****************************/
 enum e_ErrorLevel
 {
-	LEVEL_Warning,
+	LEVEL_WARNING,
 	LEVEL_ERROR
 };
 
@@ -196,8 +196,8 @@ enum  e_StorageClass
 	SC_LLOACL  = 0x00f2, 
 	SC_CMP     = 0x00f3,
 	SC_VALMASK = 0x00ff,
-	SC_LAVL    = 0x1000,
-	SC_SYM     = 0x2000,
+	SC_LAVL    = 0x1000,//左值
+	SC_SYM     = 0x2000,//符号
 	 
 	SC_ANOM    = 0x10000000,
 	SC_STRUCT  = 0x20000000,
@@ -259,7 +259,7 @@ void PostfixExpression();
 void PrimaryExpression();
 void ArgumentExpressionList();
 void SyntaxIndent();
-void PrintTab(int num);
+void PrintTab(int num);//打印table
 /*******************end*************************/
 #endif // !SCC_H_
 

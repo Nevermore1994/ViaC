@@ -5,7 +5,7 @@
 *参数：pstr为初始化的指针, initsize初始化的空间大小
 *功能：初始化
 *****************************************************/
-void Dynarray_init(Dynarray* parr, const int size)
+void DynArrayInit(DynArray* parr, const int size)
 {
 	if (parr != NULL)
 	{
@@ -19,7 +19,7 @@ void Dynarray_init(Dynarray* parr, const int size)
 	}
 }
 
-void Dynarray_realloc(Dynarray* parr, const int newsize)
+void DynArrayRealloc(DynArray* parr, const int newsize)
 {
 	if (parr != NULL)
 	{
@@ -39,20 +39,20 @@ void Dynarray_realloc(Dynarray* parr, const int newsize)
 		parr->capacity = capacity;
 	}
 }
-void Dynarray_add(Dynarray* parr, void* data)
+void DynArrayAdd(DynArray* parr, void* data)
 {
 	if (parr != NULL)
 	{
 		const int count = parr->count + 1;
 		if (count*sizeof(void*) > parr->capacity)
 		{
-			Dynarray_realloc(parr, count * sizeof(void*) );
+			DynArrayRealloc(parr, count * sizeof(void*) );
 		}
 		parr->data[count - 1] = data;
 		parr->count = count;
 	}
 }
-void Dynarray_free(Dynarray* parr)
+void DynArrayFree(DynArray* parr)
 {
 	if (parr != NULL)
 	{
@@ -68,7 +68,7 @@ void Dynarray_free(Dynarray* parr)
 		parr->capacity = 0;
 	}
 }
-int Dynarray_find(Dynarray* parr, const int data)
+int DynArrayFind(DynArray* parr, const int data)
 {
 	if (parr != NULL)
 	{
@@ -84,7 +84,7 @@ int Dynarray_find(Dynarray* parr, const int data)
 	return -1;
 }
 
-void Dynarray_delete(Dynarray* parr, const int i)
+void DynArrayDelete(DynArray* parr, const int i)
 {
 	if (parr->data [i])
 	{

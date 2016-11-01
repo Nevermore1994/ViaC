@@ -16,6 +16,6 @@ int main(const int argc, char ** argv)
 	TranslationUnit();
 	Cleanup();
 	fclose(fin);
-	printf("%s语法分析成功!",filename);
+	printf("%s语法分析成功!\n",filename);
 	return 1;
 }
