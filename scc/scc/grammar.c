@@ -676,6 +676,6 @@ void PrintTab(const int num)
 	int  count;
 	for (count = 0; count < num; ++count)
 	{
-		printf("  ");
+		printf("\t");
 	}
 }

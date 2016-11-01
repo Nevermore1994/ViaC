@@ -109,15 +109,15 @@ void InitLex()
 		{ TK_ELLIPSIS,	NULL,	"...",	NULL,	NULL },
 		{ TK_EOF,		NULL,	 "End_Of_File",	NULL,	NULL },
 
-		{ TK_CINT,		NULL,	 	"整型常量",	NULL,	NULL },
-		{ TK_CCHAR,		NULL,		"字符常量",	NULL,	NULL },
-		{ TK_CSTR,		NULL,		"字符串常量",	NULL,	NULL },
+		{ TK_CINT,		NULL,	 	"整型常量",	     NULL,	NULL },
+		{ TK_CCHAR,		NULL,		"字符常量",	     NULL,	NULL },
+		{ TK_CSTR,		NULL,		"字符串常量",	 NULL,	NULL },
 
-		{ KW_CHAR,		NULL,		"char",	NULL,	NULL },
+		{ KW_CHAR,		NULL,		"char",	    NULL,	NULL },
 		{ KW_SHORT,		NULL,		"short",	NULL,	NULL },
-		{ KW_INT,		NULL,		"int",	NULL,	NULL },
-		{ KW_VOID,		NULL,		"void",	NULL,	NULL },
-		{ KW_STRUCT,		NULL,		"struct",	NULL,	NULL },
+		{ KW_INT,		NULL,		"int",	    NULL,	NULL },
+		{ KW_VOID,		NULL,		"void",	    NULL,	NULL },
+		{ KW_STRUCT,	NULL,		"struct",	NULL,	NULL },
 
 		{ KW_IF,			NULL,		"if"	,	NULL,	NULL },
 		{ KW_ELSE,		NULL,		"else",	NULL,	NULL },
@@ -225,7 +225,8 @@ void SkipWhiteSpace()
 				return;
 			line_num++;
 		}
-		printf("%c", ch);
+		else
+			printf("%c", ch);  //决定是否打印源码中的换行
 		Getch();
 	}
 }
