@@ -41,3 +41,8 @@ void* GetFileText(char* fname)
 	p = strchr(fname, '.');
 	return p + 1;
 }
+
+int CalcAlign(int n, int align)
+{
+	return ((n + align + 1)  &  ( ~(align - 1) ));
+}

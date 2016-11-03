@@ -7,7 +7,11 @@
 #define SCC_H_
 
 #include<windows.h>
-#include<stdio.h> 
+#include<stdio.h>
+
+typedef int bool;
+#define TRUE  1
+#define FLASE 0
 
 /********定义动态字符串********/
 typedef struct DynString
@@ -15,8 +19,6 @@ typedef struct DynString
 	int count;		//字符串长度
 	int capacity;	//字符串缓冲区
 	char* data;		//字符指针
-
-
 }DynString;
 /******动态字符串函数***********/
 void DynStringInit(DynString* pstr, const int initsize);		//初始化动态字符串
@@ -110,8 +112,8 @@ typedef struct TkWord
 	int tkcode;
 	struct TkWord* next;
 	char* spelling;
-	struct Symol* sym_struct;
-	struct Symol* sym_id;
+	struct Symbol* sym_struct;
+	struct Symbol* sym_id;
 }TkWord;
 
 
@@ -178,6 +180,7 @@ void* GetFileText();
 /*****************附加函数****************/
 void* MallocInit(const int size);
 int ElfHash(char* key);				// 字符哈希函数
+int CalcAlign(int n, int align);
 
 /********************end*******************/
 /*****************语法分析*********************/
@@ -196,13 +199,13 @@ enum  e_StorageClass
 	SC_LLOACL  = 0x00f2, 
 	SC_CMP     = 0x00f3,
 	SC_VALMASK = 0x00ff,
-	SC_LAVL    = 0x1000,//左值
-	SC_SYM     = 0x2000,//符号
+	SC_LVAL    = 0x0100,//左值
+	SC_SYM     = 0x0200,//符号
 	 
-	SC_ANOM    = 0x10000000,
-	SC_STRUCT  = 0x20000000,
-	SC_MEMBER  = 0x40000000,
-	SC_PARAMS  = 0x80000000,
+	SC_ANOM    = 0x10000000,  //匿名符号
+	SC_STRUCT  = 0x20000000,  //结构体
+	SC_MEMBER  = 0x40000000,  //结构体的成员变量
+	SC_PARAMS  = 0x80000000,  //函数参数
 };
 
 enum  e_TypeCode
@@ -219,7 +222,7 @@ enum  e_TypeCode
 	T_ARRAY  = 0x0010,
 };
 
-#define ALIGH_SET 0x100
+#define ALIGN_SET 0x100
 
 extern int syntax_state;
 extern int syntax_level;
@@ -261,6 +264,60 @@ void ArgumentExpressionList();
 void SyntaxIndent();
 void PrintTab(int num);//打印table
 /*******************end*************************/
+
+
+/******************Stack*********************/
+typedef struct Stack
+{
+	void** base;
+	void** top;
+	int size;
+}Stack;
+
+void StackInit(Stack* stack, int size);
+void* StackPush(Stack* stack, void* data, int size);
+void StackPop(Stack* stack);
+void* StackgGetTop(Stack* stack);
+bool StackIsEmpty(Stack* stack);
+void StackDestroy(Stack* stack);
+/******************end*************************/
+
+
+/*******************SYM*************************/
+Stack GSYM; //全局符号栈
+Stack LSYM; //局部符号栈
+Type char_pointer_type;
+Type int_type;
+Type default_func_type;
+
+
+typedef struct Type
+{
+	int t;
+	struct Symbol *ref;
+}Type;
+typedef struct Symbol
+{
+	int v;
+	int r; 
+	int c; 
+	Type type; 
+	struct Symbol  *next; 
+	struct Symbol  *prev_tok;
+}Symbol;
+
+Symbol* StructSearch(int v);
+Symbol* SymSearch(int v);
+Symbol* SymDirectPush(Stack* stack, int v, Type* type, int c);
+Symbol* SymPush(int v, Type* type, int r, int c);
+Symbol* FuncSymPush(int v, Type *type);
+Symbol* VarSymPut(Type* type, int r, int v, int addr);
+Symbol* SecSymPut(char* sec, int c);
+void SymPop(Stack* stack, Symbol *b);
+
+int TypeSize(Type *t, int *a);
+/********************end**********************/
+
 #endif // !SCC_H_
 
 

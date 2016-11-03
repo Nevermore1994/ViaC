@@ -12,28 +12,44 @@ int syntax_state;
 int syntax_level;
 
 
-void ParameterTypeList() //解析形参类型表
+void ParameterTypeList(Type* type, int func_call) //解析形参类型表
 {
+	int n;
+	Symbol **plast, *s, *first;
+	Type pt;
+
 	GetToken();
+	first = NULL;
+	plast = &first;
 	while (token != TK_CLOSEPA)
 	{
-		if (!TypeSpecifier())
+		if (!TypeSpecifier(&pt))
 		{
 			Error("标识符无效");
 		}
-		Declarator();
+		Declarator(&pt, &n, NULL);
+		s = SymPush(n | SC_PARAMS, &pt, 0, 0);
+		*plast = s;
+		plast = &s->next;
+		
 		if (token == TK_CLOSEPA)
 			break;
 		Skip(TK_COMMA);
 		if (token == TK_ELLIPSIS)
 		{
-			//func_call = KW_CDECL;
+			func_call = KW_CDECL;
 			GetToken();
 			break;
 		}
 	}
+
 	syntax_state = SNTX_DELAY;
 	Skip(TK_CLOSEPA);
+	s = SymPush(SC_ANOM, type, func_call, 0);
+	s->next = first;
+	type->t = T_FUNC;
+	type->ref = s;
+
 	if (token == TK_BEGIN)
 	{
 		syntax_state = SNTX_LF_HT;
@@ -46,51 +62,58 @@ void ParameterTypeList() //解析形参类型表
 }
 
 
-void DirectDeclaratorPostfix() // 直接声明符后缀
+void DirectDeclaratorPostfix(Type* type, int func_call) // 直接声明符后缀
 {
 	int m;
+	Symbol* ps;
 	if (token == TK_OPENPA) //括号开始
 	{
-		ParameterTypeList();
+		ParameterTypeList(type, func_call);
 	}
 	else if (token == TK_OPENBR)  // 中括号
 	{
 		GetToken();
+		m = -1;
 		if (token == TK_CINT)
 		{
 			GetToken();
 			m = tkvalue;
 		}
 		Skip(TK_CLOSEBR);
-		DirectDeclaratorPostfix();//递归调用
+		DirectDeclaratorPostfix(type, func_call);//递归调用
+		ps = SymPush(SC_ANOM, type, 0, m);
+		type->t = T_ARRAY | T_PTR;
+		type->ref = ps;
 	}
 }
 
 
-void DirectDeclarator()
+void DirectDeclarator(Type* type, int* v, int func_call)
 {
 	if (token >= TK_IDENT)
-	{
+	{ 
+		*v = token;
 		GetToken();
 	}
 	else
 	{
 		Expect("标识符");
 	}
-	DirectDeclaratorPostfix();
+	DirectDeclaratorPostfix(type, func_call);
 }
 
 
-void Declarator()
+void Declarator(Type* type, int* v, int* force_align)
 {
-	//int fc; 
+	int fc; 
 	while (token == TK_STAR)
 	{
 		GetToken();
 	}
-	FunctionCallingConvention();
-	StructMemberAlignment();
-	DirectDeclarator();
+	FunctionCallingConvention(&fc);
+	if(force_align)
+		StructMemberAlignment(force_align);
+	DirectDeclarator(type, v, fc);
 }
 
 void TranslationUnit()
@@ -101,19 +124,27 @@ void TranslationUnit()
 	}
 }
 
-void Initializer() // 初值符
+void Initializer(Type* type) // 初值符
 {
-	AssignmentExpression();
+	if (type->t & T_ARRAY)
+	{
+		GetToken();
+	}
+	else
+		AssignmentExpression();
 }
 
 void ExternalDeclaration(const int level)
 {
-	if (!TypeSpecifier())
+	Type btype, type;
+	int v, has_init, r, addr;
+	Symbol *sym;
+	if ( !TypeSpecifier(&btype) )
 	{
 		Expect("<类型区分符>");
 	}
 
-	if (token == TK_SEMICOLON)
+	if (btype.t == T_STRUCT && token == TK_SEMICOLON)
 	{
 		GetToken();
 		return;
@@ -121,25 +152,54 @@ void ExternalDeclaration(const int level)
 
 	while (1)
 	{
-		Declarator();
+		type = btype;
+		Declarator(&type, &v, NULL);
+
 		if (token == TK_BEGIN)
 		{
 			if (level == SC_LOCAL)
 				Error("不允许嵌套定义");
-			Funcbody();
+			if ((type.t & T_BTYPE) != T_FUNC)
+				Expect("<函数定义>");
+			
+			sym = SymSearch(v);
+			if (sym)
+			{
+				if ((sym->type.t & T_BTYPE) != T_FUNC)
+					Error("'%s'重定义",GetTkstr(v));
+				sym->type = type;
+			}
+			else
+				sym = FuncSymPush(v,&type);
+			sym->r = SC_SYM | SC_GLOBAL;
+			Funcbody(sym);
 			break;
 		}
 		else
 		{
-			if (token == TK_ASSIGN)
+			if ((type.t & T_BTYPE) == T_FUNC)
 			{
-				GetToken();
-				Initializer();
+				if(SymSearch(v) == NULL)
+				{
+					sym = SymPush(v, &type, SC_GLOBAL | SC_SYM, 0);
+				}
+			}
+			else
+			{
+				r = 0; 
+				if (!(type.t & T_ARRAY))
+					r |= SC_LVAL;
+				r |= 1;
+				has_init = (token == TK_ASSIGN);
+				if (has_init)
+				{
+					GetToken();
+					Initializer(&type);
+				}
+				sym = VarSymPut(&type, r, v, addr);
 			}
 			if (token == TK_COMMA)
-			{
 				GetToken();
-			}
 			else
 			{
 				syntax_state = SNTX_LF_HT;
@@ -150,13 +210,16 @@ void ExternalDeclaration(const int level)
 	}
 }
 
-int TypeSpecifier()
+int TypeSpecifier(Type* type)
 {
-	int type_found = 0;
+	int  t, type_found = 0;
+	Type typel;
+	t = 0;
 	switch (token)
 	{
 		case KW_CHAR:
 		{
+			t = T_CHAR;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
@@ -164,6 +227,7 @@ int TypeSpecifier()
 		}
 		case KW_INT:
 		{
+			t = T_INT;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
@@ -171,12 +235,14 @@ int TypeSpecifier()
 		}
 		case KW_SHORT:
 		{
+			t = T_SHORT;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
 		}
 		case KW_VOID:
 		{
+			t = T_VOID;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
@@ -184,8 +250,11 @@ int TypeSpecifier()
 		}
 		case KW_STRUCT:
 		{
+			StructSpecifier(&typel);
+			type->ref = typel.ref;
+			t = T_STRUCT;
+
 			syntax_state = SNTX_SP;
-			StructSpecifier();
 			type_found = 1;
 			break;
 		}
@@ -194,46 +263,101 @@ int TypeSpecifier()
 	}
 	return type_found;
 }
-void StructDeclaration()
+void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 {
-	TypeSpecifier();
+	int v, size, align; 
+	Symbol* pps;
+	Type typel, btype;
+	int force_align;
+	TypeSpecifier(&btype);
+
 	while (1)
 	{
-		Declarator();
+		v = 0;
+		typel = btype;
+		Declarator(&typel, &v, &force_align);
+		size = TypeSize(&typel, &align);
+		if (force_align  & ALIGN_SET)
+		{
+			align = force_align & ~ALIGN_SET;
+		}
+		*offset = CalcAlign(*offset, align);
+		
+		if (align > *maxalign)
+		{
+			*maxalign = align;
+		}
+		pps = SymPush(v | SC_MEMBER, &typel, 0, *offset);
+		*offset += size;
+		**ps == pps;
+		*ps = &pps->next;
 
 		if (token == TK_SEMICOLON || token == TK_EOF)
 			break;
 		Skip(TK_COMMA);
 	}
+
 	syntax_state = SNTX_LF_HT;
+
 	Skip(TK_SEMICOLON);
 }
 
-void StructDeclarationList()
+void StructDeclarationList(Type* type)
 {
 	int  maxalign, offset;
-
+	Symbol *ps, **pps;
+	ps = type->ref;
+	
 	syntax_state = SNTX_LF_HT; //第一个结构体的成员和"{"不在同一行
 	++syntax_level;            //缩进进一行
 
 	GetToken();
-
+	if (ps->c != -1)
+		Error("结构体已经定义");
+	maxalign = 1;
+	pps = &ps->next; 
+	offset = 0;
 	while (token != TK_END)
 	{
-		StructDeclaration(&maxalign, &offset);
+		StructDeclaration(&maxalign, &offset, &ps);
 	}
 	Skip(TK_END);
+	ps->c = CalcAlign(offset, maxalign);
+	ps->r = maxalign;
 	syntax_state = SNTX_LF_HT;
 }
 
-void StructSpecifier()
+void StructSpecifier(Type* type)
 {
 	int t;
+	Symbol* ps;
+	Type typel;
+
 	GetToken();
 	t = token;
 
 	syntax_state = SNTX_DELAY;
 	GetToken();
+
+	if (t < TK_IDENT)
+		Expect("结构体名称");
+
+	ps = StructSearch(t);
+	if (!ps)
+	{
+		typel.t = KW_STRUCT;
+		
+		ps = SymPush(t | SC_STRUCT, &typel, 0, -1);
+		ps->r = 0;
+	}
+
+	type->t = T_STRUCT;
+	type->ref = ps;
+
+	if (token == TK_BEGIN)
+	{
+		StructDeclarationList(type);
+	}
 
 	if (token == TK_BEGIN)
 		syntax_state = SNTX_LF_HT;
@@ -242,29 +366,22 @@ void StructSpecifier()
 	else
 		syntax_state = SNTX_SP;
 	SyntaxIndent();
-
-	if (t < TK_IDENT)
-		Expect("结构体名称");
-
-	if (token == TK_BEGIN)
-	{
-		StructDeclarationList();
-	}
 }
 
-void FunctionCallingConvention()
+void FunctionCallingConvention(int* fc)
 {
-	//*fc = KW_CDECL;
+	*fc = KW_CDECL;
 	if (token == -KW_CDECL || token == KW_STDCALL)
 	{
-		//*fc = token;
+		*fc = token;
 		syntax_state = SNTX_SP;
 		GetToken();
 	}
 }
 
-void StructMemberAlignment()
+void StructMemberAlignment(int* force_align)
 {
+	int align = 1;
 	if (token == KW_ALIGN)
 	{
 		GetToken();
@@ -272,15 +389,26 @@ void StructMemberAlignment()
 		if (token == TK_CINT)
 		{
 			GetToken();
+			align = tkvalue;
 		}
 		else
 			Expect("整数常量");
 		Skip(TK_CLOSEPA);
+
+		if (align != 1 && align != 2 && align != 4)
+			align = 1;
+		align |= ALIGN_SET;
+		*force_align = align;
 	}
+	else
+		*force_align = 1;
 }
 
-void CompoundStatement()
+void CompoundStatement(int* bsym, int* csym)
 {
+	Symbol* ps;
+	ps = ( Symbol* ) StackgGetTop(&LSYM);
+
 	syntax_state = SNTX_LF_HT;
 	++syntax_level;
 
@@ -291,8 +419,9 @@ void CompoundStatement()
 	}
 	while (token != TK_END)
 	{
-		Statement();
+		Statement(bsym, csym);
 	}
+	SymPop(&LSYM, ps);
 	syntax_state = SNTX_LF_HT;
 	GetToken();
 }
@@ -300,23 +429,24 @@ void CompoundStatement()
 
 void Funcbody()
 {
-	CompoundStatement();
-
+	SymDirectPush(&LSYM, SC_ANOM, &int_type, 0);
+	CompoundStatement(NULL, NULL);
+	SymPop(&LSYM, NULL);
 }
 
 
-void Statement()
+void Statement(int* bsym, int* csym)
 {
 	switch (token)
 	{
 		case TK_BEGIN:
 		{
-			CompoundStatement();
+			CompoundStatement(bsym, csym);
 			break;
 		}
 		case KW_IF:
 		{
-			IfStatement();
+			IfStatement(bsym, csym);
 			break;
 		}
 		case KW_RETURN:
@@ -326,17 +456,17 @@ void Statement()
 		}
 		case KW_BREAK:
 		{
-			BreakStatement();
+			BreakStatement(bsym);
 			break;
 		}
 		case KW_CONTINUE:
 		{
-			ContinueStatement();
+			ContinueStatement(csym);
 			break;
 		}
 		case KW_FOR:
 		{
-			ForStatement();
+			ForStatement(bsym, csym);
 			break;
 		}
 		default:
@@ -374,21 +504,24 @@ void ExpressionStatement()
 	Skip(TK_SEMICOLON);
 }
 
-void IfStatement()
+void IfStatement(int* bsym, int* csym)
 {
+	int a, b;
 	syntax_state = SNTX_SP;
 	GetToken();
 	Skip(TK_OPENPA);
 	Expression();
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_CLOSEPA);
-	Statement();
+	//a = GenJcc(0);
+	Statement(bsym, csym);
 	if (token == KW_ELSE)
 	{
 		syntax_state = SNTX_LF_HT;
 		GetToken();
-		Statement();
+		Statement(bsym, csym);
 	}
+
 }
 
 
@@ -556,10 +689,18 @@ void UnaryExpression()
 
 void SizeofExpression()
 {
+	int align, size; 
+	Type type;
+
 	GetToken();
 	Skip(TK_OPENPA);
-	TypeSpecifier();
+	TypeSpecifier(&type);
+	
 	Skip(TK_CLOSEPA);
+	
+	size = TypeSize(&type, &align);
+	if (size < 0)
+		Error("sizeof计算类型空间失败");
 }
 
 void PostfixExpression()
@@ -591,7 +732,10 @@ void PostfixExpression()
 
 void PrimaryExpression()
 {
-	int id;
+	int id, addr;
+	Type type;
+	Symbol* ps;
+	
 	switch (token)
 	{
 		case TK_CINT:
@@ -602,7 +746,13 @@ void PrimaryExpression()
 		}
 		case TK_CSTR:
 		{
-			GetToken();
+			id = T_CHAR; 
+			type.t = id;
+			MkPointer(&type);
+			type.t |= T_ARRAY;
+			VarSymPut(&type, SC_GLOBAL, 0, addr);
+			Initializer(&type);
+		    //TODO	GetToken();
 			break;
 		}
 		case TK_OPENPA:
@@ -617,8 +767,14 @@ void PrimaryExpression()
 			id = token;
 			GetToken();
 			if (id < TK_IDENT)
-			{
 				Expect("常量或者是标识符");
+			ps = SymSearch(id);
+			if (!id)
+			{
+				if (token == TK_OPENPA)
+					Error("'%s'未声明\n", GetTkstr(id));
+				ps = FuncSymPush(id, &default_func_type);
+				ps->r = SC_GLOBAL | SC_SYM;
 			}
 			break;
 		}
