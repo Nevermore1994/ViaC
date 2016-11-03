@@ -22,7 +22,18 @@ void* MallocInit(const int size)
 void Init()
 {
 	line_num = 1;
-	InitLex();
+	InitLex(); 
+	
+	StackInit(&LSYM, 8);
+	StackInit(&GSYM, 8);
+	//SymSecRdata = SecSymPut(".rdata", 0);
+
+
+	int_type.t = T_INT;
+	char_pointer_type.t = T_CHAR; 
+	//MkPointer(&char_pointer_type);
+	default_func_type.t = T_FUNC;
+	default_func_type.ref = SymPush(SC_ANOM, &int_type, KW_CDECL, 0);
 }
 
 void Cleanup()

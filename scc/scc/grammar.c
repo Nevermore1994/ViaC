@@ -102,7 +102,6 @@ void DirectDeclarator(Type* type, int* v, int func_call)
 	DirectDeclaratorPostfix(type, func_call);
 }
 
-
 void Declarator(Type* type, int* v, int* force_align)
 {
 	int fc; 
@@ -263,6 +262,7 @@ int TypeSpecifier(Type* type)
 	}
 	return type_found;
 }
+
 void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 {
 	int v, size, align; 
@@ -434,7 +434,6 @@ void Funcbody()
 	SymPop(&LSYM, NULL);
 }
 
-
 void Statement(int* bsym, int* csym)
 {
 	switch (token)
@@ -476,7 +475,6 @@ void Statement(int* bsym, int* csym)
 		}
 	}
 }
-
 
 int IsTypeSpecifier(const int id)
 {
@@ -523,7 +521,6 @@ void IfStatement(int* bsym, int* csym)
 	}
 
 }
-
 
 void ForStatement()
 {
@@ -604,6 +601,7 @@ void AssignmentExpression()
 		AssignmentExpression();
 	}
 }
+
 void EqualityExpression()
 {
 	int t;
@@ -615,6 +613,7 @@ void EqualityExpression()
 		RelationalExpression();
 	}
 }
+
 void RelationalExpression()
 {
 	AdditiveExpression();
@@ -647,6 +646,7 @@ void MultiplicativeExpression()
 		UnaryExpression();
 	}
 }
+
 void UnaryExpression()
 {
 	switch (token)
@@ -728,7 +728,6 @@ void PostfixExpression()
 			break;
 	}
 }
-
 
 void PrimaryExpression()
 {
