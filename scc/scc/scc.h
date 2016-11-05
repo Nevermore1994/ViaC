@@ -289,9 +289,6 @@ void StackDestroy(Stack* stack);
 /*******************SYM*************************/
 Stack GSYM; //全局符号栈
 Stack LSYM; //局部符号栈
-Type char_pointer_type;
-Type int_type;
-Type default_func_type;
 
 
 typedef struct Type
@@ -299,6 +296,11 @@ typedef struct Type
 	int t;
 	struct Symbol *ref;
 }Type;
+
+Type char_pointer_type;
+Type int_type;
+Type default_func_type;
+
 typedef struct Symbol
 {
 	int v;
