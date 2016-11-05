@@ -10,6 +10,9 @@
 #include<stdio.h>
 
 typedef int bool;
+typedef unsigned int   DWORD;
+typedef unsigned char  BYTE;
+typedef unsigned short WORD;
 #define TRUE  1
 #define FLASE 0
 
@@ -317,7 +320,53 @@ void SymPop(Stack* stack, Symbol *b);
 
 int TypeSize(Type *t, int *a);
 /********************end**********************/
+/********************coff***********************/
 
+#pragma pack(push,1)
+typedef struct Section
+{
+	int data_offset; 
+	int data_allocated;
+	char* data;
+	char index; 
+	struct Section * plink;
+	int* hashtab;
+	IMAGE_SECTION_HEADER  sh;//½ÚÍ·
+}Section;
+
+typedef struct CoffSym
+{
+	DWORD Name; 
+	DWORD Next; 
+	
+	DWORD Value;
+	short sSection; 
+	WORD Type; 
+	BYTE StorageClass; 
+	BYTE NumberOfAuxSymbols;
+}CoffSym;
+
+#define CST_FUNC 0x20
+#define CST_NOFUNC 0
+
+typedef struct CoffReloc
+{
+	DWORD offset; 
+	DWORD cfsym; 
+	BYTE  section; 
+	BYTE  type;
+}CoffReloc;
+
+#pragma pack(pop)
+typedef Section* pSection;
+extern DynArray sections;
+
+extern pSection sec_text,sec_data, sec_bss, sec_idata, sec_rdata, sec_rel, sec_symtab, sec_dynsymtab;
+
+extern int nsec_image;
+
+
+/*********************end**************************/
 #endif // !SCC_H_
 
 

@@ -817,6 +817,7 @@ void PrintTab(const int num)
 		printf("\t");
 	}
 }
+
 void SyntaxIndent()
 {
 	switch (syntax_state)
