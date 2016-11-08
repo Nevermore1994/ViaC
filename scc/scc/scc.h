@@ -254,7 +254,7 @@ enum  e_StorageClass
 	SC_LOCAL = 0x00f1,
 	SC_LLOACL = 0x00f2,
 	SC_CMP = 0x00f3,
-	SC_VALMASK = 0x00ff,
+	SC_VALMASK = 0x00ff, //´æ´¢µØÖ·ÑÚÂë
 	SC_LVAL = 0x0100,//×óÖµ
 	SC_SYM = 0x0200,//·ûºÅ
 
