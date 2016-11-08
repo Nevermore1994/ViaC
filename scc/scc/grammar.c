@@ -813,7 +813,7 @@ void ArgumentExpressionList(void)
 
 void PrintTab(const int num)
 {
-	int  count;
+	int count;
 	for (count = 0; count < num; ++count)
 	{
 		printf("\t");

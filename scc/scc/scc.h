@@ -381,6 +381,7 @@ void InitCoff(void);
 void Fpad(const FILE* fp, const int new_pos);
 void WriteObj(const char* name);
 /*********************end**************************/
+/*********************operand.h*********************/
 typedef struct Operand
 {
 	Type type; 
@@ -389,7 +390,49 @@ typedef struct Operand
 	struct Symbol* sym;
 }Operand;
 
+void OperandPush(Type* type, const int r, const int value);
+void OpernandPop(void);
+void OperandSwap();
+void OperandAssgin(Operand* opd, const int t, const int r, const int value);
+void CancelValue(void);
+void CheckLvalue(void);
+void Indirection(void);
+/*********************end**************************/
+/**********************gencode.h**************************/
+enum e_Register
+{
+	REG_EAX = 0,
+	REG_ECX,
+	REG_EDX,
+	REG_EBX,
+	REG_ESP,
+	REG_EBP,
+	REG_ESI,
+	REG_EDI,
+	REG_ANY
+};
 
+#define REG_IRET REG_EAX
+
+enum e_Address
+{
+	ADDR_OTHER,
+	ADDR_REG =3,
+};
+
+#define OPSTACK_SIZE 256
+#define FUNC_PROLOG_SIZE 9
+
+extern int rsym;
+extern int ind;
+extern int loc;
+extern int func_begin_ind;
+extern int func_ret_sub;
+extern Symbol* sym_sec_rdata;
+extern Operand opstack[OPSTACK_SIZE];
+extern Operand* optop;
+
+/***********************end*****************************/
 #endif // SCC_H_
 
 
