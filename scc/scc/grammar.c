@@ -11,7 +11,7 @@
 int syntax_state;
 int syntax_level;
 
-void TranslationUnit()
+void TranslationUnit(void)
 {
 	while (token != TK_EOF)
 	{
@@ -268,7 +268,7 @@ void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 	Skip(TK_SEMICOLON);
 }
 
-void Declarator(Type* type, int* v, int* force_align)
+void Declarator(Type* type, const int* v, const int* force_align)
 {
 	int fc;
 	while (token == TK_STAR)
@@ -471,6 +471,7 @@ void Statement(int* bsym, int* csym)
 		}
 	}
 }
+
 void CompoundStatement(int* bsym, int* csym)
 {
 	Symbol* ps;
@@ -493,7 +494,7 @@ void CompoundStatement(int* bsym, int* csym)
 	GetToken();
 }
 
-void IfStatement(int* bsym, int* csym)
+void IfStatement(const int* bsym, const int* csym)
 {
 	int a, b;
 	syntax_state = SNTX_SP;
@@ -512,7 +513,8 @@ void IfStatement(int* bsym, int* csym)
 	}
 
 }
-void ForStatement(int* bsym, int* csym)
+
+void ForStatement(const int* bsym, const int* csym)
 {
 	int a, b, c, d, e;
 	
@@ -539,7 +541,7 @@ void ForStatement(int* bsym, int* csym)
 	Statement(&a, &b);  //只有此处用到break,continue可能有多个break或者是continue，需要拉链反填
 }
 
-void ContinueStatement(int* csym)
+void ContinueStatement(const int* csym)
 {
 	if (!csym)
 		Error("未找到与continue相匹配的循环");
@@ -548,7 +550,7 @@ void ContinueStatement(int* csym)
 	Skip(TK_SEMICOLON);
 }
 
-void BreakStatement(int* bsym)
+void BreakStatement(const int* bsym)
 {
 	if (!bsym)
 		Error("未找到与break相匹配的循环");
@@ -558,7 +560,7 @@ void BreakStatement(int* bsym)
 }
 
 
-void ReturnStatement()
+void ReturnStatement(void)
 {
 	syntax_state = SNTX_DELAY;
 	GetToken();
@@ -577,7 +579,7 @@ void ReturnStatement()
 	Skip(TK_SEMICOLON);
 }
 
-void ExpressionStatement()
+void ExpressionStatement(void)
 {
 	if (token != TK_SEMICOLON)
 	{
@@ -587,7 +589,7 @@ void ExpressionStatement()
 	Skip(TK_SEMICOLON);
 }
 
-void Expression()
+void Expression(void)
 {
 	while (1)
 	{
@@ -599,7 +601,7 @@ void Expression()
 }
 
 /*左循环提取公因子*/
-void AssignmentExpression()
+void AssignmentExpression(void)
 {
 	EqualityExpression();
 	if (token == TK_ASSIGN)
@@ -609,7 +611,7 @@ void AssignmentExpression()
 	}
 }
 
-void EqualityExpression()
+void EqualityExpression(void)
 {
 	int t;
 	RelationalExpression();
@@ -621,7 +623,7 @@ void EqualityExpression()
 	}
 }
 
-void RelationalExpression()
+void RelationalExpression(void)
 {
 	int t;
 	AdditiveExpression();
@@ -634,7 +636,7 @@ void RelationalExpression()
 	}
 }
 
-void AdditiveExpression()
+void AdditiveExpression(void)
 {
 	int t;
 	MultiplicativeExpression();
@@ -646,7 +648,7 @@ void AdditiveExpression()
 	}
 }
 
-void MultiplicativeExpression()
+void MultiplicativeExpression(void)
 {
 	int t;
 	UnaryExpression();
@@ -658,7 +660,7 @@ void MultiplicativeExpression()
 	}
 }
 
-void UnaryExpression()
+void UnaryExpression(void)
 {
 	switch (token)
 	{
@@ -698,7 +700,7 @@ void UnaryExpression()
 	}
 }
 
-void SizeofExpression()
+void SizeofExpression(void)
 {
 	int align, size; 
 	Type type;
@@ -714,7 +716,7 @@ void SizeofExpression()
 		Error("sizeof计算类型空间失败");
 }
 
-void PostfixExpression()
+void PostfixExpression(void)
 {
 	Symbol* ps;
 	PrimaryExpression();
@@ -741,7 +743,7 @@ void PostfixExpression()
 	}
 }
 
-void PrimaryExpression()
+void PrimaryExpression(void)
 {
 	int id, r, addr;
 	Type type;
@@ -793,7 +795,7 @@ void PrimaryExpression()
 	}
 }
 
-void ArgumentExpressionList()
+void ArgumentExpressionList(void)
 {
 	GetToken();
 	if (token != TK_CLOSEPA)
@@ -818,7 +820,7 @@ void PrintTab(const int num)
 	}
 }
 
-void SyntaxIndent()
+void SyntaxIndent(void)
 {
 	switch (syntax_state)
 	{

@@ -34,7 +34,7 @@ void SectionRealloc(pSection sec, const int newsize)
 	sec->data_allocated = size;
 }
 
-void*  SectionPtrAdd(pSection sec, int increment)
+void*  SectionPtrAdd(const pSection sec, const int increment)
 {
 	int offset, offset1;
 	offset = sec->data_offset;
@@ -47,7 +47,7 @@ void*  SectionPtrAdd(pSection sec, int increment)
 	return sec->data + offset;
 }
 
-Section* SectionNew(const char* name, int characteristics)
+Section* SectionNew(const char* name, const int characteristics)
 {
 	Section* sec; 
 	int initsize = 8;
@@ -66,7 +66,7 @@ Section* SectionNew(const char* name, int characteristics)
 	return sec;
 }
 
-int CoffsymSearch(pSection symtab, char* name)
+int CoffsymSearch(const pSection symtab, const char* name)
 {
 	CoffSym* cfsym;
 	int cs, keyno; 
@@ -87,7 +87,7 @@ int CoffsymSearch(pSection symtab, char* name)
 	return cs;
 }
 
-char* CoffstrAdd(pSection strtab, char* name)
+char* CoffstrAdd(const pSection strtab, const char* name)
 {
 	int len; 
 	char* pstr; 
@@ -97,7 +97,7 @@ char* CoffstrAdd(pSection strtab, char* name)
 	return pstr;
 }
 
-int CoffsymAdd(pSection symtab, char* name, int val, int sec_index, short type, char StrorageClass)
+int CoffsymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass)
 {
 	CoffSym*  cfsym;
 	int cs, keyno;
@@ -125,7 +125,7 @@ int CoffsymAdd(pSection symtab, char* name, int val, int sec_index, short type, 
 	return cs;
 }
 
-void CoffsymAddUpdate(Symbol* ps, int val, int sec_index, short type, char StroageClass)
+void CoffsymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass)
 {
 	char* name; 
 	CoffSym* cfsym;
@@ -142,7 +142,7 @@ void CoffsymAddUpdate(Symbol* ps, int val, int sec_index, short type, char Stroa
 	}
 }
 
-void FreeSection()
+void FreeSection(void)
 {
 	int i;
 	pSection  sec; 
@@ -158,7 +158,7 @@ void FreeSection()
 	DynArrayFree(&sections);
 }
 
-pSection NewCoffsymSection(char* symtab_name, int Characteristics, char* strtab_name)
+pSection NewCoffsymSection(const char* symtab_name, const int Characteristics, const char* strtab_name)
 {
 	pSection sec;
 	sec = SectionNew(symtab_name, Characteristics); 
@@ -167,7 +167,7 @@ pSection NewCoffsymSection(char* symtab_name, int Characteristics, char* strtab_
 	return sec;
 }
 
-void CoffelocDirectAdd(int offset, int cfsym, char section, char type)
+void CoffelocDirectAdd(const int offset, const int cfsym, const char section, const char type)
 {
 	CoffReloc* rel;
 	rel = SectionPtrAdd(sec_rel, sizeof(CoffReloc));
@@ -177,7 +177,7 @@ void CoffelocDirectAdd(int offset, int cfsym, char section, char type)
 	rel->type = type;
 }
  
-void CoffelocAdd(pSection sec, Symbol* sym, int offset, char type)
+void CoffelocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 {
 	int  cfsym; 
 	char* name;
@@ -190,7 +190,7 @@ void CoffelocAdd(pSection sec, Symbol* sym, int offset, char type)
 	CoffelocDirectAdd(offset, cfsym, sec->index, type);
 }
 
-void InitCoff()
+void InitCoff(void)
 {
 	DynArrayInit(&sections, 8);
 	nsec_image = 0; 
@@ -216,15 +216,25 @@ void InitCoff()
 	CoffSymAdd(sec_dynsymtab, "", 0, 0, 0, IMAGE_SYM_CLASS_STATIC);
 }
 
-void Fpad(FILE* fp, int new_pos)
+void Fpad(const FILE* fp, const int new_pos)
 {
+	if (fp == NULL)
+	{
+		Error("指针未初始化");
+	}
+	
 	int curpos = ftell(fp);
 	while (++curpos <= new_pos)
 		fputc(0, fp);
 }
 
-void WriteObj(char* name)
+void WriteObj(const char* name)
 {
+	if (name == NULL)
+	{
+		Error("文件名不能为空");
+	}
+	
 	int file_offset;
 	FILE* fout;
 	errno_t err = fopen_s(&fout, name, "wb");
@@ -255,13 +265,14 @@ void WriteObj(char* name)
 	fh->Machine = IMAGE_FILE_MACHINE_I386; 
 	fh->NumberOfSections = nsec_obj;
 	fh->PointerToSymbolTable = sec_symtab->sh.PointerToRawData;
-	fh->NumberOfSymbols =( sec_symtab->sh.SizeOfRawData/sizeof(CoffSym));
+	fh->NumberOfSymbols =sec_symtab->sh.SizeOfRawData/sizeof(CoffSym);
 	fwrite(fh, 1, sizeof(IMAGE_FILE_HEADER), fout); 
 	for (i = 0; i < nsec_obj; ++i)
 	{
 		pSection sec = ( pSection ) sections.data [i];
 		fwrite(sec->sh.Name, 1, sh_size, fout);
 	}
+
 	free(fh);
 	fcolse(fout);
 }

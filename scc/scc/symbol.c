@@ -7,7 +7,7 @@
 #include"scc.h"
 
 
-Symbol* StructSearch(int v)
+Symbol* StructSearch(const int v)
 {
 	if (v >= tktable.count)
 		return NULL;
@@ -15,7 +15,7 @@ Symbol* StructSearch(int v)
 		return (( TkWord* ) tktable.data [v])->sym_struct;
 }
 
-Symbol* SymSearch(int v)
+Symbol* SymSearch(const int v)
 {
 	if (v >= tktable.count)
 		return NULL;
@@ -23,7 +23,7 @@ Symbol* SymSearch(int v)
 		return (( TkWord* ) tktable.data [v])->sym_id;
 }
 
-Symbol* SymDirectPush(Stack* stack, int v, Type* type, int c)
+Symbol* SymDirectPush(const Stack* stack, const int v, const Type* type, const int c)
 {
 	if (stack == NULL)
 	{
@@ -40,7 +40,7 @@ Symbol* SymDirectPush(Stack* stack, int v, Type* type, int c)
 }
 
 
-Symbol* SymPush(int v, Type* type, int r, int c)
+Symbol* SymPush(const int v, const Type* type, const int r, const int c)
 {
 	Symbol *ps, **pps; 
 	TkWord* ts;
@@ -69,7 +69,7 @@ Symbol* SymPush(int v, Type* type, int r, int c)
 	return ps;
 }
  
-Symbol* FuncSymPush(int v, Type *type)
+Symbol* FuncSymPush(const int v, const Type* type)
 {
 	Symbol *ps, **pps;
 	ps = SymDirectPush(&GSYM, v, type, 0);
@@ -85,7 +85,7 @@ Symbol* FuncSymPush(int v, Type *type)
 	return ps;
 } 
 
-Symbol *VarSymPut(Type* type, int r, int v, int addr)
+Symbol *VarSymPut(const Type* type,const int r, const int v, const int addr)
 {
 	Symbol *sym = NULL; 
 	if ( (r&SC_VALMASK) == SC_LOCAL)
@@ -103,7 +103,7 @@ Symbol *VarSymPut(Type* type, int r, int v, int addr)
 	return sym;
 }
 
-Symbol* SecSymPut(char* sec, int c)
+Symbol* SecSymPut(const char* sec, const int c)
 {
 	TkWord* tp;
 	Symbol* s; 
@@ -115,7 +115,7 @@ Symbol* SecSymPut(char* sec, int c)
 	return s;
 }
 
-void SymPop(Stack* stack, Symbol *b)
+void SymPop(const Stack* stack, const Symbol* b)
 {
 	if (stack == NULL || b == NULL)
 	{
@@ -144,7 +144,7 @@ void SymPop(Stack* stack, Symbol *b)
 	}
 }
  
-int TypeSize(Type *t, int *a)
+int TypeSize(const Type* t, int* a)
 {
 	Symbol* ps; 
 	int bt;

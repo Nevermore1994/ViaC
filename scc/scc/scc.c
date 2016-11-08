@@ -19,7 +19,7 @@ void* MallocInit(const int size)
 	return ptr;
 }
 
-void Init()
+void Init(void)
 {
 	line_num = 1;
 	InitLex(); 
@@ -36,7 +36,7 @@ void Init()
 	default_func_type.ref = SymPush(SC_ANOM, &int_type, KW_CDECL, 0);
 }
 
-void Cleanup()
+void Cleanup(void)
 {
 	int i;
 	for (i = TK_IDENT; i < tktable.count; ++i)
@@ -46,14 +46,14 @@ void Cleanup()
 	free(tktable.data);
 }
 
-void* GetFileText(char* fname)
+void* GetFileText(const char* fname)
 {
 	char* p;
 	p = strchr(fname, '.');
 	return p + 1;
 }
 
-int CalcAlign(int n, int align)
+int CalcAlign(const int n, const int align)
 {
 	return ((n + align + 1)  &  ( ~(align - 1) ));
 }

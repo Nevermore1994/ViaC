@@ -3,7 +3,7 @@
 DynString tkstr;
 
  
-void HandleException(const int stage, const int level, char* fmt, va_list ap)
+void HandleException(const int stage, const int level, char* fmt, const va_list ap)
 {
 	char buf[1024];
 	vsprintf_s(buf, 1024,fmt, ap);
@@ -24,7 +24,7 @@ void HandleException(const int stage, const int level, char* fmt, va_list ap)
 	}
 }
 
-void Warning(char* fmt, ...)
+void Warning(const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -32,7 +32,7 @@ void Warning(char* fmt, ...)
 	va_end(ap);
 }
 
-void Error(char* fmt, ...)
+void Error(const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -52,12 +52,12 @@ void Skip( const int c)
 *函数功能:提示缺少的成分
 *msg:需要什么语法成分
 *******************************************/
-void Expect(char* msg)
+void Expect(const char* msg)
 {
 	Error("缺少%s", msg);
 }
 
-void LinkError(char* fmt,...)
+void LinkError(const char* fmt,...)
 {
 	va_list ap;
 	va_start(ap, fmt);

@@ -129,19 +129,19 @@ TkWord* TkwordDirectInsert(TkWord* pWord);
 TkWord* TkwordFind(char* p, const int key);
 
 
-void Getch();
-void Preprocess();
-void ParseIdentifier();
-void ParseNum();
-void ParseString();
-void InitLex();
-void GetToken();
+void Getch(void);
+void Preprocess(void);
+void ParseIdentifier(void);
+void ParseNum(void);
+void ParseString(void);
+void InitLex(void);
+void GetToken(void);
 int IsDigit(char c);
 int IsNoDigit(char* c);
-void SkipWhiteSpace();
-void ParseComment();
+void SkipWhiteSpace(void);
+void ParseComment(void);
 char* GetTkstr(const int v);
-void TestLex();
+void TestLex(void);
 
 
 /***************引用变量****************************/
@@ -230,42 +230,42 @@ enum  e_TypeCode
 extern int syntax_state;
 extern int syntax_level;
 
-void ParameterTypeList(); //解析形参类型表
-void DirectDeclaratorPostfix();
-void DirectDeclarator();
-void Declarator();
-void TranslationUnit();
-void Initializer();
-void ExternalDeclaration(int level);
-int TypeSpecifier();
-void StructDeclaration();
-void StructDeclarationList();
-void StructSpecifier();
-void FunctionCallingConvention();
-void StructMemberAlignment();
-void CompoundStatement();
-void Funcbody();
-void Statement();
-int IsTypeSpecifier(int id);
-void ExpressionStatement();
-void IfStatement();
-void ForStatement();
-void ContinueStatement();
-void BreakStatement();
-void ReturnStatement();
-void Expression();
-void AssignmentExpression();
-void EqualityExpression();
-void RelationalExpression();
-void AdditiveExpression();
-void MultiplicativeExpression();
-void UnaryExpression();
-void SizeofExpression();
-void PostfixExpression();
-void PrimaryExpression();
-void ArgumentExpressionList();
-void SyntaxIndent();
-void PrintTab(int num);//打印table
+void TranslationUnit(void);
+void ExternalDeclaration(const int level);
+void Initializer(Type* type); // 初值符
+int TypeSpecifier(Type* type);
+void StructSpecifier(Type* type);
+void StructDeclarationList(Type* type);
+void StructDeclaration(int* maxalign, int* offset, Symbol*** ps);
+void Declarator(Type* type, const int* v, const int* force_align);
+void FunctionCallingConvention(int* fc);
+void StructMemberAlignment(int* force_align);
+void DirectDeclarator(Type* type, int* v, const int func_call);
+void DirectDeclaratorPostfix(Type* type, const int func_call);
+void ParameterTypeList(Type* type, int func_call);
+void Funcbody(Symbol* sym);
+int IsTypeSpecifier(const int id);
+void Statement(int* bsym, int* csym);
+void CompoundStatement(int* bsym, int* csym);
+void IfStatement(const int* bsym, const int* csym);
+void ForStatement(const int* bsym, const int* csym);
+void ContinueStatement(const int* csym);
+void BreakStatement(const int* bsym);
+void ReturnStatement(void);
+void ExpressionStatement(void);
+void Expression(void);
+void AssignmentExpression(void);
+void EqualityExpression(void);
+void RelationalExpression(void);
+void AdditiveExpression(void);
+void MultiplicativeExpression(void);
+void UnaryExpression(void);
+void SizeofExpression(void);
+void PostfixExpression(void);
+void PrimaryExpression(void);
+void ArgumentExpressionList(void);
+void PrintTab(const int num);
+void SyntaxIndent(void);
 /*******************end*************************/
 
 
@@ -367,7 +367,20 @@ extern pSection sec_text,sec_data, sec_bss, sec_idata, sec_rdata, sec_rel, sec_s
 
 extern int nsec_image;
 
-
+void SectionRealloc(pSection sec, const int newsize);
+void*  SectionPtrAdd(const pSection sec, const int increment);
+Section* SectionNew(const char* name, const int characteristics);
+int CoffsymSearch(const pSection symtab, const char* name);
+char* CoffstrAdd(const pSection strtab, const char* name);
+int CoffsymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass);
+void CoffsymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass);
+void FreeSection(void);
+pSection NewCoffsymSection(const char* symtab_name, const int Characteristics, const char* strtab_name);
+void CoffelocDirectAdd(const int offset, const int cfsym, const char section, const char type);
+void CoffelocAdd(pSection sec, Symbol* sym, const int offset, const char type);
+void InitCoff(void);
+void Fpad(const FILE* fp, const int new_pos);
+void WriteObj(const char* name);
 /*********************end**************************/
 #endif // !SCC_H_
 
