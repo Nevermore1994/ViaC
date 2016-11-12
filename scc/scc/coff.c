@@ -1,3 +1,8 @@
+/******************************************
+*Author:Away
+*Date:2016-11-6
+*Function:windows平台连接模块单元代码
+*******************************************/
 #include"scc.h"
 
 DynArray sections; 
@@ -66,7 +71,7 @@ Section* SectionNew(const char* name, const int characteristics)
 	return sec;
 }
 
-int CoffsymSearch(const pSection symtab, const char* name)
+int CoffSymSearch(const pSection symtab, const char* name)
 {
 	CoffSym* cfsym;
 	int cs, keyno; 
@@ -87,7 +92,7 @@ int CoffsymSearch(const pSection symtab, const char* name)
 	return cs;
 }
 
-char* CoffstrAdd(const pSection strtab, const char* name)
+char* CoffStrAdd(const pSection strtab, const char* name)
 {
 	int len; 
 	char* pstr; 
@@ -97,7 +102,7 @@ char* CoffstrAdd(const pSection strtab, const char* name)
 	return pstr;
 }
 
-int CoffsymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass)
+int CoffSymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass)
 {
 	CoffSym*  cfsym;
 	int cs, keyno;
@@ -105,11 +110,11 @@ int CoffsymAdd(const pSection symtab, const char* name, const int val, const int
 	pSection strtab = symtab->plink;
 	int* hashtab; 
 	hashtab = symtab->hashtab;
-	cs = CoffsymSearch(symtab, name);
+	cs = CoffSymSearch(symtab, name);
 	if (cs == 0)
 	{
 		cfsym = SectionPtrAdd(symtab, sizeof(CoffSym));
-		csname = CoffstrAdd(strtab, name);
+		csname = CoffStrAdd(strtab, name);
 		cfsym->Name = csname - strtab->data;
 		cfsym->Value = val;
 		cfsym->sSection = sec_index;
@@ -125,14 +130,14 @@ int CoffsymAdd(const pSection symtab, const char* name, const int val, const int
 	return cs;
 }
 
-void CoffsymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass)
+void CoffSymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass)
 {
 	char* name; 
 	CoffSym* cfsym;
 	if (!ps->c)
 	{
 		name = (( TkWord* ) tktable.data [ps->v])->spelling;
-		ps->c = CoffsymAdd(sec_symtab, name, val, sec_index, type, StroageClass);
+		ps->c = CoffSymAdd(sec_symtab, name, val, sec_index, type, StroageClass);
 	}
 	else
 	{
@@ -145,10 +150,10 @@ void CoffsymAddUpdate(Symbol* ps, const int val, const int sec_index, const shor
 void FreeSection(void)
 {
 	int i;
-	pSection  sec; 
+	Section*  sec; 
 	for (i = 0; i < sections.count; ++i)
 	{
-		sec = ( pSection ) sections.data [i]; 
+		sec = ( Section* ) sections.data [i]; 
 		if (sec->hashtab != NULL)
 		{
 			free(sec->hashtab);
@@ -158,7 +163,7 @@ void FreeSection(void)
 	DynArrayFree(&sections);
 }
 
-pSection NewCoffsymSection(const char* symtab_name, const int Characteristics, const char* strtab_name)
+pSection NewCoffSymSection(const char* symtab_name, const int Characteristics, const char* strtab_name)
 {
 	pSection sec;
 	sec = SectionNew(symtab_name, Characteristics); 
@@ -167,7 +172,7 @@ pSection NewCoffsymSection(const char* symtab_name, const int Characteristics, c
 	return sec;
 }
 
-void CoffelocDirectAdd(const int offset, const int cfsym, const char section, const char type)
+void CoffElocDirectAdd(const int offset, const int cfsym, const char section, const char type)
 {
 	CoffReloc* rel;
 	rel = SectionPtrAdd(sec_rel, sizeof(CoffReloc));
@@ -177,17 +182,17 @@ void CoffelocDirectAdd(const int offset, const int cfsym, const char section, co
 	rel->type = type;
 }
  
-void CoffelocAdd(pSection sec, Symbol* sym, const int offset, const char type)
+void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 {
 	int  cfsym; 
 	char* name;
 	if (!sym->c)
 	{
-		CoffsymAddUpdate(sym, 0, IMAGE_SYM_UNDEFINED, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
+		CoffSymAddUpdate(sym, 0, IMAGE_SYM_UNDEFINED, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
 	}
 	name = (( TkWord* ) tktable.data [sym->v])->spelling;
-	cfsym = CoffsymSearch(sec_symtab, name);
-	CoffelocDirectAdd(offset, cfsym, sec->index, type);
+	cfsym = CoffSymSearch(sec_symtab, name);
+	CoffElocDirectAdd(offset, cfsym, sec->index, type);
 }
 
 void InitCoff(void)
@@ -206,13 +211,13 @@ void InitCoff(void)
 	sec_bss = SectionNew(".bss", IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE | IMAGE_SCN_CNT_INITIALIZED_DATA);
 
 	sec_rel = SectionNew(".rel", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ);
-	sec_symtab = NewCoffsymSection(".symtab", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ, ".strtab");
-	sec_dynsymtab = NewCoffsymSection(".dynsym", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ, ".dynstr");
+	sec_symtab = NewCoffSymSection(".symtab", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ, ".strtab");
+	sec_dynsymtab = NewCoffSymSection(".dynsym", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ, ".dynstr");
 
-	CoffsymAdd(sec_symtab, "", 0, 0, 0, IMAGE_SYM_CLASS_NULL);
-	CoffsymAdd(sec_symtab, ".data", 0, sec_data->index, 0, IMAGE_SYM_CLASS_STATIC); 
+	CoffSymAdd(sec_symtab, "", 0, 0, 0, IMAGE_SYM_CLASS_NULL);
+	CoffSymAdd(sec_symtab, ".data", 0, sec_data->index, 0, IMAGE_SYM_CLASS_STATIC); 
 	CoffSymAdd(sec_symtab, ".bss", 0, sec_bss->index, 0,IMAGE_SYM_CLASS_STATIC );
-	CoffsymAdd(sec_symtab, ".rdata", 0, sec_rdata->index, 0, IMAGE_SYM_CLASS_STATIC);
+	CoffSymAdd(sec_symtab, ".rdata", 0, sec_rdata->index, 0, IMAGE_SYM_CLASS_STATIC);
 	CoffSymAdd(sec_dynsymtab, "", 0, 0, 0, IMAGE_SYM_CLASS_STATIC);
 }
 
@@ -274,5 +279,5 @@ void WriteObj(const char* name)
 	}
 
 	free(fh);
-	fcolse(fout);
+	fclose(fout);
 }

@@ -1,6 +1,7 @@
 /******************************************
-*author:Away
-*date:2016-10-25
+*Author:Away
+*Date:2016-10-25
+*Function:通用的头文件
 *******************************************/
 
 #ifndef SCC_H_
@@ -148,12 +149,20 @@ void TestLex(void);
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
 extern DynArray tktable;				//单词动态数组
 extern DynString tkstr;
-extern FILE* fin;
+
 extern char ch;
-extern char* filename;
-extern int token;
-extern int line_num;
 extern int tkvalue;
+extern int token;
+
+
+#define  OUT_FILE_SIZE 256      //输出文件名数组大小
+extern FILE* fin;				//源文件指针
+extern char* filename;				//源文件名
+extern int line_num;				//行号
+extern DynArray src_files;			//源文件数组
+extern char outfile[OUT_FILE_SIZE];		//输出文件名
+extern int output_type;          //输出文件类型
+extern float scc_version; //编译器版本
 
 /***************错误处理*****************************/
 enum e_ErrorLevel
@@ -178,7 +187,7 @@ void  LinkError(char* fmt, ...);
 void ColorToken(const int lex_state);
 void Init(); 
 void Cleanup();
-void* GetFileText();
+void GetObjFname(const char* fname);
 
 /*****************附加函数****************/
 void* MallocInit(const int size);
@@ -198,7 +207,7 @@ typedef struct Stack
 void StackInit(Stack* stack, int size);
 void* StackPush(Stack* stack, void* data, int size);
 void StackPop(Stack* stack);
-void* StackgGetTop(Stack* stack);
+void* StackGetTop(Stack* stack);
 bool StackIsEmpty(Stack* stack);
 void StackDestroy(Stack* stack);
 /******************end*************************/
@@ -238,7 +247,87 @@ Symbol* VarSymPut(Type* type, int r, int v, int addr);
 Symbol* SecSymPut(char* sec, int c);
 void SymPop(Stack* stack, Symbol *b);
 int TypeSize(Type *t, int *a);
+void MkPointer(Type* ptype);
 /********************end**********************/
+
+/********************coff***********************/
+
+#pragma pack(push,1)
+typedef struct Section
+{
+	int data_offset;
+	int data_allocated;
+	char* data;
+	char index;
+	struct Section * plink;
+	int* hashtab;
+	IMAGE_SECTION_HEADER  sh;//节头
+}Section;
+
+typedef struct CoffSym
+{
+	DWORD Name;
+	DWORD Next;
+
+	DWORD Value;
+	short sSection;
+	WORD Type;
+	BYTE StorageClass;
+	BYTE NumberOfAuxSymbols;
+}CoffSym;
+
+#define CST_FUNC 0x20
+#define CST_NOFUNC 0
+
+typedef struct CoffReloc
+{
+	DWORD offset;
+	DWORD cfsym;
+	BYTE  section;
+	BYTE  type;
+}CoffReloc;
+
+#pragma pack(pop)
+typedef Section* pSection;
+extern DynArray sections;
+
+extern pSection sec_text, sec_data, sec_bss, sec_idata, sec_rdata, sec_rel, sec_symtab, sec_dynsymtab;
+
+extern int nsec_image;
+
+void SectionRealloc(pSection sec, const int newsize);
+void*  SectionPtrAdd(const pSection sec, const int increment);
+Section* SectionNew(const char* name, const int characteristics);
+int CoffSymSearch(const pSection symtab, const char* name);
+char* CoffStrAdd(const pSection strtab, const char* name);
+int CoffSymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass);
+void CoffSymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass);
+void FreeSection(void);
+pSection NewCoffSymSection(const char* symtab_name, const int Characteristics, const char* strtab_name);
+void CoffElocDirectAdd(const int offset, const int cfsym, const char section, const char type);
+void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type);
+void InitCoff(void);
+void Fpad(const FILE* fp, const int new_pos);
+void WriteObj(const char* name);
+/*********************end**************************/
+/*********************operand.h*********************/
+typedef struct Operand
+{
+	Type type;
+	unsigned short reg;
+	int value;
+	struct Symbol* sym;
+}Operand;
+
+void OperandPush(Type* type, const int r, const int value);
+void OperandPop(void);
+void OperandSwap();
+void OperandAssign(Operand* opd, const int t, const int r, const int value);
+void CancelLvalue(void);
+void CheckLvalue(void);
+void Indirection(void);
+/*********************end**************************/
+
 /*****************语法分析*********************/
 enum e_SynTaxState
 {
@@ -285,7 +374,7 @@ extern int syntax_level;
 
 void TranslationUnit(void);
 void ExternalDeclaration(const int level);
-void Initializer(Type* type); // 初值符
+void Initializer(const Type* ptype, const int c, Section* psec); // 初值符
 int TypeSpecifier(Type* type);
 void StructSpecifier(Type* type);
 void StructDeclarationList(Type* type);
@@ -302,8 +391,8 @@ void Statement(int* bsym, int* csym);
 void CompoundStatement(int* bsym, int* csym);
 void IfStatement(const int* bsym, const int* csym);
 void ForStatement(const int* bsym, const int* csym);
-void ContinueStatement(const int* csym);
-void BreakStatement(const int* bsym);
+void ContinueStatement(int* csym);
+void BreakStatement(int* bsym);
 void ReturnStatement(void);
 void ExpressionStatement(void);
 void Expression(void);
@@ -321,83 +410,7 @@ void PrintTab(const int num);
 void SyntaxIndent(void);
 /*******************end*************************/
 
-/********************coff***********************/
 
-#pragma pack(push,1)
-typedef struct Section
-{
-	int data_offset; 
-	int data_allocated;
-	char* data;
-	char index; 
-	struct Section * plink;
-	int* hashtab;
-	IMAGE_SECTION_HEADER  sh;//节头
-}Section;
-
-typedef struct CoffSym
-{
-	DWORD Name; 
-	DWORD Next; 
-	
-	DWORD Value;
-	short sSection; 
-	WORD Type; 
-	BYTE StorageClass; 
-	BYTE NumberOfAuxSymbols;
-}CoffSym;
-
-#define CST_FUNC 0x20
-#define CST_NOFUNC 0
-
-typedef struct CoffReloc
-{
-	DWORD offset; 
-	DWORD cfsym; 
-	BYTE  section; 
-	BYTE  type;
-}CoffReloc;
-
-#pragma pack(pop)
-typedef Section* pSection;
-extern DynArray sections;
-
-extern pSection sec_text,sec_data, sec_bss, sec_idata, sec_rdata, sec_rel, sec_symtab, sec_dynsymtab;
-
-extern int nsec_image;
-
-void SectionRealloc(pSection sec, const int newsize);
-void*  SectionPtrAdd(const pSection sec, const int increment);
-Section* SectionNew(const char* name, const int characteristics);
-int CoffsymSearch(const pSection symtab, const char* name);
-char* CoffstrAdd(const pSection strtab, const char* name);
-int CoffsymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass);
-void CoffsymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass);
-void FreeSection(void);
-pSection NewCoffsymSection(const char* symtab_name, const int Characteristics, const char* strtab_name);
-void CoffelocDirectAdd(const int offset, const int cfsym, const char section, const char type);
-void CoffelocAdd(pSection sec, Symbol* sym, const int offset, const char type);
-void InitCoff(void);
-void Fpad(const FILE* fp, const int new_pos);
-void WriteObj(const char* name);
-/*********************end**************************/
-/*********************operand.h*********************/
-typedef struct Operand
-{
-	Type type; 
-	unsigned short reg;
-	int value;
-	struct Symbol* sym;
-}Operand;
-
-void OperandPush(Type* type, const int r, const int value);
-void OpernandPop(void);
-void OperandSwap();
-void OperandAssgin(Operand* opd, const int t, const int r, const int value);
-void CancelValue(void);
-void CheckLvalue(void);
-void Indirection(void);
-/*********************end**************************/
 /**********************gencode.h**************************/
 enum e_Register
 {
@@ -431,6 +444,39 @@ extern int func_ret_sub;
 extern Symbol* sym_sec_rdata;
 extern Operand opstack[OPSTACK_SIZE];
 extern Operand* optop;
+
+void GenByte(const char c);  
+void GenPrefix(const char opcode); 
+void GenOpcode_1(const char opcode);
+void GenOpcode_2(const char first, const char end);
+void GenDword(unsigned int c);		
+void BackPatch(int t, const int a); 
+int MakeList(int add);  
+void GenAddr32(const int r, const Symbol* sym, const int c);
+void GenModrm(int mod, int reg_opcode, const int r_m, const Symbol* sym, const int c);
+void Load(const int r, Operand* opd);	
+void Store(const int r, Operand* opd); 
+int Load_1(const int rc, Operand* opd);
+void Load_2(const int lrc, const int rrc);
+void Store_1(void);
+void GenAddsp(const int val);
+void GenCall(void);
+void GenInvoke(const int nb_args);
+void GenOpi_2(const int opc, const int op);
+void GenOpi_1(int op);
+Type* PointedType(Type* t);
+int PointedSize(Type* t);
+void GenOp(const int op);
+int AllocateReg(const int rc);
+void SpillReg(int reg);
+void SpillRegs();
+int GenJmpForWard(const int t);
+void GenJmpBackWord(const int a);
+int GenJcc(int t);
+void GenProlog(Type* func_type);
+void GenEpilog();
+void InitVariable(const Type* ptype, const Section* psec, const int c, const int v);
+Section* AllocateStorage(Type* ptype, const int reg, const int has_init, const int v, int* addr);
 
 /***********************end*****************************/
 #endif // SCC_H_

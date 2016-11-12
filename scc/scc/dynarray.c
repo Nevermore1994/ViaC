@@ -1,3 +1,9 @@
+/******************************************
+*Author:Away
+*Date:2016-10-26
+*Function:动态数组模块单元代码
+*******************************************/
+
 #include"scc.h"
 
 /*****************************************************
@@ -57,14 +63,13 @@ void DynArrayFree(DynArray* parr)
 	if (parr != NULL)
 	{
 		void** p;
-		for (p = parr->data; parr->data; ++p, --parr->count)
+		for (p = parr->data; parr->count; ++p, --parr->count)
 		{
 			if (*p)
 				free(*p);
 		}
 		free(parr->data);
 		parr->data = NULL;
-		parr->count = 0;
 		parr->capacity = 0;
 	}
 }

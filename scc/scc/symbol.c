@@ -1,64 +1,65 @@
 /******************************************
 * Author：Away
 * Date: 2016-11-3
+* Function: 符号分析模块单元代码
 *******************************************/
 
 
 #include"scc.h"
 
 
-Symbol* StructSearch(const int v)
+Symbol *StructSearch(int v)
 {
 	if (v >= tktable.count)
 		return NULL;
 	else
-		return (( TkWord* ) tktable.data [v])->sym_struct;
+		return ((TkWord*)tktable.data[v])->sym_struct;
 }
 
-Symbol* SymSearch(const int v)
+
+Symbol *SymSearch(int v)
 {
 	if (v >= tktable.count)
 		return NULL;
 	else
-		return (( TkWord* ) tktable.data [v])->sym_id;
+		return ((TkWord*)tktable.data[v])->sym_id;
 }
 
-Symbol* SymDirectPush(const Stack* stack, const int v, const Type* type, const int c)
+
+Symbol *SymDirectPush(Stack *ss, int v, Type *type, int c)
 {
-	if (stack == NULL)
-	{
-		Error("指针未初始化");
-	}
 	Symbol s, *p;
 	s.v = v;
 	s.type.t = type->t;
 	s.type.ref = type->ref;
-	s.c = c; 
-	s.next = NULL; 
-	p = ( Symbol* ) StackPush(stack, &s, sizeof(Symbol)); 
+	s.c = c;
+	s.next = NULL;
+	p = (Symbol*)StackPush(ss, &s, sizeof(Symbol));
 	return p;
 }
 
-
-Symbol* SymPush(const int v, const Type* type, const int r, const int c)
+Symbol *SymPush(int v, Type *type, int r, int c)
 {
-	Symbol *ps, **pps; 
-	TkWord* ts;
-	Stack** ss;
-	if (StackIsEmpty(&LSYM) == FALSE)
+	Symbol *ps, **pps;
+	TkWord *ts;
+	Stack *ss;
+
+	if (StackIsEmpty(&LSYM) == 0)
 	{
 		ss = &LSYM;
-	} 
+	}
 	else
 	{
 		ss = &GSYM;
-	} 
-	ps = SymDirectPush(ss, v, type, c); 
+	}
+	ps = SymDirectPush(ss, v, type, c);
 	ps->r = r;
-	
+
+	// 不记录结构体成员及匿名符号
 	if ((v & SC_STRUCT) || v < SC_ANOM)
 	{
-		ts = ( TkWord* ) tktable.data [(v & ~SC_STRUCT)]; 
+		// 更新单词sym_struct或sym_id字段
+		ts = (TkWord*)tktable.data[(v & ~SC_STRUCT)];
 		if (v & SC_STRUCT)
 			pps = &ts->sym_struct;
 		else
@@ -68,41 +69,43 @@ Symbol* SymPush(const int v, const Type* type, const int r, const int c)
 	}
 	return ps;
 }
+
  
-Symbol* FuncSymPush(const int v, const Type* type)
+Symbol *FuncSymPush(int v, Type *type)
 {
-	Symbol *ps, **pps;
-	ps = SymDirectPush(&GSYM, v, type, 0);
-	
-	pps = & (( TkWord* ) tktable.data [v])->sym_id;
-	
-	//同名符号函数符号放在最后
-	while (*pps != NULL)
-		pps = &(*pps)->prev_tok;
+	Symbol *s, **ps;
+	s = SymDirectPush(&GSYM, v, type, 0);
 
-	ps->prev_tok = NULL;
-	*pps = ps;
-	return ps;
-} 
+	ps = &((TkWord*)tktable.data[v])->sym_id;
+	// 同名符号，函数符号放在最后-> ->...s
+	while (*ps != NULL)
+		ps = &(*ps)->prev_tok;
+	s->prev_tok = NULL;
+	*ps = s;
+	return s;
+}
 
-Symbol *VarSymPut(const Type* type,const int r, const int v, const int addr)
+Symbol *VarSymPut(Type *type, int r, int v, int addr)
 {
-	Symbol *sym = NULL; 
-	if ( (r&SC_VALMASK) == SC_LOCAL)
+	Symbol *sym = NULL;
+	if ((r & SC_VALMASK) == SC_LOCAL)			// 局部变量
 	{
-		sym = SymPush(v, type, r,addr);
+
+		sym = SymPush(v, type, r, addr);
 	}
-	else if (v && (r & SC_VALMASK) == SC_GLOBAL)
+	else if (v && (r & SC_VALMASK) == SC_GLOBAL) // 全局变量
 	{
 		sym = SymSearch(v);
 		if (sym)
-			Error("%s重定义\n", (( TkWord* ) tktable.data [v])->spelling);
+			Error("%s重定义\n", ((TkWord*)tktable.data[v])->spelling);
 		else
+		{
 			sym = SymPush(v, type, r | SC_SYM, 0);
+		}
 	}
+	//else 字符串常量符号
 	return sym;
 }
-
 Symbol* SecSymPut(const char* sec, const int c)
 {
 	TkWord* tp;
@@ -115,18 +118,15 @@ Symbol* SecSymPut(const char* sec, const int c)
 	return s;
 }
 
-void SymPop(const Stack* stack, const Symbol* b)
+void SymPop(const Stack* ptop, const Symbol* b) //b可以为NULL
 {
-	if (stack == NULL || b == NULL)
-	{
+	if (ptop == NULL)
 		Error("指针未初始化");
-	}
-	
 	int v;
 	Symbol *ps, **pps;
 	TkWord *ts;
 	
-	ps = ( Symbol* ) StackgGetTop(stack);
+	ps = ( Symbol* ) StackGetTop(ptop);
 	while (ps != b)
 	{
 		v = ps->v; 
@@ -139,9 +139,17 @@ void SymPop(const Stack* stack, const Symbol* b)
 				pps = &ts->sym_id;
 			*pps = ps->prev_tok;
 		}
-		StackPop(stack);
-		ps = ( Symbol* ) StackgGetTop(stack);
+		StackPop(ptop);
+		ps = ( Symbol* ) StackGetTop(ptop);
 	}
+}
+
+void MkPointer(Type* ptype)
+{
+	Symbol* psym;
+	psym = SymPush(SC_ANOM, ptype, 0, -1);
+	ptype->t = T_PTR; 
+	ptype->ref = psym;
 }
  
 int TypeSize(const Type* t, int* a)
@@ -150,7 +158,7 @@ int TypeSize(const Type* t, int* a)
 	int bt;
 	int PTR_SIZE = 4;
 
-	bt = t->t | T_BTYPE; 
+	bt = t->t & T_BTYPE; 
 	switch (bt)
 	{
 		case T_STRUCT:

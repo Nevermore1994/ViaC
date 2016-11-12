@@ -1,8 +1,8 @@
 /******************************************
 * Author：Away
 * Date: 2016-11-3
+* Function：辅助栈模块单元代码
 *******************************************/
-
 
 #include"scc.h" 
 
@@ -34,7 +34,7 @@ void* StackPush(Stack* stack, void* data, int size)
 	if (stack->top >= stack->size + stack->base)
 	{
 		newsize = stack->size * 2;
-		stack->base = ( void** ) realloc(stack->base, newsize);
+		stack->base = ( void** ) realloc(stack->base, sizeof(void**) * newsize);
 		if (stack->base == NULL)
 		{
 			Error("重新分配失败");
@@ -44,11 +44,12 @@ void* StackPush(Stack* stack, void* data, int size)
 		stack->size = newsize;
 	}
 	*stack->top = ( void** ) malloc(size);
+
 	if (*stack->top == NULL)
 	{
 		Error("内存分配失败");
 	}
-	errno_t  err=memcpy_s(*stack->top, size, data, size);
+	errno_t  err = memcpy_s(*stack->top, size, data, size);
 	if (err)
 	{
 		Error("编译过程中出现内存复制错误");
@@ -66,12 +67,11 @@ void StackPop(Stack* stack)
 	}
 	if (stack->top > stack->base)
 	{
-		free(*stack->top);
-		stack->top--;
+		free(* (--stack->top));
 	}
 }
 
-void* StackgGetTop(Stack* stack)
+void* StackGetTop(Stack* stack)
 {
 	void** topdata = NULL;
 	if (stack == NULL)
@@ -80,7 +80,7 @@ void* StackgGetTop(Stack* stack)
 	}
 	if (stack->top > stack->base)
 	{ 
-		topdata = stack->top-1; 
+		topdata = stack->top - 1; 
 		return *topdata;
 	}
 	return NULL;
