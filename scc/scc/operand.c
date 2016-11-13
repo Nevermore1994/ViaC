@@ -4,7 +4,7 @@
 *function:辅助栈模块单元代码
 *******************************************/
 
-#include"scc.h"
+#include"viac.h"
 
 void OperandPush(Type* type, const int r, const int value)
 {
@@ -42,12 +42,12 @@ void OperandAssign(Operand* opd, const int t, const int r, const int value )
 void CancelLvalue(void)
 {
 	CheckLvalue(); // 左值
-	optop->reg &= ~SC_LVAL;
+	optop->reg &= ~ViaC_LVAL;
 }
 
 void CheckLvalue(void)
 {
-	if (!(optop->reg & SC_LVAL))
+	if (!(optop->reg & ViaC_LVAL))
 	{
 		Expect("左值");
 	}
@@ -61,7 +61,7 @@ void Indirection(void)
 			return;
 		Expect("指针");
 	}
-	if ((optop->reg & SC_LVAL))
+	if ((optop->reg & ViaC_LVAL))
 	{
 		Load_1(REG_ANY, optop);
 	}
@@ -69,6 +69,6 @@ void Indirection(void)
  
 	if ( (!(optop->type.t & T_ARRAY)  && ((optop->type.t)  &  T_BTYPE) ) != T_FUNC )
 	{
-		optop->reg |= SC_LVAL;
+		optop->reg |= ViaC_LVAL;
 	}
 }

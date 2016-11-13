@@ -158,11 +158,11 @@ extern int token;
 #define  OUT_FILE_SIZE 256      //输出文件名数组大小
 extern FILE* fin;				//源文件指针
 extern char* filename;				//源文件名
-extern int line_num;				//行号
-extern DynArray src_files;			//源文件数组
+extern int linenum;				//行号
+extern DynArray srcfiles;			//源文件数组
 extern char outfile[OUT_FILE_SIZE];		//输出文件名
-extern int output_type;          //输出文件类型
-extern float scc_version; //编译器版本
+extern int outtype;          //输出文件类型
+extern float ViaCVersion; //编译器版本
 
 /***************错误处理*****************************/
 enum e_ErrorLevel
@@ -479,7 +479,7 @@ void InitVariable(const Type* ptype, const Section* psec, const int c, const int
 Section* AllocateStorage(Type* ptype, const int reg, const int has_init, const int v, int* addr);
 
 /***********************end*****************************/
-#endif // SCC_H_
+#endif // viac.h_
 
 
 

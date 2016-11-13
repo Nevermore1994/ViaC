@@ -4,7 +4,7 @@
 *function:词法分析模块单元代码
 *******************************************/
 
-#include"scc.h"
+#include"viac.h"
 
 typedef TkWord* pTkWord;
 
@@ -199,7 +199,7 @@ void ParseComment()
 		};
 		if (ch == '\n')
 		{
-			line_num++;
+			linenum++;
 			Getch();
 		}
 		else if (ch == '*')
@@ -228,7 +228,7 @@ void SkipWhiteSpace()
 			Getch();
 			if (ch != '\n')
 				return;
-			line_num++;
+			linenum++;
 		}
 		else
 			printf("%c", ch);  //决定是否打印源码中的换行
@@ -668,6 +668,6 @@ void TestLex()
 		GetToken();
 		ColorToken(LEX_NORMAL);
 	} while (token != TK_EOF);
-	printf("\n代码行数:%d行\n", line_num);
+	printf("\n代码行数:%d行\n", linenum);
 }
 

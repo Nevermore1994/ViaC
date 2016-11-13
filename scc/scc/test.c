@@ -3,7 +3,7 @@
 *Date:2016-11-8
 *Function:测试模块单元代码
 *******************************************/
-#include"scc.h"
+#include"viac.h"
 
 int main(const int argc, char ** argv)
 {

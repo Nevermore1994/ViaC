@@ -3,7 +3,7 @@
 *Date:2016-11-8
 *Function:异常模块单元代码
 *******************************************/
-#include"scc.h"
+#include"viac.h"
 
 DynString tkstr;
 
@@ -15,10 +15,10 @@ void HandleException(const int stage, const int level, char* fmt, const va_list 
 	if (stage == STAGE_COMPILE)
 	{
 		if (level == LEVEL_WARNING)
-			printf("%s(第%d行):编译警告：%s\n:", filename, line_num, buf);
+			printf("%s(第%d行):编译警告：%s\n:", filename, linenum, buf);
 		else
 		{
-			printf("%s(第%d行:编译错误:%s\n", filename, line_num, buf);
+			printf("%s(第%d行:编译错误:%s\n", filename, linenum, buf);
 			exit(-1);
 		}
 	}
