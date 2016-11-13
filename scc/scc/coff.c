@@ -15,7 +15,7 @@ pSection sec_rel;
 pSection sec_symtab;
 pSection sec_dynsymtab;
 
-int nsec_image;
+int secnum;
 
 void SectionRealloc(pSection sec, const int newsize)
 {
@@ -24,19 +24,19 @@ void SectionRealloc(pSection sec, const int newsize)
 		Error("coff中的指针未初始化");
 	}
 	
-	int size;
+	int nowsize;
 	char* data;
-	size = sec->data_allocated; 
-	while (size < newsize)
-		size = size * 2;
-	data = (char*)realloc(sec->data, size);
+	nowsize = sec->data_allocated; 
+	while (nowsize < newsize)
+		nowsize = nowsize * 2;
+	data = (char*)realloc(sec->data, nowsize);
 	if (!data)
 	{
 		Error("内存分配失败");
 	}
-	memset(data+sec->data_allocated, 0 ,size - sec->data_allocated);
+	memset(data+sec->data_allocated, 0 ,nowsize - sec->data_allocated);
 	sec->data = data; 
-	sec->data_allocated = size;
+	sec->data_allocated = nowsize;
 }
 
 void*  SectionPtrAdd(const pSection sec, const int increment)
@@ -54,21 +54,19 @@ void*  SectionPtrAdd(const pSection sec, const int increment)
 
 Section* SectionNew(const char* name, const int characteristics)
 {
-	Section* sec; 
+	Section* psec; 
 	int initsize = 8;
-	sec = (Section*)MallocInit(sizeof(Section));
+	psec = (Section*)MallocInit(sizeof(Section));
 	size_t length = strlen(name); 
-	strcpy_s((char*)sec->sh.Name, IMAGE_SIZEOF_SHORT_NAME,name);
-	sec->sh.Characteristics = characteristics; 
-	sec->index = sections.count + 1; 
-	sec->data = ( char* ) MallocInit(sizeof(char) * initsize);
-	sec->data_allocated = initsize; 
+	strcpy_s((char*)psec->sh.Name, IMAGE_SIZEOF_SHORT_NAME, name);
+	psec->sh.Characteristics = characteristics; 
+	psec->index = sections.count + 1; 
+	psec->data = ( char* ) MallocInit(sizeof(char) * initsize);
+	psec->data_allocated = initsize; 
 	if (!(characteristics & IMAGE_SCN_LNK_REMOVE))
-	{
-		nsec_image++;
-	}
-	DynArrayAdd(&sections, sec);
-	return sec;
+		secnum++;
+	DynArrayAdd(&sections, psec);
+	return psec;
 }
 
 int CoffSymSearch(const pSection symtab, const char* name)
@@ -104,7 +102,7 @@ char* CoffStrAdd(const pSection strtab, const char* name)
 
 int CoffSymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass)
 {
-	CoffSym*  cfsym;
+	CoffSym* cfsym;
 	int cs, keyno;
 	char* csname;
 	pSection strtab = symtab->plink;
@@ -198,7 +196,7 @@ void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 void InitCoff(void)
 {
 	DynArrayInit(&sections, 8);
-	nsec_image = 0; 
+	secnum = 0; 
 
 	sec_text = SectionNew(".text", IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_CNT_CODE);
 	
@@ -211,17 +209,19 @@ void InitCoff(void)
 	sec_bss = SectionNew(".bss", IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE | IMAGE_SCN_CNT_INITIALIZED_DATA);
 
 	sec_rel = SectionNew(".rel", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ);
+
+
 	sec_symtab = NewCoffSymSection(".symtab", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ, ".strtab");
 	sec_dynsymtab = NewCoffSymSection(".dynsym", IMAGE_SCN_LNK_REMOVE | IMAGE_SCN_MEM_READ, ".dynstr");
 
 	CoffSymAdd(sec_symtab, "", 0, 0, 0, IMAGE_SYM_CLASS_NULL);
 	CoffSymAdd(sec_symtab, ".data", 0, sec_data->index, 0, IMAGE_SYM_CLASS_STATIC); 
-	CoffSymAdd(sec_symtab, ".bss", 0, sec_bss->index, 0,IMAGE_SYM_CLASS_STATIC );
+	CoffSymAdd(sec_symtab, ".bss", 0, sec_bss->index, 0, IMAGE_SYM_CLASS_STATIC );
 	CoffSymAdd(sec_symtab, ".rdata", 0, sec_rdata->index, 0, IMAGE_SYM_CLASS_STATIC);
-	CoffSymAdd(sec_dynsymtab, "", 0, 0, 0, IMAGE_SYM_CLASS_STATIC);
+	CoffSymAdd(sec_dynsymtab, "", 0, 0, 0, IMAGE_SYM_CLASS_NULL);
 }
 
-void Fpad(const FILE* fp, const int new_pos)
+void Fpad(const FILE* fp, const int newpos)
 {
 	if (fp == NULL)
 	{
@@ -229,7 +229,7 @@ void Fpad(const FILE* fp, const int new_pos)
 	}
 	
 	int curpos = ftell(fp);
-	while (++curpos <= new_pos)
+	while (++curpos <= newpos)
 		fputc(0, fp);
 }
 
@@ -270,7 +270,7 @@ void WriteObj(const char* name)
 	fh->Machine = IMAGE_FILE_MACHINE_I386; 
 	fh->NumberOfSections = nsec_obj;
 	fh->PointerToSymbolTable = sec_symtab->sh.PointerToRawData;
-	fh->NumberOfSymbols =sec_symtab->sh.SizeOfRawData/sizeof(CoffSym);
+	fh->NumberOfSymbols = sec_symtab->sh.SizeOfRawData/sizeof(CoffSym);
 	fwrite(fh, 1, sizeof(IMAGE_FILE_HEADER), fout); 
 	for (i = 0; i < nsec_obj; ++i)
 	{

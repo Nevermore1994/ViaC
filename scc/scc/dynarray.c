@@ -45,6 +45,7 @@ void DynArrayRealloc(DynArray* parr, const int newsize)
 		parr->capacity = capacity;
 	}
 }
+
 void DynArrayAdd(DynArray* parr, void* data)
 {
 	if (parr != NULL)
@@ -58,6 +59,7 @@ void DynArrayAdd(DynArray* parr, void* data)
 		parr->count = count;
 	}
 }
+
 void DynArrayFree(DynArray* parr)
 {
 	if (parr != NULL)
@@ -73,6 +75,7 @@ void DynArrayFree(DynArray* parr)
 		parr->capacity = 0;
 	}
 }
+
 int DynArrayFind(DynArray* parr, const int data)
 {
 	if (parr != NULL)
