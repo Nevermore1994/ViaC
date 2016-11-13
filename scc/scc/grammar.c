@@ -163,11 +163,11 @@ int TypeSpecifier(Type* type)
 		}
 		case KW_STRUCT:
 		{
+			syntax_state = SNTX_SP;
+
 			StructSpecifier(&typel);
 			type->ref = typel.ref;
 			t = T_STRUCT;
-
-			syntax_state = SNTX_SP;
 			type_found = 1;
 			break;
 		}
