@@ -1,6 +1,6 @@
 // 《自己动手写编译器、链接器》配套源代码
 
-#include "scc.h"
+#include "viac.h"
 int syntax_state;
 int syntax_level;
 
@@ -13,7 +13,7 @@ void TranslationUnit()
 {
 	while (token != TK_EOF)
 	{
-		ExternalDeclaration(SC_GLOBAL);
+		ExternalDeclaration(ViaC_GLOBAL);
 	}
 }
 
@@ -66,7 +66,7 @@ void ExternalDeclaration(int l)
 
 		if (token == TK_BEGIN) //函数定义
 		{
-			if (l == SC_LOCAL)
+			if (l == ViaC_LOCAL)
 				Error("不支持函数嵌套定义");
 
 			if ((type.t & T_BTYPE) != T_FUNC)
@@ -83,7 +83,7 @@ void ExternalDeclaration(int l)
 			{
 				sym = FuncSymPush(v, &type);
 			}
-			sym->r = SC_SYM | SC_GLOBAL;
+			sym->r = ViaC_SYM | ViaC_GLOBAL;
 			Funcbody(sym);
 			break;
 		}
@@ -93,14 +93,14 @@ void ExternalDeclaration(int l)
 			{
 				if (SymSearch(v) == NULL)
 				{
-					SymPush(v, &type, SC_GLOBAL | SC_SYM, 0);
+					SymPush(v, &type, ViaC_GLOBAL | ViaC_SYM, 0);
 				}
 			}
 			else //变量声明
 			{
 				r = 0;
 				if (!(type.t & T_ARRAY))
-					r |= SC_LVAL;
+					r |= ViaC_LVAL;
 
 				r |= l;
 				has_init = (token == TK_ASSIGN);
@@ -112,7 +112,7 @@ void ExternalDeclaration(int l)
 
 				sec = AllocateStorage(&type, r, has_init, v, &addr);
 				sym = VarSymPut(&type, r, v, addr);
-				if (l == SC_GLOBAL)
+				if (l == ViaC_GLOBAL)
 					CoffSymAddUpdate(sym, addr, sec->index, 0, IMAGE_SYM_CLASS_EXTERNAL);
 
 				if (has_init)
@@ -249,7 +249,7 @@ void StructSpecifier(Type *type)
 	{
 		type1.t = KW_STRUCT;
 		// -1表示结构体未定义
-		s = SymPush(v | SC_STRUCT, &type1, 0, -1);
+		s = SymPush(v | ViaC_STRUCT, &type1, 0, -1);
 		s->r = 0;
 	}
 
@@ -324,7 +324,7 @@ void StructDeclaration(int *maxalign, int *offset, Symbol ***ps)
 
 		if (align > *maxalign)
 			*maxalign = align;
-		ss = SymPush(v | SC_MEMBER, &type1, 0, *offset);
+		ss = SymPush(v | ViaC_MEMBER, &type1, 0, *offset);
 		*offset += size;
 		**ps = ss;
 		*ps = &ss->next;
@@ -463,7 +463,7 @@ void DirectDeclaratorPostfix(Type *type, int func_call)
 		}
 		Skip(TK_CLOSEBR);
 		DirectDeclaratorPostfix(type, func_call);
-		s = SymPush(SC_ANOM, type, 0, n);
+		s = SymPush(ViaC_ANOM, type, 0, n);
 		type->t = T_ARRAY | T_PTR;
 		type->ref = s;
 	}
@@ -497,7 +497,7 @@ void ParameterTypeList(Type *type, int func_call)
 			Error("无效类型标识符");
 		}
 		Declarator(&pt, &n, NULL);
-		s = SymPush(n | SC_PARAMS, &pt, 0, 0);
+		s = SymPush(n | ViaC_PARAMS, &pt, 0, 0);
 		*plast = s;
 		plast = &s->next;
 		if (token == TK_CLOSEPA)
@@ -519,7 +519,7 @@ void ParameterTypeList(Type *type, int func_call)
 	SyntaxIndent();
 
 	// 此处将函数返回类型存储，然后指向参数，最后将type设为函数类型，引用的相关信息放在ref中
-	s = SymPush(SC_ANOM, type, func_call, 0);
+	s = SymPush(ViaC_ANOM, type, func_call, 0);
 	s->next = first;
 	type->t = T_FUNC;
 	type->ref = s;
@@ -536,7 +536,7 @@ void Funcbody(Symbol *sym)
 	ind = sec_text->data_offset;
 	CoffSymAddUpdate(sym, ind, sec_text->index, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
 	/* 放一匿名符号在局部符号表中 */
-	SymDirectPush(&LSYM, SC_ANOM, &int_type, 0);
+	SymDirectPush(&LSYM, ViaC_ANOM, &int_type, 0);
 	GenProlog(&sym->type);
 	rsym = 0;
 	CompoundStatement(NULL, NULL);
@@ -624,7 +624,7 @@ void CompoundStatement(int *bsym, int *csym)
 	GetToken();
 	while (IsTypeSpecifier(token))
 	{
-		ExternalDeclaration(SC_LOCAL);
+		ExternalDeclaration(ViaC_LOCAL);
 	}
 	while (token != TK_END)
 	{
@@ -942,7 +942,7 @@ void UnaryExpression()
 			break;
 		case TK_MINUS:
 			GetToken();
-			OperandPush(&int_type, SC_GLOBAL, 0);
+			OperandPush(&int_type, ViaC_GLOBAL, 0);
 			UnaryExpression();
 			GenOp(TK_MINUS);
 			break;
@@ -975,7 +975,7 @@ void SizeofExpression()
 	size = TypeSize(&type, &align);
 	if (size < 0)
 		Error("sizeof计算类型尺寸失败");
-	OperandPush(&int_type, SC_GLOBAL, size);
+	OperandPush(&int_type, ViaC_GLOBAL, size);
 }
 
 /***********************************************************
@@ -1003,24 +1003,24 @@ void PostfixExpression()
 			if ((optop->type.t & T_BTYPE) != T_STRUCT)
 				Expect("结构体变量");
 			s = optop->type.ref;
-			token |= SC_MEMBER;
+			token |= ViaC_MEMBER;
 			while ((s = s->next) != NULL)
 			{
 				if (s->v == token)
 					break;
 			}
 			if (!s)
-				Error("没有此成员变量: %s", GetTkstr(token & ~SC_MEMBER));
+				Error("没有此成员变量: %s", GetTkstr(token & ~ViaC_MEMBER));
 			/* 成员变量地址 = 结构变量指针 + 成员变量偏移 */
 			optop->type = char_pointer_type; /* 成员变量的偏移是指相对于结构体首地址的字节偏移，因此此处变换类型为字节变量指针 */
-			OperandPush(&int_type, SC_GLOBAL, s->c);
+			OperandPush(&int_type, ViaC_GLOBAL, s->c);
 			GenOp(TK_PLUS);  //执行后optop->value记忆了成员地址
 							  /* 变换类型为成员变量数据类型 */
 			optop->type = s->type;
 			/* 数组变量不能充当左值 */
 			if (!(optop->type.t & T_ARRAY))
 			{
-				optop->reg |= SC_LVAL;
+				optop->reg |= ViaC_LVAL;
 			}
 			GetToken();
 		}
@@ -1061,7 +1061,7 @@ void PrimaryExpression()
 	{
 		case TK_CINT:
 		case TK_CCHAR:
-			OperandPush(&int_type, SC_GLOBAL, tkvalue);
+			OperandPush(&int_type, ViaC_GLOBAL, tkvalue);
 			GetToken();
 			break;
 		case TK_CSTR:
@@ -1069,8 +1069,8 @@ void PrimaryExpression()
 			type.t = t;
 			MkPointer(&type);
 			type.t |= T_ARRAY;
-			sec = AllocateStorage(&type, SC_GLOBAL, 2, 0, &addr);
-			VarSymPut(&type, SC_GLOBAL, 0, addr);
+			sec = AllocateStorage(&type, ViaC_GLOBAL, 2, 0, &addr);
+			VarSymPut(&type, ViaC_GLOBAL, 0, addr);
 			Initializer(&type, addr, sec);
 			break;
 		case TK_OPENPA:
@@ -1090,12 +1090,12 @@ void PrimaryExpression()
 					Error("'%s'未声明\n", GetTkstr(t));
 
 				s = FuncSymPush(t, &default_func_type);//允许函数不声明，直接引用
-				s->r = SC_GLOBAL | SC_SYM;
+				s->r = ViaC_GLOBAL | ViaC_SYM;
 			}
 			r = s->r;
 			OperandPush(&s->type, r, s->c);
 			/* 符号引用，操作数必须记录符号地址 */
-			if (optop->reg & SC_SYM)
+			if (optop->reg & ViaC_SYM)
 			{
 				optop->sym = s;
 				optop->value = 0;  //用于函数调用，及全局变量引用 printf("g_cc=%c\n",g_cc);

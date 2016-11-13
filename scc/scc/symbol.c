@@ -5,7 +5,7 @@
 *******************************************/
 
 
-#include"scc.h"
+#include"viac.h"
 
 
 Symbol *StructSearch(int v)
@@ -56,11 +56,11 @@ Symbol *SymPush(int v, Type *type, int r, int c)
 	ps->r = r;
 
 	// 不记录结构体成员及匿名符号
-	if ((v & SC_STRUCT) || v < SC_ANOM)
+	if ((v & ViaC_STRUCT) || v < ViaC_ANOM)
 	{
 		// 更新单词sym_struct或sym_id字段
-		ts = (TkWord*)tktable.data[(v & ~SC_STRUCT)];
-		if (v & SC_STRUCT)
+		ts = (TkWord*)tktable.data[(v & ~ViaC_STRUCT)];
+		if (v & ViaC_STRUCT)
 			pps = &ts->sym_struct;
 		else
 			pps = &ts->sym_id;
@@ -88,19 +88,19 @@ Symbol *FuncSymPush(int v, Type *type)
 Symbol *VarSymPut(Type *type, int r, int v, int addr)
 {
 	Symbol *sym = NULL;
-	if ((r & SC_VALMASK) == SC_LOCAL)			// 局部变量
+	if ((r & ViaC_VALMASK) == ViaC_LOCAL)			// 局部变量
 	{
 
 		sym = SymPush(v, type, r, addr);
 	}
-	else if (v && (r & SC_VALMASK) == SC_GLOBAL) // 全局变量
+	else if (v && (r & ViaC_VALMASK) == ViaC_GLOBAL) // 全局变量
 	{
 		sym = SymSearch(v);
 		if (sym)
 			Error("%s重定义\n", ((TkWord*)tktable.data[v])->spelling);
 		else
 		{
-			sym = SymPush(v, type, r | SC_SYM, 0);
+			sym = SymPush(v, type, r | ViaC_SYM, 0);
 		}
 	}
 	//else 字符串常量符号
@@ -114,7 +114,7 @@ Symbol* SecSymPut(const char* sec, const int c)
 	type.t = T_INT;
 	tp = TkwordInsert(sec);
 	token = tp->tkcode;
-	s = SymPush(token, &type, SC_GLOBAL, c);
+	s = SymPush(token, &type, ViaC_GLOBAL, c);
 	return s;
 }
 
@@ -130,10 +130,10 @@ void SymPop(const Stack* ptop, const Symbol* b) //b可以为NULL
 	while (ps != b)
 	{
 		v = ps->v; 
-		if ((v & SC_STRUCT) || v < SC_ANOM)
+		if ((v & ViaC_STRUCT) || v < ViaC_ANOM)
 		{
-			ts = ( TkWord* ) tktable.data [v & ~SC_STRUCT];
-			if (v & SC_STRUCT)
+			ts = ( TkWord* ) tktable.data [v & ~ViaC_STRUCT];
+			if (v & ViaC_STRUCT)
 				pps = &ts->sym_struct;
 			else
 				pps = &ts->sym_id;
@@ -147,7 +147,7 @@ void SymPop(const Stack* ptop, const Symbol* b) //b可以为NULL
 void MkPointer(Type* ptype)
 {
 	Symbol* psym;
-	psym = SymPush(SC_ANOM, ptype, 0, -1);
+	psym = SymPush(ViaC_ANOM, ptype, 0, -1);
 	ptype->t = T_PTR; 
 	ptype->ref = psym;
 }
