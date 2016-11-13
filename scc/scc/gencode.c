@@ -34,9 +34,9 @@ void GenOpcode_1(const char opcode)//生成单指令
 	GenByte(opcode);
 }
 
-void GenOpcode_2(const char first, const char end)//生成双字节指令
+void GenOpcode_2(const char begin, const char end)//生成双字节指令
 {
-	GenByte(first);
+	GenByte(begin);
 	GenByte(end);
 }
 
@@ -48,16 +48,16 @@ void GenDword(unsigned int c)		//生成4字节的指令
 	GenByte(c >> 24);
 }
 
-void BackPatch(int t, const int a) //回填函数,把t为链首的待定跳转地址填入相对地址 a为指令跳转地址
+void BackPatch(int top, const int a) //回填函数,把t为链首的待定跳转地址填入相对地址 a为指令跳转地址
 {
 	int n;
 	int* ptr;
-	while (t)
+	while (top)
 	{
-		ptr = (int*)(sec_text->data + t);
+		ptr = (int*)(sec_text->data + top);
 		n = *ptr;
-		*ptr = a - t - 4;
-		t = n;
+		*ptr = a - top - 4;
+		top = n;
 	}
 }
 
@@ -73,25 +73,19 @@ int MakeList(int add)  //记录待定跳转地址的指令链 add前一跳转地址
 	return add;
 }
 
-void GenAddr32(const int r, const Symbol* sym, const int c)//生成全局符号地址，增加coff的重定位
+void GenAddr32(const int r, const Symbol* psym, const int c)//生成全局符号地址，增加coff的重定位
 {
-	if (sym == NULL)
-	{
-		Error("指针未初始化");
-	}
+	/*psym可以为空*/
 	if (r & ViaC_SYM)
 	{
-		CoffElocAdd(sec_text, sym, ind, IMAGE_REL_I386_DIR32);
+		CoffElocAdd(sec_text, psym, ind, IMAGE_REL_I386_DIR32);
 	}
 	GenDword(c);
 }
 
-void GenModrm(int mod, int reg_opcode, const int r_m, const Symbol* sym, const int c) //生成指令寻址方式字节ModR/M
+void GenModrm(int mod, int reg_opcode, const int r_m, const Symbol* psym, const int c) //生成指令寻址方式字节ModR/M
 {
-	if (sym == NULL)
-	{
-		Error("指针未初始化");
-	}
+	/********psym可以为空****/
 	mod <<= 6;
 	reg_opcode <<= 3;
 	if (mod == 0xc0) //mod =11 寄存器寻址 89 E5	MOV EBP, EBP
@@ -101,7 +95,7 @@ void GenModrm(int mod, int reg_opcode, const int r_m, const Symbol* sym, const i
 	else if ((r_m | ViaC_VALMASK) == ViaC_GLOBAL)
 	{
 		GenByte(0x05 | reg_opcode); //直接寻址
-		GenAddr32(r_m, sym, c);
+		GenAddr32(r_m, psym, c);
 	}
 	else if ((r_m & ViaC_VALMASK) == ViaC_LOCAL)
 	{

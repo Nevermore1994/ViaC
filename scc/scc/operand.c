@@ -20,16 +20,16 @@ void OperandPush(Type* type, const int r, const int value)
 
 void OperandPop(void)
 {
-	optop--;
+	--optop;
 }
 
 void OperandSwap()
 {
 	Operand tmp;
 	
-	tmp = optop[0]; 
-	optop[0] = optop[-1];
-	optop[-1] = tmp;
+	tmp = optop[-1]; 
+	optop[-1] = optop[0];
+	optop[0] = tmp;
 }
 
 void OperandAssign(Operand* opd, const int t, const int r, const int value )

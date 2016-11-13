@@ -6,25 +6,33 @@
 #include"viac.h"
 
 DynString tkstr;
-
- 
-void HandleException(const int stage, const int level, char* fmt, const va_list ap)
+#define BUF_SIZE 1024
+#define ERR_SIZE 2048
+void* HandleException(const int stage, const int level, char* fmt, const va_list ap)
 {
-	char buf[1024];
-	vsprintf_s(buf, 1024,fmt, ap);
+	char buf[BUF_SIZE];
+	char errstr[ERR_SIZE];
+	vsprintf_s(buf, BUF_SIZE,fmt, ap);
 	if (stage == STAGE_COMPILE)
 	{
 		if (level == LEVEL_WARNING)
+		{
 			printf("%s(第%d行):编译警告：%s\n:", filename, linenum, buf);
+			sprintf_s(errstr, ERR_SIZE, "%s(第%d行):编译警告：%s\n:", filename, linenum, buf);
+		}
 		else
 		{
 			printf("%s(第%d行:编译错误:%s\n", filename, linenum, buf);
+			sprintf_s(errstr, ERR_SIZE, "%s(第%d行:编译错误:%s\n", filename, linenum, buf);
+			Cleanup();
 			exit(-1);
 		}
 	}
 	else
 	{
 		printf("链接错误:%s\n", buf);
+		sprintf_s(errstr, ERR_SIZE, "链接错误:%s\n", buf);
+		Cleanup();
 		exit(-1);
 	}
 }
