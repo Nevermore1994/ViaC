@@ -3,7 +3,7 @@
 *date:2016-11-8
 *function:×Ö·û¹þÏ£º¯Êý
 *******************************************/
-#include"scc.h"
+#include"viac.h"
 
 
 int ElfHash(char* key)

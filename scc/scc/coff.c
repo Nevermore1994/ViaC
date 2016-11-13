@@ -3,7 +3,7 @@
 *Date:2016-11-6
 *Function:windows平台连接模块单元代码
 *******************************************/
-#include"scc.h"
+#include"viac.h"
 
 DynArray sections; 
 pSection sec_text; 

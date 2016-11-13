@@ -4,7 +4,7 @@
 *Function:动态数组模块单元代码
 *******************************************/
 
-#include"scc.h"
+#include"viac.h"
 
 /*****************************************************
 *函数名：DystingInit(DynString* pstr, const int initsize)
