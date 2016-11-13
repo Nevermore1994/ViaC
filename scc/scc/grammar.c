@@ -1,15 +1,17 @@
-// 《自己动手写编译器、链接器》配套源代码
+/******************************************
+* Author：Away
+* Date: 2016-10-30
+* Function:SCC语法分析
+* Note:递归自顶向下分析法，由于是上下文无关，
+有些语法的限制需要语义控制程序去限制
+*******************************************/
 
-#include "viac.h"
+#include"viac.h"
+
 int syntax_state;
 int syntax_level;
 
-/***********************************************************
-* 功能:	解析翻译单位
-*
-* <TranslationUnit>::={ExternalDeclaration}<TK_EOF>
-**********************************************************/
-void TranslationUnit()
+void TranslationUnit(void)
 {
 	while (token != TK_EOF)
 	{
@@ -17,37 +19,12 @@ void TranslationUnit()
 	}
 }
 
-/***********************************************************
-* 功能:	解析外部声明
-* l:		存储类型，局部的还是全局的
-*
-* <ExternalDeclaration>::=<function_definition>|<declaration>
-*
-* <function_definition>::= <TypeSpecifier> <Declarator><Funcbody>
-*
-* <declaration>::= <TypeSpecifier><TK_SEMICOLON>
-*		|<TypeSpecifier>< init_declarator_list><TK_SEMICOLON>
-*
-* <init_declarator_list>::=
-*      <init_declarator>{<TK_COMMA> <init_declarator>}
-*
-* <init_declarator>::=
-*      <Declarator>|<Declarator> <TK_ASSIGN><Initializer>
-*
-* 改写后文法：
-* <ExternalDeclaration>::=
-*  <TypeSpecifier> (<TK_SEMICOLON>
-*      |<Declarator><Funcbody>
-*	    |<Declarator>[<TK_ASSIGN><Initializer>]
-*	     {<TK_COMMA> <Declarator>[<TK_ASSIGN><Initializer>]}
-*		 <TK_SEMICOLON>
-**********************************************************/
-void ExternalDeclaration(int l)
+void ExternalDeclaration(const int level)
 {
 	Type btype, type;
 	int v, has_init, r, addr;
-	Symbol *sym;
-	Section *sec = NULL;
+	Symbol*  sym = NULL;
+	Section* psec = NULL;
 
 	if (!TypeSpecifier(&btype))
 	{
@@ -59,71 +36,68 @@ void ExternalDeclaration(int l)
 		GetToken();
 		return;
 	}
+
 	while (1)
 	{
 		type = btype;
 		Declarator(&type, &v, NULL);
 
-		if (token == TK_BEGIN) //函数定义
+		if (token == TK_BEGIN)
 		{
-			if (l == ViaC_LOCAL)
-				Error("不支持函数嵌套定义");
-
+			if (level == ViaC_LOCAL)
+				Error("不允许嵌套定义");
 			if ((type.t & T_BTYPE) != T_FUNC)
 				Expect("<函数定义>");
 
 			sym = SymSearch(v);
-			if (sym)	// 函数前面声明过，现在给出函数定义
+			if (sym)
 			{
 				if ((sym->type.t & T_BTYPE) != T_FUNC)
 					Error("'%s'重定义", GetTkstr(v));
 				sym->type = type;
 			}
 			else
-			{
 				sym = FuncSymPush(v, &type);
-			}
 			sym->r = ViaC_SYM | ViaC_GLOBAL;
 			Funcbody(sym);
 			break;
 		}
 		else
 		{
-			if ((type.t & T_BTYPE) == T_FUNC) // 函数声明
+			if ((type.t & T_BTYPE) == T_FUNC)
 			{
 				if (SymSearch(v) == NULL)
 				{
-					SymPush(v, &type, ViaC_GLOBAL | ViaC_SYM, 0);
+					sym = SymPush(v, &type, ViaC_GLOBAL | ViaC_SYM, 0);
 				}
 			}
-			else //变量声明
+			else
 			{
 				r = 0;
 				if (!(type.t & T_ARRAY))
+				{
 					r |= ViaC_LVAL;
+				}
 
-				r |= l;
+				r |= level;
 				has_init = (token == TK_ASSIGN);
 
 				if (has_init)
 				{
-					GetToken(); //不能放到后面，char str[]="abc"情况，需要AllocateStorage求字符串长度				    
+					GetToken();
 				}
-
-				sec = AllocateStorage(&type, r, has_init, v, &addr);
+				psec = AllocateStorage(&type, r, has_init, v, &addr);
 				sym = VarSymPut(&type, r, v, addr);
-				if (l == ViaC_GLOBAL)
-					CoffSymAddUpdate(sym, addr, sec->index, 0, IMAGE_SYM_CLASS_EXTERNAL);
 
+				if (level == ViaC_GLOBAL)
+					CoffSymAddUpdate(sym, addr, psec->index, 0, IMAGE_SYM_CLASS_EXTERNAL);
 				if (has_init)
 				{
-					Initializer(&type, addr, sec);
+					Initializer(&type, addr, psec);
 				}
 			}
 			if (token == TK_COMMA)
-			{
 				GetToken();
-			}
 			else
 			{
 				syntax_state = SNTX_LF_HT;
@@ -134,79 +108,69 @@ void ExternalDeclaration(int l)
 	}
 }
 
-
-/***********************************************************
-* 功能:	解析初值符
-* type:	变量类型
-* c:		变量相关值
-* sec:		变量所在节
-*
-* < Initializer>::=<AssignmentExpression>
-**********************************************************/
-void Initializer(Type *type, int c, Section *sec)
+void Initializer(const Type* ptype, const int c, Section* psec) // 初值符
 {
-	if (type->t & T_ARRAY && sec)
+	if (ptype->t & T_ARRAY && psec)
 	{
-		memcpy(sec->data + c, tkstr.data, tkstr.count);
+		memcpy_s(psec->data + c, tkstr.count, tkstr.data, tkstr.count);
 		GetToken();
 	}
 	else
 	{
 		AssignmentExpression();
-		InitVariable(type, sec, c, 0);
+		InitVariable(ptype, psec, c, 0);
 	}
+
 }
 
-/***********************************************************
-* 功能:		类型区分符
-* type(输出):	数据类型
-* 返回值:		是否发现合法的类型区分符
-*
-* <TypeSpecifier>::= <KW_INT>
-*		| <KW_CHAR>
-*		| <KW_SHORT>
-*		| <KW_VOID >
-*		| <StructSpecifier>
-**********************************************************/
-int TypeSpecifier(Type *type)
+int TypeSpecifier(Type* type)
 {
-	int t, type_found;
-	Type type1;
+	int  t, type_found = 0;
+	Type typel;
 	t = 0;
-	type_found = 0;
 	switch (token)
 	{
 		case KW_CHAR:
+		{
 			t = T_CHAR;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
 			break;
-		case KW_SHORT:
-			t = T_SHORT;
+		}
+		case KW_INT:
+		{
+			t = T_INT;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
 			break;
+		}
+		case KW_SHORT:
+		{
+			t = T_SHORT;
+			type_found = 1;
+			syntax_state = SNTX_SP;
+			GetToken();
+		}
 		case KW_VOID:
+		{
 			t = T_VOID;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
 			break;
-		case KW_INT:
-			t = T_INT;
-			syntax_state = SNTX_SP;
-			type_found = 1;
-			GetToken();
-			break;
+		}
 		case KW_STRUCT:
-			syntax_state = SNTX_SP;
-			StructSpecifier(&type1);
-			type->ref = type1.ref;
+		{
+			StructSpecifier(&typel);
+			type->ref = typel.ref;
 			t = T_STRUCT;
+
+			syntax_state = SNTX_SP;
 			type_found = 1;
 			break;
+		}
 		default:
 			break;
 	}
@@ -214,47 +178,40 @@ int TypeSpecifier(Type *type)
 	return type_found;
 }
 
-/***********************************************************
-* 功能:		解析结构区分符
-* type(输出):	结构类型
-*
-* <StructSpecifier>::=
-*	<KW_STRUCT><IDENTIFIER><TK_BEGIN><StructDeclarationList><TK_END>
-*		| <KW_STRUCT><IDENTIFIER>
-**********************************************************/
-void StructSpecifier(Type *type)
+void StructSpecifier(Type* type)
 {
-	int v;
-	Symbol *s;
-	Type type1;
+	int t;
+	Symbol* ps;
+	Type typel;
 
 	GetToken();
-	v = token;
+	t = token;
 
-	syntax_state = SNTX_DELAY;      // 新取单词不即时输出，延迟到取出单词后根据单词类型判断输出格式
+	syntax_state = SNTX_DELAY;
 	GetToken();
 
-	if (token == TK_BEGIN)			// 适用于结构体定义
+	if (token == TK_BEGIN)
 		syntax_state = SNTX_LF_HT;
-	else if (token == TK_CLOSEPA)	// 适用于 sizeof(struct struct_name)
+	else if (token == TK_CLOSEPA)
 		syntax_state = SNTX_NUL;
-	else							// 适用于结构变量声明
+	else
 		syntax_state = SNTX_SP;
 	SyntaxIndent();
 
-	if (v < TK_IDENT)				// 关键字不能作为结构名称
-		Expect("结构体名");
-	s = StructSearch(v);
-	if (!s)
+	if (t < TK_IDENT)
+		Expect("结构体名称");
+
+	ps = StructSearch(t);
+	if (!ps)
 	{
-		type1.t = KW_STRUCT;
-		// -1表示结构体未定义
-		s = SymPush(v | ViaC_STRUCT, &type1, 0, -1);
-		s->r = 0;
+		typel.t = KW_STRUCT;
+
+		ps = SymPush(t | ViaC_STRUCT, &typel, 0, -1);
+		ps->r = 0;
 	}
 
 	type->t = T_STRUCT;
-	type->ref = s;
+	type->ref = ps;
 
 	if (token == TK_BEGIN)
 	{
@@ -262,93 +219,72 @@ void StructSpecifier(Type *type)
 	}
 }
 
-/***********************************************************
-* 功能:		解析结构声明符表
-* type(输出):	结构类型
-*
-* <StructDeclarationList>::=<StructDeclaration>{<StructDeclaration>}
-**********************************************************/
-void StructDeclarationList(Type *type)
+void StructDeclarationList(Type* type)
 {
-	int maxalign, offset;
-	Symbol *s, **ps;
-	s = type->ref;
-	syntax_state = SNTX_LF_HT;   // 第一个结构体成员与'{'不写在一行
-	syntax_level++;              // 结构体成员变量声明，缩进增加一级
+	int  maxalign, offset;
+	Symbol *ps, **pps;
+	ps = type->ref;
+
+	syntax_state = SNTX_LF_HT; //第一个结构体的成员和"{"不在同一行
+	++syntax_level;            //缩进进一行
+
 	GetToken();
-	if (s->c != -1)
+	if (ps->c != -1)
 		Error("结构体已定义");
 	maxalign = 1;
-	ps = &s->next;
+	pps = &ps->next;
 	offset = 0;
 	while (token != TK_END)
 	{
-		StructDeclaration(&maxalign, &offset, &ps);
+		StructDeclaration(&maxalign, &offset, &pps);
 	}
 	Skip(TK_END);
 	syntax_state = SNTX_LF_HT;
 
-	s->c = CalcAlign(offset, maxalign);//结构体大小
-	s->r = maxalign; //结构体对齐
+	ps->c = CalcAlign(offset, maxalign);
+	ps->r = maxalign;
+
 }
 
-/***********************************************************
-* 功能:				解析结构声明
-* maxalign(输入,输出):	成员最大对齐粒度
-* offset(输入,输出):	偏移量
-* ps(输出):			结构定义符号
-*
-* <StructDeclaration>::=
-*		<TypeSpecifier><struct_declarator_list><TK_SEMICOLON>
-*
-* <struct_declarator_list>::=<Declarator>{<TK_COMMA><Declarator>}
-**********************************************************/
-void StructDeclaration(int *maxalign, int *offset, Symbol ***ps)
+void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 {
 	int v, size, align;
-	Symbol *ss;
-	Type type1, btype;
+	Symbol* psym;
+	Type typel, btype;
 	int force_align;
 	TypeSpecifier(&btype);
+
 	while (1)
 	{
 		v = 0;
-		type1 = btype;
-		Declarator(&type1, &v, &force_align);
-		size = TypeSize(&type1, &align);
+		typel = btype;
+		Declarator(&typel, &v, &force_align);
+		size = TypeSize(&typel, &align);
 
-		if (force_align & ALIGN_SET)
+		if (force_align  & ALIGN_SET)
+		{
 			align = force_align & ~ALIGN_SET;
-
+		}
 		*offset = CalcAlign(*offset, align);
 
 		if (align > *maxalign)
+		{
 			*maxalign = align;
-		ss = SymPush(v | ViaC_MEMBER, &type1, 0, *offset);
+		}
+		psym = SymPush(v | ViaC_MEMBER, &typel, 0, *offset);
 		*offset += size;
-		**ps = ss;
-		*ps = &ss->next;
+		**ps = psym;
+		*ps = &psym->next;
 
 		if (token == TK_SEMICOLON || token == TK_EOF)
 			break;
 		Skip(TK_COMMA);
 	}
+
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_SEMICOLON);
 }
 
-
-/***********************************************************
-* 功能:				解析声明符
-* type:				数据类型
-* v(输出):				单词编号
-* force_align(输出):	强制对齐粒度
-*
-* <Declarator>::={<pointer>}{<FunctionCallingConvention>}
-*	{<StructMemberAlignment>}<DirectDeclarator>
-*
-* <pointer>::=<TK_STAR>
-**********************************************************/
 void Declarator(Type *type, int *v, int *force_align)
 {
 	int fc;
@@ -363,13 +299,7 @@ void Declarator(Type *type, int *v, int *force_align)
 	DirectDeclarator(type, v, fc);
 }
 
-/***********************************************************
-* 功能:	解析函数调用约定
-* fc(输出):调用约定
-*
-* <FunctionCallingConvention>::=<KW_CDECL>|<KW_STDCALL>
-* 用于函数声明上，用在数据声明上忽略掉
-**********************************************************/
+
 void FunctionCallingConvention(int *fc)
 {
 	*fc = KW_CDECL;
@@ -381,12 +311,6 @@ void FunctionCallingConvention(int *fc)
 	}
 }
 
-/***********************************************************
-* 功能:				解析结构成员对齐
-* force_align(输出):	强制对齐粒度
-*
-* <StructMemberAlignment>::=<KW_ALIGN><TK_OPENPA><TK_CINT><TK_CLOSEPA>
-**********************************************************/
 void StructMemberAlignment(int *force_align)
 {
 	int align = 1;
@@ -411,14 +335,6 @@ void StructMemberAlignment(int *force_align)
 		*force_align = 1;
 }
 
-/***********************************************************
-* 功能:			解析直接声明符
-* type(输入,输出):	数据类型
-* v(输出):			单词编号
-* func_call:		函数调用约定
-*
-* <DirectDeclarator>::=<IDENTIFIER><DirectDeclaratorPostfix>
-**********************************************************/
 void DirectDeclarator(Type *type, int *v, int func_call)
 {
 	if (token >= TK_IDENT)
@@ -432,17 +348,6 @@ void DirectDeclarator(Type *type, int *v, int func_call)
 	}
 	DirectDeclaratorPostfix(type, func_call);
 }
-
-/***********************************************************
-* 功能:			直接声明符后缀
-* type(输入,输出):	数据类型
-* func_call:		函数调用约定
-*
-* <direct_declarator_ postfix>::= {<TK_OPENBR><TK_CINT><TK_CLOSEBR>
-* 		|<TK_OPENBR><TK_CLOSEBR>
-*		|<TK_OPENPA><ParameterTypeList><TK_CLOSEPA>
-*		|<TK_OPENPA><TK_CLOSEPA>}
-**********************************************************/
 void DirectDeclaratorPostfix(Type *type, int func_call)
 {
 	int n;
@@ -469,17 +374,6 @@ void DirectDeclaratorPostfix(Type *type, int func_call)
 	}
 }
 
-/***********************************************************
-* 功能:			解析形参类型表
-* type(输入,输出):	数据类型
-* func_call:		函数调用约定
-*
-* <ParameterTypeList>::=<parameter_list>
-*        |<parameter_list><TK_COMMA><TK_ELLIPSIS>
-*
-*  <parameter_list>::=
-*		<parameter_declaration>{<TK_COMMA ><parameter_declaration>}
-**********************************************************/
 void ParameterTypeList(Type *type, int func_call)
 {
 	int n;
@@ -525,12 +419,7 @@ void ParameterTypeList(Type *type, int func_call)
 	type->ref = s;
 }
 
-/***********************************************************
-* 功能:	解析函数体
-* sym:		函数符号
-*
-* <Funcbody>::=<CompoundStatement>
-**********************************************************/
+
 void Funcbody(Symbol *sym)
 {
 	ind = sec_text->data_offset;
@@ -546,13 +435,9 @@ void Funcbody(Symbol *sym)
 	SymPop(&LSYM, NULL); /* 清空局部符号栈*/
 }
 
-/***********************************************************
-* 功能:	判断是否为类型区分符
-* v:		单词编号
-**********************************************************/
-int IsTypeSpecifier(int v)
+int IsTypeSpecifier(const int id)
 {
-	switch (v)
+	switch (id)
 	{
 		case KW_CHAR:
 		case KW_SHORT:
@@ -566,60 +451,55 @@ int IsTypeSpecifier(int v)
 	return 0;
 }
 
-/***********************************************************
-* 功能:	解析语句
-* bsym:	break跳转位置
-* csym:	continue跳转位置
-*
-* <Statement >::=<CompoundStatement>
-*		|<IfStatement>
-*		| <ReturnStatement>
-*		| <BreakStatement>
-*		| <ContinueStatement>
-*		| <ForStatement>
-*		| <ExpressionStatement>
-**********************************************************/
-void Statement(int *bsym, int *csym)
+void Statement(int* bsym, int* csym)
 {
 	switch (token)
 	{
 		case TK_BEGIN:
+		{
 			CompoundStatement(bsym, csym);
 			break;
+		}
 		case KW_IF:
+		{
 			IfStatement(bsym, csym);
 			break;
+		}
 		case KW_RETURN:
+		{
 			ReturnStatement();
 			break;
+		}
 		case KW_BREAK:
+		{
 			BreakStatement(bsym);
 			break;
+		}
 		case KW_CONTINUE:
+		{
 			ContinueStatement(csym);
 			break;
+		}
 		case KW_FOR:
+		{
 			ForStatement(bsym, csym);
 			break;
+		}
 		default:
+		{
 			ExpressionStatement();
 			break;
+		}
 	}
 }
 
-/***********************************************************
-* 功能:	解析复合语句
-* bsym:	break跳转位置
-* csym:	continue跳转位置
-*
-* <CompoundStatement>::=<TK_BEGIN>{<declaration>}{<Statement>}<TK_END>
-**********************************************************/
-void CompoundStatement(int *bsym, int *csym)
+void CompoundStatement(int* bsym, int* csym)
 {
-	Symbol *s;
-	s = (Symbol*)StackGetTop(&LSYM);
+	Symbol* ps;
+	ps = (Symbol*)StackGetTop(&LSYM);
+
 	syntax_state = SNTX_LF_HT;
-	syntax_level++;						// 复合语句，缩进增加一级
+	++syntax_level;
 
 	GetToken();
 	while (IsTypeSpecifier(token))
@@ -630,20 +510,12 @@ void CompoundStatement(int *bsym, int *csym)
 	{
 		Statement(bsym, csym);
 	}
-	SymPop(&LSYM, s);
+	SymPop(&LSYM, ps);
 	syntax_state = SNTX_LF_HT;
 	GetToken();
 }
 
-/***********************************************************
-* 功能:	解析if语句
-* bsym:	break跳转位置
-* csym:	continue跳转位置
-*
-* <IfStatement>::=<KW_IF><TK_OPENPA><Expression>
-*	<TK_CLOSEPA><Statement>[<KW_ELSE><Statement>]
-**********************************************************/
-void IfStatement(int *bsym, int *csym)
+void IfStatement(const int* bsym, const int* csym)
 {
 	int a, b;
 	syntax_state = SNTX_SP;
@@ -658,26 +530,20 @@ void IfStatement(int *bsym, int *csym)
 	{
 		syntax_state = SNTX_LF_HT;
 		GetToken();
+
 		b = GenJmpForWard(0);
 		BackPatch(a, ind);
 		Statement(bsym, csym);
-		BackPatch(b, ind); /* 反填else跳转 */
+		BackPatch(b, ind);
 	}
 	else
 		BackPatch(a, ind);
 }
 
-/***********************************************************
-* 功能:	解析for语句
-* bsym:	break跳转位置
-* csym:	continue跳转位置
-*
-* <ForStatement>::=<KW_FOR><TK_OPENPA><ExpressionStatement>
-*	<ExpressionStatement><Expression><TK_CLOSEPA><Statement>
-**********************************************************/
-void ForStatement(int *bsym, int *csym)
+void ForStatement(const int* bsym, const int* csym)
 {
 	int a, b, c, d, e;
+
 	GetToken();
 	Skip(TK_OPENPA);
 	if (token != TK_SEMICOLON)
@@ -696,6 +562,7 @@ void ForStatement(int *bsym, int *csym)
 		a = GenJcc(0);
 	}
 	Skip(TK_SEMICOLON);
+
 	if (token != TK_CLOSEPA)
 	{
 		e = GenJmpForWard(0);
@@ -707,57 +574,42 @@ void ForStatement(int *bsym, int *csym)
 	}
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_CLOSEPA);
-	Statement(&a, &b);//只有此处用到break,及continue,一个循环中可能有多个break,或多个continue,故需要拉链以备反填
+	Statement(&a, &b);  //拉链反填
 	GenJmpBackWord(c);
 	BackPatch(a, ind);
 	BackPatch(b, c);
 }
 
-/***********************************************************
-* 功能:	解析continue语句
-* csym:	continue跳转位置
-*
-* <ContinueStatement>::=<KW_CONTINUE><TK_SEMICOLON>
-**********************************************************/
-void ContinueStatement(int *csym)
+void ContinueStatement(int* csym)
 {
 	if (!csym)
-		Error("此处不能用continue");
+		Error("未找到与continue相匹配的循环");
 	*csym = GenJmpForWard(*csym);
+
 	GetToken();
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_SEMICOLON);
 }
 
-/***********************************************************
-* 功能:	解析break语句
-* bsym:	break跳转位置
-*
-* <BreakStatement>::=<KW_BREAK><TK_SEMICOLON>
-**********************************************************/
-void BreakStatement(int *bsym)
+void BreakStatement(int* bsym)
 {
 	if (!bsym)
-		Error("此处不能用break");
+		Error("未找到与break相匹配的循环");
 	*bsym = GenJmpForWard(*bsym);
 	GetToken();
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_SEMICOLON);
 }
-/***********************************************************
-* 功能:	解析return语句
-*
-* <ReturnStatement>::=<KW_RETURN><TK_SEMICOLON>
-*			|<KW_RETURN><Expression><TK_SEMICOLON>
-**********************************************************/
-void ReturnStatement()
+
+void ReturnStatement(void)
 {
 	syntax_state = SNTX_DELAY;
 	GetToken();
-	if (token == TK_SEMICOLON)	// 适用于 return;
+	if (token == TK_SEMICOLON)
 		syntax_state = SNTX_NUL;
-	else						// 适用于 return <Expression>;
+	else
 		syntax_state = SNTX_SP;
+
 	SyntaxIndent();
 
 	if (token != TK_SEMICOLON)
@@ -771,12 +623,7 @@ void ReturnStatement()
 	rsym = GenJmpForWard(rsym);
 }
 
-/***********************************************************
-* 功能:	解析表达式语句
-*
-* <ExpressionStatement>::= <TK_SEMICOLON>|<Expression><TK_SEMICOLON>
-**********************************************************/
-void ExpressionStatement()
+void ExpressionStatement(void)
 {
 	if (token != TK_SEMICOLON)
 	{
@@ -787,12 +634,7 @@ void ExpressionStatement()
 	Skip(TK_SEMICOLON);
 }
 
-/***********************************************************
-* 功能:	解析表达式
-*
-* <Expression>::=<AssignmentExpression>{<TK_COMMA><AssignmentExpression>}
-**********************************************************/
-void Expression()
+void Expression(void)
 {
 	while (1)
 	{
@@ -804,15 +646,8 @@ void Expression()
 	}
 }
 
-
-/***********************************************************
-* 功能:	解析赋值表达式
-*
-* <AssignmentExpression>::= <EqualityExpression>
-*		|<UnaryExpression><TK_ASSIGN> <EqualityExpression>
-**********************************************************/
-//这里有左递归，可以提取公因子
-void AssignmentExpression()
+/*左循环提取公因子*/
+void AssignmentExpression(void)
 {
 	EqualityExpression();
 	if (token == TK_ASSIGN)
@@ -824,16 +659,8 @@ void AssignmentExpression()
 	}
 }
 
-/***********************************************************
-* 功能:	解析相等类表达式
-*
-* < EqualityExpression >::=<RelationalExpression>
-*		{<TK_EQ> <RelationalExpression>
-*		|<TK_NEQ><RelationalExpression>}
-**********************************************************/
-void EqualityExpression()
+void EqualityExpression(void)
 {
-
 	int t;
 	RelationalExpression();
 	while (token == TK_EQ || token == TK_NEQ)
@@ -845,20 +672,11 @@ void EqualityExpression()
 	}
 }
 
-/***********************************************************
-* 功能:	解析关系表达式
-*
-* <RelationalExpression>::=<AdditiveExpression>{
-*		<TK_LT><AdditiveExpression>
-*		|<TK_GT><AdditiveExpression>
-*		|<TK_LEQ><AdditiveExpression>
-*		|<TK_GEQ><AdditiveExpression>}
-**********************************************************/
-void RelationalExpression()
+void RelationalExpression(void)
 {
 	int t;
 	AdditiveExpression();
-	while ((token == TK_LT || token == TK_LEQ) ||
+	while (token == TK_LT || token == TK_LEQ ||
 		token == TK_GT || token == TK_GEQ)
 	{
 		t = token;
@@ -868,14 +686,7 @@ void RelationalExpression()
 	}
 }
 
-/***********************************************************
-* 功能:	解析加减类表达式
-*
-* <AdditiveExpression>::=< MultiplicativeExpression>
-*		{<TK_PLUS> <MultiplicativeExpression>
-*		<TK_MINUS>< MultiplicativeExpression>}
-**********************************************************/
-void AdditiveExpression()
+void AdditiveExpression(void)
 {
 	int t;
 	MultiplicativeExpression();
@@ -888,15 +699,7 @@ void AdditiveExpression()
 	}
 }
 
-/***********************************************************
-* 功能:	解析乘除类表达式
-*
-* <MultiplicativeExpression>::=<UnaryExpression>
-*		{<TK_STAR>  < UnaryExpression >
-*		|<TK_DIVIDE>< UnaryExpression >
-*		|<TK_MOD>  < UnaryExpression >}
-**********************************************************/
-void MultiplicativeExpression()
+void MultiplicativeExpression(void)
 {
 	int t;
 	UnaryExpression();
@@ -909,60 +712,55 @@ void MultiplicativeExpression()
 	}
 }
 
-/***********************************************************
-* 功能:	解析一元表达式
-*
-* <UnaryExpression>::= <PostfixExpression>
-*			|<TK_AND><UnaryExpression>
-*			|<TK_STAR><UnaryExpression>
-*			|<TK_PLUS><UnaryExpression>
-*			|<TK_MINUS><UnaryExpression>
-*			|<KW_SIZEOF><TK_OPENPA><TypeSpecifier><TK_ CLOSEPA>
-**********************************************************/
-void UnaryExpression()
+void UnaryExpression(void)
 {
 	switch (token)
 	{
 		case TK_AND:
+		{
 			GetToken();
 			UnaryExpression();
-			if ((optop->type.t & T_BTYPE) != T_FUNC &&
-				!(optop->type.t & T_ARRAY))
+			if ((optop->type.t & T_BTYPE) != T_FUNC  && !(optop->type.t & T_ARRAY))
+			{
 				CancelLvalue();
+			}
 			MkPointer(&optop->type);
 			break;
+		}
 		case TK_STAR:
+		{
 			GetToken();
 			UnaryExpression();
 			Indirection();
 			break;
+		}
 		case TK_PLUS:
+		{
 			GetToken();
 			UnaryExpression();
-			break;
+		}
 		case TK_MINUS:
+		{
 			GetToken();
 			OperandPush(&int_type, ViaC_GLOBAL, 0);
 			UnaryExpression();
 			GenOp(TK_MINUS);
 			break;
+		}
 		case KW_SIZEOF:
+		{
 			SizeofExpression();
 			break;
+		}
 		default:
+		{
 			PostfixExpression();
 			break;
+		}
 	}
-
 }
 
-/***********************************************************
-* 功能:	解析sizeof表达式
-*
-* <SizeofExpression>::=
-*		<KW_SIZEOF><TK_OPENPA><TypeSpecifier><TK_ CLOSEPA>
-**********************************************************/
-void SizeofExpression()
+void SizeofExpression(void)
 {
 	int align, size;
 	Type type;
@@ -970,27 +768,18 @@ void SizeofExpression()
 	GetToken();
 	Skip(TK_OPENPA);
 	TypeSpecifier(&type);
+
 	Skip(TK_CLOSEPA);
 
 	size = TypeSize(&type, &align);
 	if (size < 0)
-		Error("sizeof计算类型尺寸失败");
+		Error("sizeof计算类型空间失败");
 	OperandPush(&int_type, ViaC_GLOBAL, size);
 }
 
-/***********************************************************
-* 功能:	解析后缀表达式
-*
-* <PostfixExpression>::=  <PrimaryExpression>
-*		{<TK_OPENBR><Expression> <TK_CLOSEBR>
-*		|<TK_OPENPA><TK_CLOSEPA>
-*		|<TK_OPENPA><ArgumentExpressionList><TK_CLOSEPA>
-*		|<TK_DOT><IDENTIFIER>
-*		|<TK_POINTSTO><IDENTIFIER>}
-**********************************************************/
-void PostfixExpression()
+void PostfixExpression(void)
 {
-	Symbol *s;
+	Symbol* ps;
 	PrimaryExpression();
 	while (1)
 	{
@@ -1002,22 +791,19 @@ void PostfixExpression()
 			GetToken();
 			if ((optop->type.t & T_BTYPE) != T_STRUCT)
 				Expect("结构体变量");
-			s = optop->type.ref;
+			ps = optop->type.ref;
 			token |= ViaC_MEMBER;
-			while ((s = s->next) != NULL)
+			while ((ps = ps->next) != NULL)
 			{
-				if (s->v == token)
+				if (ps->v == token)
 					break;
 			}
-			if (!s)
-				Error("没有此成员变量: %s", GetTkstr(token & ~ViaC_MEMBER));
-			/* 成员变量地址 = 结构变量指针 + 成员变量偏移 */
-			optop->type = char_pointer_type; /* 成员变量的偏移是指相对于结构体首地址的字节偏移，因此此处变换类型为字节变量指针 */
-			OperandPush(&int_type, ViaC_GLOBAL, s->c);
-			GenOp(TK_PLUS);  //执行后optop->value记忆了成员地址
-							  /* 变换类型为成员变量数据类型 */
-			optop->type = s->type;
-			/* 数组变量不能充当左值 */
+			if (!ps)
+				Error("没有此成员变量：%s", GetTkstr(token  & ~ViaC_MEMBER));
+			optop->type = char_pointer_type;
+			OperandPush(&int_type, ViaC_GLOBAL, ps->c);
+			GenOp(TK_PLUS);
+			optop->type = ps->type;
 			if (!(optop->type.t & T_ARRAY))
 			{
 				optop->reg |= ViaC_LVAL;
@@ -1039,92 +825,87 @@ void PostfixExpression()
 		else
 			break;
 	}
-
 }
 
-/***********************************************************
-* 功能:	解析初等表达式
-*
-* <PrimaryExpression>::=<IDENTIFIER>
-*		|<TK_CINT>
-*		|<TK_CSTR>
-*		|<TK_CCHAR>
-*		|<TK_OPENPA><Expression><TK_CLOSEPA>
-**********************************************************/
-void PrimaryExpression()
+void PrimaryExpression(void)
 {
-	int t, r, addr;
+	int id, r, addr;
 	Type type;
-	Symbol *s;
-	Section *sec = NULL;
+	Symbol* ps = NULL;
+	pSection psec = NULL;
+
 	switch (token)
 	{
 		case TK_CINT:
 		case TK_CCHAR:
+		{
 			OperandPush(&int_type, ViaC_GLOBAL, tkvalue);
 			GetToken();
 			break;
+		}
 		case TK_CSTR:
-			t = T_CHAR;
-			type.t = t;
+		{
+			id = T_CHAR;
+			type.t = id;
 			MkPointer(&type);
 			type.t |= T_ARRAY;
-			sec = AllocateStorage(&type, ViaC_GLOBAL, 2, 0, &addr);
+			psec = AllocateStorage(&type, ViaC_GLOBAL, 2, 0, &addr);
 			VarSymPut(&type, ViaC_GLOBAL, 0, addr);
-			Initializer(&type, addr, sec);
+			Initializer(&type, addr, psec);
 			break;
+		}
 		case TK_OPENPA:
+		{
 			GetToken();
 			Expression();
 			Skip(TK_CLOSEPA);
 			break;
+		}
 		default:
-			t = token;
+		{
+			id = token;
 			GetToken();
-			if (t < TK_IDENT)
-				Expect("标识符或常量");
-			s = SymSearch(t);
-			if (!s)
+			if (id < TK_IDENT)
+				Expect("常量或者是标识符");
+			ps = SymSearch(id);
+			if (!ps)
 			{
 				if (token != TK_OPENPA)
-					Error("'%s'未声明\n", GetTkstr(t));
-
-				s = FuncSymPush(t, &default_func_type);//允许函数不声明，直接引用
-				s->r = ViaC_GLOBAL | ViaC_SYM;
+					Error("'%s'未声明\n", GetTkstr(id));
+				ps = FuncSymPush(id, &default_func_type);
+				ps->r = ViaC_GLOBAL | ViaC_SYM;
 			}
-			r = s->r;
-			OperandPush(&s->type, r, s->c);
-			/* 符号引用，操作数必须记录符号地址 */
+			r = ps->r;
+			OperandPush(&ps->type, r, ps->c);
 			if (optop->reg & ViaC_SYM)
 			{
-				optop->sym = s;
-				optop->value = 0;  //用于函数调用，及全局变量引用 printf("g_cc=%c\n",g_cc);
+				optop->sym = ps;
+				optop->value = 0;
 			}
 			break;
+		}
 	}
 }
 
-/***********************************************************
-* 功能:	解析实参表达式表
-*
-* <ArgumentExpressionList >::=<AssignmentExpression>
-*		{<TK_COMMA> <AssignmentExpression>}
-**********************************************************/
-void ArgumentExpressionList()
+void ArgumentExpressionList(void)
 {
-	Operand ret;
-	Symbol *s, *sa;
-	int nb_args;
+	Operand opd;
+	Symbol* s = NULL;
+	Symbol* sa = NULL;
+	int nb_args = 0;
 	s = optop->type.ref;
+
 	GetToken();
+
 	sa = s->next;
 	nb_args = 0;
-	ret.type = s->type;
-	ret.reg = REG_IRET;
-	ret.value = 0;
+	opd.value = 0;
+	opd.reg = REG_IRET;
+	opd.type = s->type;
+
 	if (token != TK_CLOSEPA)
 	{
-		for (;;)
+		while (1)
 		{
 			AssignmentExpression();
 			nb_args++;
@@ -1136,50 +917,46 @@ void ArgumentExpressionList()
 		}
 	}
 	if (sa)
-		Error("实参个数少于函数形参个数"); //讲一下形参，实参
+		Error("实参个数少于形参个数");
 	Skip(TK_CLOSEPA);
 	GenInvoke(nb_args);
 
-	OperandPush(&ret.type, ret.reg, ret.value);
+	OperandPush(&opd.type, opd.reg, opd.value);
 }
 
-/***********************************************************
-* 功能:	缩进n个tab键
-* n:		缩进个数
-**********************************************************/
-void PrintTab(int n)
+void PrintTab(const int num)
 {
-	int i = 0;
-	for (; i < n; i++)
+	int count;
+	for (count = 0; count < num; ++count)
+	{
 		printf("\t");
+	}
 }
 
-/***********************************************************
-* 功能:	语法缩进
-* 通常情况在GetToken最后调用，
-* 如果必须根据新取单词类型判断输出格式，则在取该单词前设置syntax_state = SNTX_DELAY，暂不输出，
-* 待取出新单词后，根据单词类型设置syntax_state，重新调用该函数根据syntax_state，进行适当输出
-**********************************************************/
-void SyntaxIndent()
+void SyntaxIndent(void)
 {
 	switch (syntax_state)
 	{
-		case SNTX_NUL:
+		case  SNTX_NUL:
+		{
 			ColorToken(LEX_NORMAL);
 			break;
-		case SNTX_SP:
+		}
+		case  SNTX_SP:
+		{
 			printf(" ");
 			ColorToken(LEX_NORMAL);
 			break;
+		}
 		case SNTX_LF_HT:
 		{
-			if (token == TK_END)		// 遇到'}',缩进减少一级
-				syntax_level--;
+			if (token == TK_END)
+				--syntax_level;
 			printf("\n");
 			PrintTab(syntax_level);
+			ColorToken(LEX_NORMAL);
+			break;
 		}
-		ColorToken(LEX_NORMAL);
-		break;
 		case SNTX_DELAY:
 			break;
 	}
