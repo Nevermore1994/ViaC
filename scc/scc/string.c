@@ -6,11 +6,7 @@
 
 #include"viac.h"
 
-/*****************************************************
-*函数名：Dysting_init(DynString* pstr, int initsize)
-*参数：pstr为初始化的指针, initsize初始化的空间大小
-*功能：初始化动态字符串
-*****************************************************/
+
 void DynStringInit(DynString* pstr, const int initsize)
 {
 	if (pstr != NULL)
@@ -25,11 +21,7 @@ void DynStringInit(DynString* pstr, const int initsize)
 	}
 }
 
-/****************************************************
-*函数名：DynStringFree(DynString* pstr)
-*参数：pstr释放指针
-*功能：将动态字符串空间释放
-****************************************************/
+
 void DynStringFree(DynString* pstr)
 {
 	if (pstr != NULL)
@@ -42,11 +34,7 @@ void DynStringFree(DynString* pstr)
 	}
 }
 
-/*************************************************
-*函数名：
-*参数：
-*功能：
-**************************************************/
+
 void DynStringRealloc(DynString* pstr, const int newsize)
 {
 	if (pstr != NULL)
@@ -67,11 +55,7 @@ void DynStringRealloc(DynString* pstr, const int newsize)
 		pstr->capacity = capacity;
 	}
 }
-/*************************************************
-*函数名：DynStringChcat(DynString* pstr, int ch)
-*参数：pstr为字符指针，ch为添加的字符
-*功能：为动态字符串添加字符
-**************************************************/
+
 void DynStringChcat(DynString* pstr, const int ch)
 {
 	if (pstr != NULL)
@@ -86,11 +70,7 @@ void DynStringChcat(DynString* pstr, const int ch)
 	}
 }
 
-/*************************************************
-*函数名：DynStringReset(DynString* pstr)
-*参数：pstr为字符指针
-*功能：重置字符指针
-**************************************************/
+
 void DynStringReset(DynString* pstr)
 {
 	if (pstr != NULL)

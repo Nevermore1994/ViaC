@@ -6,11 +6,7 @@
 
 #include"viac.h"
 
-/*****************************************************
-*函数名：DystingInit(DynString* pstr, const int initsize)
-*参数：pstr为初始化的指针, initsize初始化的空间大小
-*功能：初始化
-*****************************************************/
+
 void DynArrayInit(DynArray* parr, const int size)
 {
 	if (parr != NULL)
