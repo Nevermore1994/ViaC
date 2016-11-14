@@ -9,7 +9,7 @@ int main(const int argc, char ** argv)
 {
 	
 	Init();
-	filename = "C:\\Users\\Away\\Documents\\scc\\scc\\Debug\\HelloWorld.c";
+	filename = "C:\\Users\\Away\\Documents\\ViaC\\viac\\viac\\Debug\\HelloWorld.c";
 	errno_t err = fopen_s(&fin, filename, "rb");
 	if (err)
 	{
