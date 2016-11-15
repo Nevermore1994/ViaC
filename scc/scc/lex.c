@@ -267,6 +267,8 @@ void SkipWhiteSpace()
 				return;
 			linenum++;
 		}
+		else if(ch == ' ')
+			printf("%c", ch);
 		else
 			printf("%c", ch);  //决定是否打印源码中的换行
 		Getch();

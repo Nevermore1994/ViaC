@@ -783,7 +783,6 @@ Section* AllocateStorage(Type* ptype, const int reg, const int has_init, const i
 
 	if (size < 0)
 	{
-		printf("%d", size);
 		if ((ptype->t & T_ARRAY) && (ptype->ref->type.t == T_CHAR))
 		{
 			ptype->ref->c = strlen((char*)tkstr.data) + 1;
