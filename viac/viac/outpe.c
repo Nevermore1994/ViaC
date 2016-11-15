@@ -110,7 +110,7 @@ DWORD PeVirtualAlign(const DWORD addr)
 	return CalcAlign(addr, SectionAlignment);
 }
 
-void PeSetDatadir(int dir, DWORD addr, DWORD size)
+void PeSetDatadir( const int dir, const DWORD addr, const DWORD size)
 {
 	nt_header.OptionalHeader.DataDirectory[dir].VirtualAddress = addr;
 	nt_header.OptionalHeader.DataDirectory[dir].Size = size;
@@ -134,17 +134,15 @@ int LoadObjFile(const char* fname)
 	fread(&fh, 1, sizeof(IMAGE_FILE_HEADER), fobj);
 	int nsec_obj;
 	nsec_obj= fh.NumberOfSections; 
-	Section** ppsec = NULL;
-	ppsec = (Section**)sections.data; 
+	Section** ppsec = (Section**)sections.data;
+
 	int i = 1;
 	for (i = 0; i < nsec_obj; ++i)
 	{
 		fread(ppsec[i]->sh.Name, 1, sh_size, fobj);
 	}
-	int cur_text_offset;
-	int cur_rel_offset; 
-	cur_text_offset = sec_text->data_offset;
-	cur_rel_offset = sec_rel->data_offset;
+	int cur_text_offset = sec_text->data_offset;
+	int cur_rel_offset = sec_rel->data_offset;
 	CoffSym* cfsyms = NULL;
 	CoffSym* cfsym = NULL;
 	int nsym = 0;
@@ -173,7 +171,7 @@ int LoadObjFile(const char* fname)
 		ptr = SectionPtrAdd(ppsec[i], ppsec[i]->sh.SizeOfRawData);
 		fread(ptr, 1, ppsec[i]->sh.SizeOfRawData, fobj);
 	}
-	int* replace_sym = NULL;
+	int* replace_sym = MallocInit(sizeof(int) * nsym);
 	char* csname = NULL;
 	int cfsym_index = 0;
 	for (i = 0; i < nsym; ++i)
@@ -183,10 +181,8 @@ int LoadObjFile(const char* fname)
 		cfsym_index = CoffSymAdd(sec_dynsymtab, csname, cfsym->Value, cfsym->sSection, cfsym->Type, cfsym->StorageClass);
 		replace_sym[i] = cfsym_index;
 	}
-	CoffReloc* rel; 
-	CoffReloc* rel_end;
-	rel = (CoffReloc*)(sec_rel->data + cur_rel_offset);
-	rel_end = (CoffReloc*)(sec_rel->data + sec_rel->data_offset);
+	CoffReloc* rel = (CoffReloc*)(sec_rel->data + cur_rel_offset);
+	CoffReloc* rel_end = (CoffReloc*)(sec_rel->data + sec_rel->data_offset);
 	for (; rel < rel_end; ++rel)
 	{
 		cfsym_index = rel->cfsym; 
@@ -216,20 +212,23 @@ char* GetLine(const char* line, const int size, const FILE* fp)
 	return p;
 }
 
-char* GetDllName(char* libfile)
+char* GetDllName(const char* libfile)
 {
+	if (libfile == NULL)
+		Error("链接器内部指针未初始化");
 	int len;
 	char* libname;
 	len  = strlen(libfile);
 	libname = libfile;
 	char* p;
-	for (p = libfile + len; len > 0; --p)
+	for (p = libfile + len; len > 0;  --p)
 	{
 		if (*p == '\\')
 		{
 			libname = p + 1;
 			break;
 		}
+		--len;
 	}
 	
 	int namelen = strlen(libname);

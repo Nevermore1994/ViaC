@@ -514,6 +514,8 @@ typedef struct PEInfo
 	int   sec_size;
 	DynArray imps;
 }PEInfo;
+
+char* GetDllName(const char* libfile);
 #endif // viac.h_
 
 

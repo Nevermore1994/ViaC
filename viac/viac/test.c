@@ -8,7 +8,7 @@
 int main(const int argc, char ** argv)
 {
 	
-	Init();
+	/*Init();
 	filename = "C:\\Users\\Away\\Documents\\ViaC\\viac\\viac\\Debug\\HelloWorld.c";
 	errno_t err = fopen_s(&fin, filename, "rb");
 	if (err)
@@ -27,6 +27,9 @@ int main(const int argc, char ** argv)
 	char file[2048];
 	sprintf_s(file, 2048, "C:\\Users\\Away\\Documents\\scc\\scc\\Debug\\1.viac%c",'\0' );
 	printf("%s\n语法分析成功!\n",file);
-	Cleanup();
+	Cleanup();*/
+	char* name = GetDllName("hello.slib");
+	printf("%s", name); 
+	free(name);
 	return 1;
 }
