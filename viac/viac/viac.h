@@ -219,8 +219,8 @@ void StackDestroy(Stack* stack);
 
 
 /*******************SYM*************************/
-Stack GSYM; //全局符号栈
-Stack LSYM; //局部符号栈
+Stack GSYM ; //全局符号栈
+Stack LSYM ; //局部符号栈
 
 
 typedef struct Type
@@ -484,6 +484,36 @@ void InitVariable(const Type* ptype, const Section* psec, const int c, const int
 Section* AllocateStorage(Type* ptype, const int reg, const int has_init, const int v, int* addr);
 
 /***********************end*****************************/
+/*************************outpe.h******/
+typedef struct ImportSym
+{
+	int iat_index;
+	int thk_offset;
+	IMAGE_IMPORT_BY_NAME imp_sym;
+}ImportSym;
+
+/* 导入模块内存存储结构 */
+typedef struct ImportInfo
+{
+	int dll_index;
+	DynArray imp_syms;
+	IMAGE_IMPORT_DESCRIPTOR imphdr;
+}ImportInfo;
+
+/* PE信息存储结构 */
+typedef struct PEInfo
+{
+	Section *thunk;
+	const char *filename;
+	DWORD entry_addr;
+	DWORD imp_offs;
+	DWORD imp_size;
+	DWORD iat_offs;
+	DWORD iat_size;
+	Section **secs;
+	int   sec_size;
+	DynArray imps;
+}PEInfo;
 #endif // viac.h_
 
 

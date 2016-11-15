@@ -15,7 +15,7 @@ pSection sec_rel;
 pSection sec_symtab;
 pSection sec_dynsymtab;
 
-int secnum;
+int nsec_image;
 
 void SectionRealloc(pSection sec, const int newsize)
 {
@@ -64,7 +64,7 @@ Section* SectionNew(const char* name, const int characteristics)
 	psec->data = ( char* ) MallocInit(sizeof(char) * initsize);
 	psec->data_allocated = initsize; 
 	if (!(characteristics & IMAGE_SCN_LNK_REMOVE))
-		secnum++;
+		nsec_image++;
 	DynArrayAdd(&sections, psec);
 	return psec;
 }
@@ -196,7 +196,7 @@ void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 void InitCoff(void)
 {
 	DynArrayInit(&sections, 8);
-	secnum = 0; 
+	nsec_image = 0; 
 
 	sec_text = SectionNew(".text", IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_CNT_CODE);
 	
