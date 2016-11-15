@@ -75,7 +75,7 @@ enum e_TokenCode
 	TK_COMMA,							// , 逗号
 	TK_ELLIPSIS,						// ... 省略号
 	TK_EOF,								// 文件结束符
-
+	TK_SPACE,							//
 	/* 常量 */
 	TK_CINT,							// 整型常量
 	TK_CCHAR,							// 字符常量
@@ -94,7 +94,11 @@ enum e_TokenCode
 	KW_BREAK,							// break关键字   
 	KW_RETURN,							// return关键字
 	KW_SIZEOF,							// sizeof关键字
-
+	KW_INCLUDE,
+	KW_DO,
+	KW_END,
+	
+	KW_REQUIRE,
 	KW_ALIGN,							// __align关键字	
 	KW_CDECL,							// __cdecl关键字 standard c call
 	KW_STDCALL,							// __stdcall关键字 pascal c call
@@ -141,6 +145,7 @@ int IsDigit(char c);
 int IsNoDigit(char* c);
 void SkipWhiteSpace(void);
 void ParseComment(void);
+void ParseComment_2();
 char* GetTkstr(const int v);
 void TestLex(void);
 

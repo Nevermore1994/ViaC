@@ -31,7 +31,7 @@ void ExternalDeclaration(const int level)
 		Expect("<类型区分符>");
 	}
 
-	if (btype.t == T_STRUCT && token == TK_SEMICOLON)
+	if (btype.t == T_STRUCT && (token == TK_SEMICOLON || token == TK_SPACE))
 	{
 		GetToken();
 		return;
@@ -42,7 +42,7 @@ void ExternalDeclaration(const int level)
 		type = btype;
 		Declarator(&type, &v, NULL);
 
-		if (token == TK_BEGIN)
+		if (token == TK_BEGIN || token == KW_DO)
 		{
 			if (level == ViaC_LOCAL)
 				Error("不允许嵌套定义");
@@ -101,7 +101,10 @@ void ExternalDeclaration(const int level)
 			else
 			{
 				syntax_state = SNTX_LF_HT;
-				Skip(TK_SEMICOLON);
+				if (token == TK_SEMICOLON)
+					Skip(TK_SEMICOLON);
+				else if (token == TK_SPACE)
+					Skip(TK_SPACE);
 				break;
 			}
 		}
@@ -190,7 +193,7 @@ void StructSpecifier(Type* type)
 	syntax_state = SNTX_DELAY;
 	GetToken();
 
-	if (token == TK_BEGIN)
+	if (token == TK_BEGIN || token == KW_DO)
 		syntax_state = SNTX_LF_HT;
 	else if (token == TK_CLOSEPA)
 		syntax_state = SNTX_NUL;
@@ -213,7 +216,7 @@ void StructSpecifier(Type* type)
 	type->t = T_STRUCT;
 	type->ref = ps;
 
-	if (token == TK_BEGIN)
+	if (token == TK_BEGIN || token == KW_DO)
 	{
 		StructDeclarationList(type);
 	}
@@ -234,11 +237,14 @@ void StructDeclarationList(Type* type)
 	maxalign = 1;
 	pps = &ps->next;
 	offset = 0;
-	while (token != TK_END)
+	while (token != TK_END && token != KW_END)
 	{
 		StructDeclaration(&maxalign, &offset, &pps);
 	}
-	Skip(TK_END);
+	if (token == TK_END)
+		Skip(TK_END);
+	else if (token == KW_END)
+		Skip(KW_END);
 	syntax_state = SNTX_LF_HT;
 
 	ps->c = CalcAlign(offset, maxalign);
@@ -276,16 +282,20 @@ void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 		**ps = psym;
 		*ps = &psym->next;
 
-		if (token == TK_SEMICOLON || token == TK_EOF)
+		if (token == TK_SEMICOLON || token == TK_EOF || token == TK_SPACE)
 			break;
 		Skip(TK_COMMA);
 	}
 
 	syntax_state = SNTX_LF_HT;
-	Skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
+
 }
 
-void Declarator(Type *type, int *v, int *force_align)
+void Declarator(Type* type, const int* v, const int* force_align)
 {
 	int fc;
 	while (token == TK_STAR)
@@ -335,7 +345,7 @@ void StructMemberAlignment(int *force_align)
 		*force_align = 1;
 }
 
-void DirectDeclarator(Type *type, int *v, int func_call)
+void DirectDeclarator(Type* type, int* v, const int func_call)
 {
 	if (token >= TK_IDENT)
 	{
@@ -348,8 +358,13 @@ void DirectDeclarator(Type *type, int *v, int func_call)
 	}
 	DirectDeclaratorPostfix(type, func_call);
 }
-void DirectDeclaratorPostfix(Type *type, int func_call)
+
+void DirectDeclaratorPostfix(Type* type, const int func_call)
 {
+	if (type == NULL)
+	{
+		Error("指针未初始化");
+	}
 	int n;
 	Symbol *s;
 
@@ -406,7 +421,7 @@ void ParameterTypeList(Type *type, int func_call)
 	}
 	syntax_state = SNTX_DELAY;
 	Skip(TK_CLOSEPA);
-	if (token == TK_BEGIN)			// 函数定义
+	if (token == TK_BEGIN || token == KW_DO)			// 函数定义
 		syntax_state = SNTX_LF_HT;
 	else							// 函数声明
 		syntax_state = SNTX_NUL;
@@ -460,6 +475,11 @@ void Statement(int* bsym, int* csym)
 			CompoundStatement(bsym, csym);
 			break;
 		}
+		case KW_DO:
+		{
+			CompoundStatement(bsym, csym);
+			break;
+		}
 		case KW_IF:
 		{
 			IfStatement(bsym, csym);
@@ -506,7 +526,7 @@ void CompoundStatement(int* bsym, int* csym)
 	{
 		ExternalDeclaration(ViaC_LOCAL);
 	}
-	while (token != TK_END)
+	while (token != TK_END && token != KW_END)
 	{
 		Statement(bsym, csym);
 	}
@@ -546,23 +566,29 @@ void ForStatement(const int* bsym, const int* csym)
 
 	GetToken();
 	Skip(TK_OPENPA);
-	if (token != TK_SEMICOLON)
+	if (token != TK_SEMICOLON && token == TK_SPACE)
 	{
 		Expression();
 		OperandPop();
 	}
-	Skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
 	d = ind;
 	c = ind;
 	a = 0;
 	b = 0;
-	if (token != TK_SEMICOLON)
+	if (token != TK_SEMICOLON && token != TK_SPACE)
 	{
 		Expression();
 		a = GenJcc(0);
 	}
-	Skip(TK_SEMICOLON);
 
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
 	if (token != TK_CLOSEPA)
 	{
 		e = GenJmpForWard(0);
@@ -588,7 +614,10 @@ void ContinueStatement(int* csym)
 
 	GetToken();
 	syntax_state = SNTX_LF_HT;
-	Skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
 }
 
 void BreakStatement(int* bsym)
@@ -598,40 +627,49 @@ void BreakStatement(int* bsym)
 	*bsym = GenJmpForWard(*bsym);
 	GetToken();
 	syntax_state = SNTX_LF_HT;
-	Skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
 }
 
 void ReturnStatement(void)
 {
 	syntax_state = SNTX_DELAY;
 	GetToken();
-	if (token == TK_SEMICOLON)
+	if (token == TK_SEMICOLON || token == TK_SPACE)
 		syntax_state = SNTX_NUL;
 	else
 		syntax_state = SNTX_SP;
 
 	SyntaxIndent();
 
-	if (token != TK_SEMICOLON)
+	if (token != TK_SEMICOLON && token != TK_SPACE)
 	{
 		Expression();
 		Load_1(REG_IRET, optop);
 		OperandPop();
 	}
 	syntax_state = SNTX_LF_HT;
-	Skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
 	rsym = GenJmpForWard(rsym);
 }
 
 void ExpressionStatement(void)
 {
-	if (token != TK_SEMICOLON)
+	if (token != TK_SEMICOLON && token != TK_SPACE)
 	{
 		Expression();
 		OperandPop();
 	}
 	syntax_state = SNTX_LF_HT;
-	Skip(TK_SEMICOLON);
+	if (token == TK_SEMICOLON)
+		Skip(TK_SEMICOLON);
+	else if (token == TK_SPACE)
+		Skip(TK_SPACE);
 }
 
 void Expression(void)
@@ -950,7 +988,7 @@ void SyntaxIndent(void)
 		}
 		case SNTX_LF_HT:
 		{
-			if (token == TK_END)
+			if (token == TK_END || token == KW_END)
 				--syntax_level;
 			printf("\n");
 			PrintTab(syntax_level);

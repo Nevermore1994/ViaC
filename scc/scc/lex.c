@@ -88,7 +88,7 @@ void Getch()
 void InitLex()
 {
 	TkWord* tp;
-	static TkWord keywords[] = {	    
+	static TkWord keywords[] = {
 		{ TK_PLUS,		NULL,	  "+",	            NULL,	NULL },
 		{ TK_MINUS,		NULL,	  "-",	            NULL,	NULL },
 		{ TK_STAR,		NULL,	  "*",	            NULL,	NULL },
@@ -114,7 +114,7 @@ void InitLex()
 		{ TK_COMMA,		NULL,	  ",",	            NULL,	NULL },
 		{ TK_ELLIPSIS,	NULL,	  "...",            NULL,	NULL },
 		{ TK_EOF,		NULL,	 "End_Of_File\n",	NULL,	NULL },
-
+		{ TK_SPACE,		NULL,		"",			    NULL,	NULL },
 		{ TK_CINT,		NULL,	 	"整型常量",	    NULL,	NULL },
 		{ TK_CCHAR,		NULL,		"字符常量",	    NULL,	NULL },
 		{ TK_CSTR,		NULL,		"字符串常量",	NULL,	NULL },
@@ -124,7 +124,7 @@ void InitLex()
 		{ KW_INT,		NULL,		"int",	        NULL,	NULL },
 		{ KW_VOID,		NULL,		"void",	        NULL,	NULL },
 		{ KW_STRUCT,	NULL,		"struct",       NULL,	NULL },
-											       
+
 		{ KW_IF,		NULL,		"if",           NULL,	NULL },
 		{ KW_ELSE,		NULL,		"else",	        NULL,	NULL },
 		{ KW_FOR,		NULL,		"for",	        NULL,	NULL },
@@ -132,6 +132,9 @@ void InitLex()
 		{ KW_BREAK,		NULL,		"break",        NULL,	NULL },
 		{ KW_RETURN,	NULL,		"return",       NULL,	NULL },
 		{ KW_SIZEOF,	NULL,		"sizeof",       NULL,	NULL },
+		{ KW_INCLUDE,	NULL,		"include",      NULL,	NULL },
+		{ KW_DO,		NULL,		"do",			NULL,	NULL },
+		{ KW_END,		NULL,		"end",			NULL,	NULL },
 		{ KW_ALIGN,		NULL,		"__align",      NULL,	NULL },
 		{ KW_CDECL,		NULL,		"__cdecl",      NULL,	NULL },
 		{ KW_STDCALL,	NULL,		"__stdcall",    NULL,	NULL },
@@ -139,9 +142,11 @@ void InitLex()
 	};
 
 	DynArrayInit(&tktable, 8);
-	for (tp = &keywords [0]; tp->spelling != NULL; tp++)
-		 TkwordDirectInsert(tp);
+	for (tp = &keywords[0]; tp->spelling != NULL; tp++)
+		TkwordDirectInsert(tp);
 }
+
+
 
 /****************************************************
 *函数功能：跳过c这个单词，如果当前单词不是c,提示错误
@@ -590,6 +595,12 @@ void GetToken()
 			Getch();
 			break;
 		}
+		case '\n':
+		{
+			token = TK_SPACE;
+			Getch();
+			break;
+		}
 		case ',':
 		{
 
@@ -613,7 +624,7 @@ void GetToken()
 		{
 			ParseString(ch);
 			token = TK_CCHAR;
-			tkvalue = *( char* ) tkstr.data;
+			tkvalue = *(char*)tkstr.data;
 			break;
 		}
 		case EOF:
