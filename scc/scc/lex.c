@@ -178,6 +178,10 @@ void Preprocess()
 			{
 				ParseComment();
 			}
+			else if (ch == '/')
+			{
+				ParseComment_2();
+			}
 			else
 			{
 				ungetc(ch, fin);
@@ -185,10 +189,38 @@ void Preprocess()
 				break;
 			}
 		}
+		else if (ch == '#')
+		{
+			ParseComment_2();
+		}
 		else
 			break;
 	}
 }
+
+void ParseComment_2()
+{
+	Getch();
+	while (1)
+	{
+		if (ch == '\n')
+		{
+			++linenum;
+			break;
+		}
+		else if (ch == CH_EOF)
+		{
+			return;
+		}
+		else
+		{
+			Getch();
+		}
+
+	}
+	Getch();
+}
+
 
 void ParseComment()
 {
