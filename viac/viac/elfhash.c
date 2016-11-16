@@ -6,7 +6,7 @@
 #include"viac.h"
 
 
-int ElfHash(char* key)
+int ElfHash(const char* key)
 {
 	int h = 0;
 	int g;

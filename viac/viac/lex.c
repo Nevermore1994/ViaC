@@ -9,7 +9,7 @@
 typedef TkWord* pTkWord;
 
 DynArray tktable;
-TkWord* tk_hashtable [MAXKEY];
+TkWord* tk_hashtable[MAXKEY];
 DynString sourcestr;
 DynString tkstr;
 char ch;
@@ -26,17 +26,17 @@ TkWord* TkwordDirectInsert(TkWord* tp)
 	DynArrayAdd(&tktable, tp);
 	keyno = ElfHash(tp->spelling);
 
-	tp->next = tk_hashtable [keyno];
-	tk_hashtable [keyno] = tp;
+	tp->next = tk_hashtable[keyno];
+	tk_hashtable[keyno] = tp;
 	return tp;
 }
 
 
 
-TkWord* TkwordFind(char *p, const int keyno)
+TkWord* TkwordFind(const char *p, const int keyno)
 {
 	TkWord *tp = NULL, *tp1;
-	for (tp1 = tk_hashtable [keyno]; tp1; tp1 = tp1->next)
+	for (tp1 = tk_hashtable[keyno]; tp1; tp1 = tp1->next)
 	{
 		if (!strcmp(p, tp1->spelling))
 		{
@@ -48,7 +48,7 @@ TkWord* TkwordFind(char *p, const int keyno)
 }
 
 
-TkWord* TkwordInsert(char *p)
+TkWord* TkwordInsert(const char *p)
 {
 	TkWord*  tp;
 	int keyno;
@@ -61,16 +61,17 @@ TkWord* TkwordInsert(char *p)
 	if (tp == NULL)
 	{
 		length = strlen(p);
-		tp = ( TkWord* ) MallocInit(sizeof(TkWord) + length + 1);
-		tp->next = tk_hashtable [keyno];
-		tk_hashtable [keyno] = tp;
+		tp = (TkWord*)MallocInit(sizeof(TkWord) + length + 1);
+		tp->next = tk_hashtable[keyno];
+		tk_hashtable[keyno] = tp;
 		DynArrayAdd(&tktable, tp);
 		tp->tkcode = tktable.count - 1;
-		s = ( char * ) tp + sizeof(TkWord);
-		tp->spelling = ( char * ) s;
-		for (end = p + length; p < end;)
+		s = (char *)tp + sizeof(TkWord);
+		tp->spelling = (char *)s;
+		for (end = p + length; p < end; ++p)
 		{
-			*s++ = *p++;
+			*s = *p;
+			++s;
 		}
 		*s = (char) '\0';
 
@@ -80,7 +81,7 @@ TkWord* TkwordInsert(char *p)
 	return tp;
 }
 
-void Getch()
+void  GetCh()
 {
 	ch = getc(fin);
 }
@@ -160,7 +161,7 @@ char* GetTkstr(const int c)
 	else if (c >= TK_CINT && c <= TK_CSTR)
 		return sourcestr.data;
 	else
-		return (( TkWord* ) tktable.data [c])->spelling;
+		return ((TkWord*)tktable.data[c])->spelling;
 }
 
 void Preprocess()
@@ -173,7 +174,7 @@ void Preprocess()
 		}
 		else if (ch == '/')
 		{
-			Getch();
+			 GetCh();
 			if (ch == '*')
 			{
 				ParseComment();
@@ -200,7 +201,7 @@ void Preprocess()
 
 void ParseComment_2()
 {
-	Getch();
+	 GetCh();
 	while (1)
 	{
 		if (ch == '\n')
@@ -214,37 +215,37 @@ void ParseComment_2()
 		}
 		else
 		{
-			Getch();
+			 GetCh();
 		}
 
 	}
-	Getch();
+	 GetCh();
 }
 
 
 void ParseComment()
 {
-	Getch();
+	 GetCh();
 	while (1)
 	{
-		while(1)
+		while (1)
 		{
 			if (ch == '\n' || ch == '*' || ch == CH_EOF)
 				break;
 			else
-				Getch();
+				 GetCh();
 		};
 		if (ch == '\n')
 		{
 			linenum++;
-			Getch();
+			 GetCh();
 		}
 		else if (ch == '*')
 		{
-			Getch();
+			 GetCh();
 			if (ch == '/')
 			{
-				Getch();
+				 GetCh();
 				return;                              //注释完成		
 			}
 		}
@@ -262,28 +263,28 @@ void SkipWhiteSpace()
 	{
 		if (ch == '\r')
 		{
-			Getch();
+			 GetCh();
 			if (ch != '\n')
 				return;
 			linenum++;
 		}
-		else if(ch == ' ')
+		else if (ch == ' ')
 			printf("%c", ch);
 		else
 			printf("%c", ch);  //决定是否打印源码中的换行
-		Getch();
+		 GetCh();
 	}
 }
 
 
-int IsNoDigit(char* c)
+int IsNoDigit(const char c)
 {
 	return (c >= 'A' && c <= 'Z') ||
-		   (c >= 'a' && c <= 'z') ||
-		    c == '_';
+		(c >= 'a' && c <= 'z') ||
+		c == '_';
 }
 
-int IsDigit(char c)
+int IsDigit(const char c)
 {
 	return c >= '0' && c <= '9';
 }
@@ -293,11 +294,11 @@ void ParseIdentifier()
 {
 	DynStringReset(&tkstr);
 	DynStringChcat(&tkstr, ch);
-	Getch();
+	 GetCh();
 	while (IsNoDigit(ch) || IsDigit(ch))
 	{
 		DynStringChcat(&tkstr, ch);
-		Getch();
+		 GetCh();
 	}
 	DynStringChcat(&tkstr, '\0');
 }
@@ -311,7 +312,7 @@ void ParseNum()
 	{
 		DynStringChcat(&tkstr, ch);
 		DynStringChcat(&sourcestr, ch);
-		Getch();
+		 GetCh();
 	} while (IsDigit(ch));
 	if (ch == '.')
 	{
@@ -326,21 +327,21 @@ void ParseNum()
 	tkvalue = atoi(tkstr.data);
 }
 
-void ParseString(char sep)
+void ParseString(const char sep)
 {
 	char c;
 	DynStringReset(&tkstr);
 	DynStringReset(&sourcestr);
 	DynStringChcat(&sourcestr, sep);
-	Getch();
-	while(1)
+	 GetCh();
+	while (1)
 	{
 		if (ch == sep)
 			break;
 		else if (ch == '\\')
 		{
 			DynStringChcat(&sourcestr, ch);
-			Getch();
+			 GetCh();
 			switch (ch)
 			{
 				case '0':
@@ -390,19 +391,19 @@ void ParseString(char sep)
 			}
 			DynStringChcat(&tkstr, c);
 			DynStringChcat(&sourcestr, ch);
-			Getch();
+			 GetCh();
 		}
 		else
 		{
 			DynStringChcat(&tkstr, ch);
 			DynStringChcat(&sourcestr, ch);
-			Getch();
+			 GetCh();
 		}
 	}
 	DynStringChcat(&tkstr, '\0');
 	DynStringChcat(&sourcestr, sep);
 	DynStringChcat(&sourcestr, '\0');
-	Getch();
+	 GetCh();
 }
 
 
@@ -444,17 +445,17 @@ void GetToken()
 		}
 		case '+':
 		{
-			Getch();
+			 GetCh();
 			token = TK_PLUS;
 			break;
 		}
 		case '-':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '>')
 			{
 				token = TK_POINTSTO;
-				Getch();
+				 GetCh();
 			}
 			else
 				token = TK_MINUS;
@@ -462,23 +463,23 @@ void GetToken()
 		}
 		case '%':
 		{
-			Getch();
+			 GetCh();
 			token = TK_MOD;
 			break;
 		}
 		case '/':
 		{
-			Getch();
+			 GetCh();
 			token = TK_DIVIDE;
 			break;
 		}
 		case '=':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '=')
 			{
 				token = TK_EQ;
-				Getch();
+				 GetCh();
 			}
 			else
 			{
@@ -488,11 +489,11 @@ void GetToken()
 		}
 		case '!':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '=')
 			{
 				token = TK_NEQ;
-				Getch();
+				 GetCh();
 			}
 			else
 			{
@@ -503,7 +504,7 @@ void GetToken()
 		}
 		case '<':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '<')
 			{
 				Error("非法操作符");
@@ -512,7 +513,7 @@ void GetToken()
 			else if (ch == '=')
 			{
 				token = TK_LEQ;
-				Getch();
+				 GetCh();
 			}
 			else
 				token = TK_LT;
@@ -520,7 +521,7 @@ void GetToken()
 		}
 		case '>':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '>')
 			{
 				Error("非法操作符");
@@ -529,7 +530,7 @@ void GetToken()
 			else if (ch == '=')
 			{
 				token = TK_GEQ;
-				Getch();
+				 GetCh();
 			}
 			else
 				token = TK_GT;
@@ -538,10 +539,10 @@ void GetToken()
 		}
 		case '.':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '.')
 			{
-				Getch();
+				 GetCh();
 				if (ch == '.')
 				{
 					token = TK_ELLIPSIS;
@@ -550,7 +551,7 @@ void GetToken()
 				{
 					Error("拼写错误");
 				}
-				Getch();
+				 GetCh();
 			}
 			else
 			{
@@ -569,12 +570,12 @@ void GetToken()
 			{
 				token = TK_AND;
 			}
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '|':
 		{
-			Getch();
+			 GetCh();
 			if (ch == '|')
 			{
 				Error("不能识别的操作符");
@@ -590,62 +591,62 @@ void GetToken()
 		case '(':
 		{
 			token = TK_OPENPA;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case ')':
 		{
 			token = TK_CLOSEPA;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '[':
 		{
 			token = TK_OPENBR;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case ']':
 		{
 			token = TK_CLOSEBR;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '{':
 		{
 			token = TK_BEGIN;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '}':
 		{
 			token = TK_END;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case ';':
 		{
 			token = TK_SEMICOLON;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '\n':
 		{
 			token = TK_SPACE;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case ',':
 		{
 
 			token = TK_COMMA;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '*':
 		{
 			token = TK_STAR;
-			Getch();
+			 GetCh();
 			break;
 		}
 		case '\"':
@@ -669,7 +670,7 @@ void GetToken()
 		default:
 		{
 			Error("未能识别的操作符%c", ch);
-			Getch();
+			 GetCh();
 			break;
 		}
 	}
@@ -685,8 +686,8 @@ void ColorToken(const int lex_state)
 	{
 		case LEX_NORMAL:
 		{
-			if (token >= TK_IDENT)   
-				SetConsoleTextAttribute(had, FOREGROUND_INTENSITY | FOREGROUND_BLUE | FOREGROUND_GREEN );
+			if (token >= TK_IDENT)
+				SetConsoleTextAttribute(had, FOREGROUND_INTENSITY | FOREGROUND_BLUE | FOREGROUND_GREEN);
 			else if (token >= KW_CHAR)
 				SetConsoleTextAttribute(had, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 			else if (token >= TK_CINT)

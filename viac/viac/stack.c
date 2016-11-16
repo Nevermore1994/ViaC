@@ -6,7 +6,7 @@
 
 #include"viac.h" 
 
-void StackInit(Stack* stack, int size)
+void StackInit(Stack* stack, const int size)
 {
 	if (stack == NULL)
 	{
@@ -24,7 +24,7 @@ void StackInit(Stack* stack, int size)
 	}
 }
 
-void* StackPush(Stack* stack, void* data, int size)
+void* StackPush(Stack* stack, const void* data, const int size)
 {
 	if (stack == NULL)
 	{
@@ -71,7 +71,7 @@ void StackPop(Stack* stack)
 	}
 }
 
-void* StackGetTop(Stack* stack)
+void* StackGetTop(const Stack* stack)
 {
 	void** topdata = NULL;
 	if (stack == NULL)
@@ -86,7 +86,7 @@ void* StackGetTop(Stack* stack)
 	return NULL;
 }
 
-bool StackIsEmpty(Stack* stack)
+bool StackIsEmpty(const Stack* stack)
 {
 	if (stack == NULL)
 	{

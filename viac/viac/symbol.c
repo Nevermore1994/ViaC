@@ -8,7 +8,7 @@
 #include"viac.h"
 
 
-Symbol *StructSearch(int v)
+Symbol *StructSearch(const int v)
 {
 	if (v >= tktable.count)
 		return NULL;
@@ -17,7 +17,7 @@ Symbol *StructSearch(int v)
 }
 
 
-Symbol *SymSearch(int v)
+Symbol *SymSearch(const int v)
 {
 	if (v >= tktable.count)
 		return NULL;
@@ -26,8 +26,10 @@ Symbol *SymSearch(int v)
 }
 
 
-Symbol *SymDirectPush(Stack *ss, int v, Type *type, int c)
+Symbol* SymDirectPush(Stack *ss, const int v, const Type *type, const int c)
 {
+	if (type == NULL || ss == NULL)
+		Error("symbol中指针未初始化");
 	Symbol s, *p;
 	s.v = v;
 	s.type.t = type->t;
@@ -38,8 +40,10 @@ Symbol *SymDirectPush(Stack *ss, int v, Type *type, int c)
 	return p;
 }
 
-Symbol *SymPush(int v, Type *type, int r, int c)
+Symbol *SymPush(const int v, const Type *type, const int r, const int c)
 {
+	if (type == NULL )
+		Error("symbol中指针未初始化");
 	Symbol *ps, **pps;
 	TkWord *ts;
 	Stack *ss;
@@ -71,7 +75,7 @@ Symbol *SymPush(int v, Type *type, int r, int c)
 }
 
  
-Symbol *FuncSymPush(int v, Type *type)
+Symbol* FuncSymPush(const int v, const Type *type)
 {
 	Symbol *s, **ps;
 	s = SymDirectPush(&GSYM, v, type, 0);
@@ -85,7 +89,7 @@ Symbol *FuncSymPush(int v, Type *type)
 	return s;
 }
 
-Symbol *VarSymPut(Type *type, int r, int v, int addr)
+Symbol *VarSymPut(const Type *type, const int r, const int v, const int addr)
 {
 	Symbol *sym = NULL;
 	if ((r & ViaC_VALMASK) == ViaC_LOCAL)			// 局部变量
@@ -118,7 +122,7 @@ Symbol* SecSymPut(const char* sec, const int c)
 	return s;
 }
 
-void SymPop(const Stack* ptop, const Symbol* b) //b可以为NULL
+void SymPop(Stack* ptop, const Symbol* b) //b可以为NULL
 {
 	if (ptop == NULL)
 		Error("指针未初始化");

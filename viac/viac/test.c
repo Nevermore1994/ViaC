@@ -5,31 +5,48 @@
 *******************************************/
 #include"viac.h"
 
-int main(const int argc, char ** argv)
+int main(const int argc, char** argv)
 {
+	Init();
+	outtype = OUTPUT_EXE;
 	
-	/*Init();
-	filename = "C:\\Users\\Away\\Documents\\ViaC\\viac\\viac\\Debug\\HelloWorld.c";
-	errno_t err = fopen_s(&fin, filename, "rb");
-	if (err)
+	subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
+	char* str[5] = { "viac","-lmsvcrt","-o","HelloWorld.exe","HelloWorld.c" };
+	int opind = ProcessCommand(5, str);
+	if (opind == 0)
 	{
-		printf("不能打开文件!\n");
 		return 0;
 	}
+	int i;
+	char* ext = NULL;
+	for (i = 0; i < srcfiles.count; ++i)
+	{
+		
+		filename = srcfiles.data[i]; 
+		
+		ext = GetFileText(filename);
+		
+		if (!strcmp(ext, "viac"))
+			Compile(filename);
+		else if (!strcmp(ext, "c"))
+			Compile(filename);
+		if (!strcmp(ext, "obj"))
+		{
+			LoadObjFile(filename);
+		}
+			
+	}
+	if (outtype == OUTPUT_OBJ)
+	{
+		if(outfile)
+			WriteObj(outfile);
+	}
+	else
+	{
+		if (outfile);
+			PeOutputFile(outfile);
+	}
+	Cleanup();
 	
-	Getch();
-	GetToken();
-	TranslationUnit();
-	fclose(fin);
-
-	GetObjFname(filename);
-	WriteObj(outfile);
-	char file[2048];
-	sprintf_s(file, 2048, "C:\\Users\\Away\\Documents\\scc\\scc\\Debug\\1.viac%c",'\0' );
-	printf("%s\n语法分析成功!\n",file);
-	Cleanup();*/
-	char* name = GetDllName("hello.slib");
-	printf("%s", name); 
-	free(name);
 	return 1;
 }

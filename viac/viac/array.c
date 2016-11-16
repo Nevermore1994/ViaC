@@ -11,13 +11,13 @@ void DynArrayInit(DynArray* parr, const int size)
 {
 	if (parr != NULL)
 	{
-		parr->count = 0;
-		parr->capacity = size;
 		parr->data = (void**)malloc(sizeof(void*) * size);
 		if (parr->data == NULL)
 		{
 			Error("ÄÚ´æ·ÖÅä´íÎó!");
 		}
+		parr->count = 0;
+		parr->capacity = size;
 	}
 }
 
@@ -42,12 +42,12 @@ void DynArrayRealloc(DynArray* parr, const int newsize)
 	}
 }
 
-void DynArrayAdd(DynArray* parr, void* data)
+void DynArrayAdd(DynArray* parr,const void* data)
 {
 	if (parr != NULL)
 	{
 		const int count = parr->count + 1;
-		if (count*sizeof(void*) > parr->capacity)
+		if ( (count * (int)sizeof(void*)) > parr->capacity)
 		{
 			DynArrayRealloc(parr, count * sizeof(void*) );
 		}
@@ -72,17 +72,18 @@ void DynArrayFree(DynArray* parr)
 	}
 }
 
-int DynArrayFind(DynArray* parr, const int data)
+int DynArrayFind(const DynArray* parr, const int data)
 {
 	if (parr != NULL)
 	{
 		const int** p = (const int**)parr->data;
-		for (size_t i = 0; i < parr->count; ++i,++p)
+		for (int i = 0; i < parr->count; ++p)
 		{
 			if (  **p == data)
 			{
 				return i;
 			}
+			++i;
 		}
 	}
 	return -1;

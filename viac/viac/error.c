@@ -8,14 +8,14 @@
 DynString tkstr;
 #define BUF_SIZE 1024
 #define ERR_SIZE 2048
-void* HandleException(const int stage, const int level, char* fmt, const va_list ap)
+void HandleException(const int stage, const int level, const char* fmt, const va_list ap)
 {
 	char buf[BUF_SIZE];
 	char errstr[ERR_SIZE];
 	vsprintf_s(buf, BUF_SIZE,fmt, ap);
 	if (stage == STAGE_COMPILE)
 	{
-		if (level == LEVEL_WARNING)
+		if (level == LEVEL_Warning)
 		{
 			printf("%s(第%d行):编译警告：%s\n:", filename, linenum, buf);
 			sprintf_s(errstr, ERR_SIZE, "%s(第%d行):编译警告：%s\n:", filename, linenum, buf);
@@ -41,7 +41,7 @@ void Warning(const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	HandleException(STAGE_COMPILE, LEVEL_WARNING, fmt, ap);
+	HandleException(STAGE_COMPILE, LEVEL_Warning, fmt, ap);
 	va_end(ap);
 }
 
@@ -49,7 +49,7 @@ void Error(const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	HandleException(STAGE_COMPILE, LEVEL_ERROR, fmt, ap);
+	HandleException(STAGE_COMPILE, LEVEL_Error, fmt, ap);
 	va_end(ap);
 }
  
@@ -74,6 +74,6 @@ void LinkError(const char* fmt,...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	HandleException(STAGE_LINK, LEVEL_ERROR, fmt, ap);
+	HandleException(STAGE_LINK, LEVEL_Error, fmt, ap);
 	va_end(ap);
 }

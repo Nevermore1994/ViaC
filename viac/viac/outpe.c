@@ -110,7 +110,7 @@ DWORD PeVirtualAlign(const DWORD addr)
 	return CalcAlign(addr, SectionAlignment);
 }
 
-void PeSetDatadir( const int dir, const DWORD addr, const DWORD size)
+void PeSetDatadir(const int dir, const DWORD addr, const DWORD size)
 {
 	nt_header.OptionalHeader.DataDirectory[dir].VirtualAddress = addr;
 	nt_header.OptionalHeader.DataDirectory[dir].Size = size;
@@ -133,10 +133,10 @@ int LoadObjFile(const char* fname)
 	IMAGE_FILE_HEADER fh;
 	fread(&fh, 1, sizeof(IMAGE_FILE_HEADER), fobj);
 	int nsec_obj;
-	nsec_obj= fh.NumberOfSections; 
+	nsec_obj = fh.NumberOfSections;
 	Section** ppsec = (Section**)sections.data;
 
-	int i = 1;
+	int i;
 	for (i = 0; i < nsec_obj; ++i)
 	{
 		fread(ppsec[i]->sh.Name, 1, sh_size, fobj);
@@ -150,7 +150,7 @@ int LoadObjFile(const char* fname)
 	void* ptr = NULL;
 	for (i = 0; i < nsec_obj; ++i)
 	{
-		if (! strcmp(ppsec[i]->sh.Name, ".symtab"))
+		if (!strcmp(ppsec[i]->sh.Name, ".symtab"))
 		{
 			cfsyms = MallocInit(ppsec[i]->sh.SizeOfRawData);
 			fseek(fobj, SEEK_SET, ppsec[i]->sh.PointerToRawData);
@@ -158,14 +158,14 @@ int LoadObjFile(const char* fname)
 			nsym = (ppsec[i]->sh.SizeOfRawData) / sizeof(CoffSym);
 			continue;
 		}
-		if (! strcmp(ppsec[i]->sh.Name, ".strtab"))
+		if (!strcmp(ppsec[i]->sh.Name, ".strtab"))
 		{
 			strs = MallocInit(ppsec[i]->sh.SizeOfRawData);
 			fseek(fobj, SEEK_SET, ppsec[i]->sh.PointerToRawData);
 			fread(strs, 1, ppsec[i]->sh.SizeOfRawData, fobj);
 			continue;
 		}
-		if (! strcmp(ppsec[i]->sh.Name, ".dynsym") || ! strcmp(ppsec[i]->sh.Name, ".dynstr"))
+		if (!strcmp(ppsec[i]->sh.Name, ".dynsym") || !strcmp(ppsec[i]->sh.Name, ".dynstr"))
 			continue;
 		fseek(fobj, SEEK_SET, ppsec[i]->sh.PointerToRawData);
 		ptr = SectionPtrAdd(ppsec[i], ppsec[i]->sh.SizeOfRawData);
@@ -174,19 +174,19 @@ int LoadObjFile(const char* fname)
 	int* replace_sym = MallocInit(sizeof(int) * nsym);
 	char* csname = NULL;
 	int cfsym_index = 0;
-	for (i = 0; i < nsym; ++i)
+	for (i = 1; i < nsym; ++i)
 	{
 		cfsym = &cfsyms[i];
 		csname = strs + cfsym->Name;
-		cfsym_index = CoffSymAdd(sec_dynsymtab, csname, cfsym->Value, cfsym->sSection, cfsym->Type, cfsym->StorageClass);
+		cfsym_index = CoffSymAdd(sec_symtab, csname, cfsym->Value, cfsym->sSection, cfsym->Type, cfsym->StorageClass);
 		replace_sym[i] = cfsym_index;
 	}
 	CoffReloc* rel = (CoffReloc*)(sec_rel->data + cur_rel_offset);
 	CoffReloc* rel_end = (CoffReloc*)(sec_rel->data + sec_rel->data_offset);
 	for (; rel < rel_end; ++rel)
 	{
-		cfsym_index = rel->cfsym; 
-		rel->cfsym = replace_sym[cfsym_index]; 
+		cfsym_index = rel->cfsym;
+		rel->cfsym = replace_sym[cfsym_index];
 		rel->offset += cur_text_offset;
 	}
 	free(cfsyms);
@@ -196,7 +196,7 @@ int LoadObjFile(const char* fname)
 	return 1;
 }
 
-char* GetLine(const char* line, const int size, const FILE* fp)
+char* GetLine(char* line, const int size, const FILE* fp)
 {
 	char* p;
 	char* p1;
@@ -214,14 +214,15 @@ char* GetLine(const char* line, const int size, const FILE* fp)
 
 char* GetDllName(const char* libfile)
 {
+
 	if (libfile == NULL)
 		Error("链接器内部指针未初始化");
 	int len;
-	char* libname;
-	len  = strlen(libfile);
+	const char* libname;
+	len = strlen(libfile);
 	libname = libfile;
-	char* p;
-	for (p = libfile + len; len > 0;  --p)
+	const char* p;
+	for (p = libfile + len; len > 0; --p)
 	{
 		if (*p == '\\')
 		{
@@ -230,25 +231,25 @@ char* GetDllName(const char* libfile)
 		}
 		--len;
 	}
-	
+
 	int namelen = strlen(libname);
 	char* dllname;
 	dllname = MallocInit(sizeof(char) * namelen);
-	memcpy_s(dllname, namelen - 4, libname, namelen -4);
+	memcpy_s(dllname, namelen - 4, libname, namelen - 4);
 	memcpy_s(dllname + namelen - 4, 4, "dll", 3);
 	return dllname;
 }
- 
+
 int PeLoadLibFile(char* fname)
 {
 	if (fname == NULL)
 		Error("名字不能为空");
 	char libfile[MAX_PATH];
-	sprintf_s(libfile, MAX_PATH, "%s%s", lib_path, fname);
+	sprintf_s(libfile, MAX_PATH, "%s%s.slib", lib_path, fname);
 	FILE* fp;
 	errno_t err = fopen_s(&fp, libfile, "rb");
 	if (err)
-		printf("不能打开文件");
+		printf("不能打开静态库文件");
 	char* dllname;
 	char* p;
 	char line[400];
@@ -259,12 +260,12 @@ int PeLoadLibFile(char* fname)
 		DynArrayAdd(&arr_dll, dllname);
 		while (1)
 		{
-			p = GetLine( line, sizeof(line),  fp);
+			p = GetLine(line, sizeof(line), fp);
 			if (NULL == p)
 				break;
-			else if (0 == *p || ";" == *p)
+			else if ((0 == *p) || (';' == *p))
 				continue;
-			CoffStrAdd(sec_dynsymtab, p, arr_dll.count, sec_text->index, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
+			CoffSymAdd(sec_dynsymtab, p, arr_dll.count, sec_text->index, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
 		}
 		ret = 0;
 		if (fp)
@@ -279,13 +280,11 @@ int PeLoadLibFile(char* fname)
 
 void GetEntryAddr(PEInfo* pe)
 {
-	if (pe == NULL)
-		Error("链接器内部指针未初始化");
+
 	unsigned long addr = 0;
-	CoffSym* cfsym_entry = NULL;
-	int cs = CoffSymSearch( sec_symtab, entry_symbol);
-	cfsym_entry = (CoffSym*)sec_symtab->data + cs;
-	addr = cfsym_entry->Value; 
+	int cs = CoffSymSearch(sec_symtab, entry_symbol);
+	CoffSym*  cfsym_entry = (CoffSym*)sec_symtab->data + cs;
+	addr = cfsym_entry->Value;
 	pe->entry_addr = addr;
 }
 
@@ -312,18 +311,17 @@ void AddRuntimeLibs()
 
 int PeFindImport(char* symbol)
 {
-	int sym_index; 
+	int sym_index;
 	sym_index = CoffSymSearch(sec_dynsymtab, symbol);
 	return sym_index;
 }
- 
-ImportSym* PeAddImport(const PEInfo* pe, const int sym_index, const  char* name)
+
+ImportSym* PeAddImport(PEInfo* pe, const int sym_index, const  char* name)
 {
 	if (name == NULL)
 		Error("名字不能为空");
-	int dll_index;
 	CoffSym* psym = (CoffSym*)sec_dynsymtab->data + sym_index;
-	dll_index = psym ->Value;
+	int dll_index = psym->Value;
 	if (0 == dll_index)
 		return NULL;
 	int i = DynArrayFind(&pe->imps, dll_index);
@@ -336,7 +334,7 @@ ImportSym* PeAddImport(const PEInfo* pe, const int sym_index, const  char* name)
 	else
 	{
 		p = MallocInit(sizeof(*p));
-		DynArrayInit(&p->imp_syms, 8); 
+		DynArrayInit(&p->imp_syms, 8);
 		p->dll_index = dll_index;
 		DynArrayAdd(&pe->imps, p);
 	}
@@ -350,17 +348,17 @@ ImportSym* PeAddImport(const PEInfo* pe, const int sym_index, const  char* name)
 	{
 		s = MallocInit(sizeof(ImportSym) + strlen(name));
 		DynArrayAdd(&p->imp_syms, s);
-		strcpy_s((char*)&s->imp_sym.Name, 1, name);
+		strcpy_s((char*)&s->imp_sym.Name, strlen(name) + 1, name);
 		return s;
 	}
 	return NULL;
-} 
+}
 
-int ResolveCoffsym(const PEInfo* pe)
+int ResolveCoffsym(PEInfo* pe)
 {
 	if (pe == NULL)
 		Error("指针未初始化");
-	int sym_end = sec_symtab->data_offset;
+	int sym_end = (sec_symtab->data_offset) / sizeof(CoffSym);
 	int sym_index;
 	CoffSym* psym = NULL;
 	int found = 1;
@@ -368,6 +366,7 @@ int ResolveCoffsym(const PEInfo* pe)
 	for (sym_index = 1; sym_index < sym_end; sym_index++)
 	{
 		psym = (CoffSym*)sec_symtab->data + sym_index;
+
 		if (psym->sSection == IMAGE_SYM_UNDEFINED)
 		{
 			char* name = sec_symtab->plink->data + psym->Name;
@@ -380,6 +379,7 @@ int ResolveCoffsym(const PEInfo* pe)
 			is = PeAddImport(pe, imp_sym, name);
 			if (!is)
 				found = 0;
+
 			if (found && type == CST_FUNC)
 			{
 				int offset = is->thk_offset;
@@ -389,7 +389,7 @@ int ResolveCoffsym(const PEInfo* pe)
 
 				sprintf_s(buffer, 100, "IAT.%s", name);
 				is->iat_index = CoffSymAdd(sec_symtab, buffer, 0, sec_idata->index, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
-				CoffElocDirectAdd(offset + 2, is->iat_index, sec_text->index, IMAGE_REL_I386_DIR32);
+				CoffRelocDirectAdd(offset + 2, is->iat_index, sec_text->index, IMAGE_REL_I386_DIR32);
 				is->thk_offset = offset;
 
 				psym = (CoffSym*)sec_symtab->data + sym_index;
@@ -406,69 +406,63 @@ int ResolveCoffsym(const PEInfo* pe)
 	return ret;
 }
 
-int PutImportStr(const Section* sec, const char* sym)
+int PutImportStr(Section* sec, const char* sym)
 {
-	int len;
-	len = strlen(sym) + 1;
-	int offset;
-	offset = sec->data_offset; 
-	char* ptr;
-	ptr = SectionPtrAdd(sec, len);
+	int len = strlen(sym) + 1;
+	int offset = sec->data_offset;
+	char* ptr = SectionPtrAdd(sec, len);
 	memcpy_s(ptr, len, sym, len);
-	return offset; 
+	return offset;
 }
 
 void PeBuildImports(PEInfo* pe)
 {
-	if (pe == NULL)
-		Error("链接器内部指针未初始化");
-	DWORD rva_base = pe->thunk->sh.VirtualAddress - nt_header.OptionalHeader.ImageBase; 
-	int ndlls = pe->imps.count; 
-	
-	int i, sym_cnt; 
+
+	DWORD rva_base = pe->thunk->sh.VirtualAddress - nt_header.OptionalHeader.ImageBase;
+	int ndlls = pe->imps.count;
+
+	int i, sym_cnt;
 	for (sym_cnt = i = 0; i < ndlls; ++i)
 		sym_cnt += ((ImportInfo*)pe->imps.data[i])->imp_syms.count;
 	if (0 == sym_cnt)
 		return;
-	int dll_ptr;
+	int dll_ptr = pe->thunk->data_offset;
+	pe->imp_offs = dll_ptr;
 	pe->imp_size = (ndlls + 1) * sizeof(IMAGE_IMPORT_DESCRIPTOR);
-	pe->imp_offs = dll_ptr = pe->thunk->data_offset; 
 	pe->iat_offs = dll_ptr + pe->imp_size;
 	pe->iat_size = (sym_cnt + ndlls) * sizeof(DWORD);
-	
+
 	SectionPtrAdd(pe->thunk, pe->imp_size + (2 * pe->iat_size));
-	
-	int thk_ptr, ent_ptr;
-	thk_ptr = pe->iat_offs;
-	ent_ptr = pe->iat_offs + pe->iat_size;
-	
+
+	int thk_ptr = pe->iat_offs;
+	int ent_ptr = pe->iat_offs + pe->iat_size;
+
 	for (i = 0; i < pe->imps.count; ++i)
 	{
 		ImportInfo* p = pe->imps.data[i];
 		char* name = arr_dll.data[p->dll_index - 1];
-		
-		int v;
-		v = PutImportStr(pe->thunk, name);
-	
-		p->imphdr.OriginalFirstThunk = ent_ptr + rva_base; 
+
+		int v = PutImportStr(pe->thunk, name);
+
+		p->imphdr.OriginalFirstThunk = ent_ptr + rva_base;
 		p->imphdr.FirstThunk = thk_ptr + rva_base;
 		p->imphdr.Name = v + rva_base;
 		memcpy_s(pe->thunk->data + dll_ptr, sizeof(IMAGE_IMPORT_DESCRIPTOR), &p->imphdr, sizeof(IMAGE_IMPORT_DESCRIPTOR));
-		
-		int k, n;
-		n = p->imp_syms.count;
-		for (k = 0; k <= n; ++k )
+
+		int k;
+		int n = p->imp_syms.count;
+		for (k = 0; k <= n; ++k)
 		{
 			if (k < n)
 			{
 				ImportSym* is = (ImportSym*)p->imp_syms.data[k];
-				DWORD iat_index = is->iat_index; 
-				CoffSym* org_sym = (CoffSym*)sec_symtab->data + iat_index; 
-				
-				org_sym->Value = thk_ptr; 
-				org_sym->sSection = pe->thunk->index; 
-				v = pe->thunk->data_offset + rva_base; 
-				
+				DWORD iat_index = is->iat_index;
+				CoffSym* org_sym = (CoffSym*)sec_symtab->data + iat_index;
+
+				org_sym->Value = thk_ptr;
+				org_sym->sSection = pe->thunk->index;
+				v = pe->thunk->data_offset + rva_base;
+
 				SectionPtrAdd(pe->thunk, sizeof(is->imp_sym.Hint));
 				PutImportStr(pe->thunk, is->imp_sym.Name);
 			}
@@ -491,10 +485,10 @@ int PeAssginAddress(PEInfo* pe)
 {
 	if (pe == NULL)
 		Error("链接器中有指针未初始化");
-	
-	pe->thunk = sec_idata; 
+
+	pe->thunk = sec_idata;
 	pe->secs = (Section**)MallocInit(nsec_image * sizeof(Section*));
-	
+
 	DWORD addr = nt_header.OptionalHeader.ImageBase + 1;
 	int i;
 	Section* sec;
@@ -504,10 +498,10 @@ int PeAssginAddress(PEInfo* pe)
 		sec = (Section*)sections.data[i];
 		pps = &pe->secs[pe->sec_size];
 		*pps = sec;
-		
+
 		addr = PeVirtualAlign(addr);
 		sec->sh.VirtualAddress = addr;
-		
+
 		if (sec == pe->thunk)
 			PeBuildImports(pe);
 		if (sec->data_offset)
@@ -521,36 +515,36 @@ int PeAssginAddress(PEInfo* pe)
 
 void RelocateSyms()
 {
-	CoffSym* sym_end; 
-	sym_end = (CoffSym*)(sec_symtab->data + sec_symtab->data_offset);
+	CoffSym* sym_end = (CoffSym*)(sec_symtab->data + sec_symtab->data_offset);
 	CoffSym* sym;
 	Section* sec;
-	for (sym = (CoffSym*)(sec_symtab->data + 1); sym < sym_end; ++sym)
+	for (sym = (CoffSym*)(sec_symtab->data) + 1; sym < sym_end; ++sym)
 	{
 		sec = (Section*)sections.data[sym->sSection - 1];
-		sym->Value = sec->sh.VirtualAddress;
+		sym->Value += sec->sh.VirtualAddress;
 	}
 }
 
-void CoffElocsFixup()
+void CoffRelocsFixup()
 {
 	Section* sr = sec_rel;
-	CoffReloc* rel_end =(CoffReloc*)(sr->data + sr->data_offset);
+	CoffReloc* rel_end = (CoffReloc*)(sr->data + sr->data_offset);
 	CoffReloc* qrel = (CoffReloc*)sr->data;
-	CoffReloc* rel;
-	Section* sec;
-	CoffSym* sym;
-	char* name;
-	char* ptr;
+	CoffReloc* rel = NULL;
+	Section* sec = NULL;
+	CoffSym* sym = NULL;
+	char* name = NULL;
+	char* ptr = NULL;
 	int sym_index, type;
-	unsigned long val, addr; 
+	unsigned long val, addr;
 	for (rel = qrel; rel < rel_end; ++rel)
 	{
 		sec = (Section*)sections.data[rel->section - 1];
+
 		sym_index = rel->cfsym;
 		sym = &((CoffSym*)sec_symtab->data)[sym_index];
 		name = sec_symtab->plink->data + sym->Name;
-		val = sym->Value; 
+		val = sym->Value;
 		addr = sec->sh.VirtualAddress + rel->offset;
 		type = rel->type;
 
@@ -560,11 +554,11 @@ void CoffElocsFixup()
 			case IMAGE_REL_I386_DIR32:
 			{
 				*(int*)ptr += val;
-				break; 
+				break;
 			}
-			case IMAGE_REL_I386_REL32: 
+			case IMAGE_REL_I386_REL32:
 			{
-				*(int*)ptr += val - addr;
+				*(int*)ptr += (val - addr);
 				break;
 			}
 		}
@@ -583,13 +577,13 @@ int PeWrite(PEInfo* pe)
 		LinkError("'%s'生成失败", pe->filename);
 		return 1;
 	}
-	
-	int size=sizeof(dos_header) + sizeof(dos_stub) + sizeof(nt_header)+pe->sec_size * sizeof(IMAGE_SECTION_HEADER);
-	int sizeofheaders = PeFileAlign(size); 
-	
-	DWORD file_offset = sizeofheaders; 
+
+	int size = sizeof(dos_header) + sizeof(dos_stub) + sizeof(nt_header) + (pe->sec_size * sizeof(IMAGE_SECTION_HEADER));
+	int sizeofheaders = PeFileAlign(size);
+
+	DWORD file_offset = sizeofheaders;
 	Fpad(fp, file_offset);
-	
+
 	int i;
 	for (i = 0; i < pe->sec_size; ++i)
 	{
@@ -598,7 +592,7 @@ int PeWrite(PEInfo* pe)
 		unsigned long addr = sec->sh.VirtualAddress - nt_header.OptionalHeader.ImageBase;
 		unsigned long size = sec->data_offset;
 		IMAGE_SECTION_HEADER* psh = &sec->sh;
-		
+
 		if (!strcmp(sec->sh.Name, ".text"))
 		{
 			nt_header.OptionalHeader.BaseOfCode = addr;
@@ -614,41 +608,40 @@ int PeWrite(PEInfo* pe)
 				PeSetDatadir(IMAGE_DIRECTORY_ENTRY_IAT, pe->iat_offs + addr, pe->iat_size);
 			}
 		}
-		
-		strcpy_s((char*) psh->Name, IMAGE_SIZEOF_SHORT_NAME, sh_name);
-		psh->VirtualAddress = addr; 
+
+		strcpy_s((char*)psh->Name, IMAGE_SIZEOF_SHORT_NAME, sh_name);
+		psh->VirtualAddress = addr;
 		psh->Misc.VirtualSize = size;
 		nt_header.OptionalHeader.SizeOfImage = PeVirtualAlign(size + addr);
-		
-		DWORD r; 
+
+		DWORD r;
 		if (sec->data_offset)
 		{
-			psh->PointerToRawData = r = file_offset;
+			r = file_offset;
+			psh->PointerToRawData = r;
 			if (!strcmp(sec->sh.Name, ".bss"))
 			{
 				sec->sh.SizeOfRawData = 0;
-				continue; 
+				continue;
 			}
 			fwrite(sec->data, 1, sec->data_offset, fp);
-			file_offset = PeFileAlign(file_offset + sec->data_offset); 
-			psh->SizeOfRawData = file_offset - r ;
+			file_offset = PeFileAlign(file_offset + sec->data_offset);
+			psh->SizeOfRawData = file_offset - r;
 			Fpad(fp, file_offset);
 		}
 	}
-	
-	nt_header.FileHeader.NumberOfSections = pe->sec_size; 
+
+	nt_header.FileHeader.NumberOfSections = pe->sec_size;
 	nt_header.OptionalHeader.SizeOfHeaders = sizeofheaders;
-	
-	nt_header.OptionalHeader.Subsystem = subsystem; 
+
+	nt_header.OptionalHeader.Subsystem = subsystem;
 	fseek(fp, SEEK_SET, 0);
 	fwrite(&dos_header, 1, sizeof(dos_header), fp);
 	fwrite(&dos_stub, 1, sizeof(dos_stub), fp);
 	fwrite(&nt_header, 1, sizeof(nt_header), fp);
 
 	for (i = 0; i < pe->sec_size; ++i)
-	{
 		fwrite(&pe->secs[i]->sh, 1, sizeof(IMAGE_SECTION_HEADER), fp);
-	}
 	fclose(fp);
 	return 0;
 }
@@ -656,25 +649,31 @@ int PeWrite(PEInfo* pe)
 int PeOutputFile(const char* filename)
 {
 	if (filename == NULL)
-		Error("链接器内部指针未初始化");
-	
-	PEInfo pe; 
-	
+	{
+		Error("名字不能为空");
+	}
+	PEInfo pe;
+
 	memset(&pe, 0, sizeof(pe));
 	DynArrayInit(&pe.imps, 8);
+
 	pe.filename = filename;
 	AddRuntimeLibs();
 	GetEntryAddr(&pe);
-	
+
 	int ret = ResolveCoffsym(&pe);
 	if (0 == ret)
 	{
+
 		PeAssginAddress(&pe);
+
 		RelocateSyms();
-		CoffElocsFixup();
+
+		CoffRelocsFixup();
+
 		ret = PeWrite(&pe);
 		free(pe.secs);
 	}
-	
+
 	return ret;
 }

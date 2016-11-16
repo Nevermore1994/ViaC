@@ -10,13 +10,48 @@
 #include<windows.h>
 #include<stdio.h>
 
+/************定义动态数组*******/
+typedef struct DynArray
+{
+	int count;
+	int capacity;
+	void** data;
+}DynArray;
+/************动态数组函数*****/
+void DynArrayInit(DynArray* parr, const int size);
+void DynArrayRealloc(DynArray* parr, const int newsize);
+void DynArrayAdd(DynArray* parr, const void* data);
+void DynArrayFree(DynArray* parr);
+int  DynArrayFind(const DynArray* parr, const int data);
+void DynArrayDelete(DynArray* parr, const int i);
+/************单词编码**********/
+
 typedef int bool;
-typedef unsigned int   DWORD;
-typedef unsigned char  BYTE;
-typedef unsigned short WORD;
+
 #define TRUE  1
 #define FLASE 0
 
+enum e_OutType
+{
+	OUTPUT_OBJ,		// 目标文件
+	OUTPUT_EXE,		// EXE可执行文件
+	OUTPUT_MEMORY	// 内存中直接运行，不输出
+};
+
+#define  OUT_FILE_SIZE 256      //输出文件名数组大小
+extern FILE* fin;				//源文件指针
+extern char* filename;				//源文件名
+extern int linenum;				//行号
+extern DynArray srcfiles;			//源文件数组
+extern char* outfile;		//输出文件名
+extern int outtype;          //输出文件类型
+extern float ViaCVersion; //编译器版本
+
+void Compile(char* fname);
+char* GetFileText(char* fname);
+int ProcessCommand(int argc, char** argv);
+void Cleanup(void);
+void Init(void);
 /********定义动态字符串********/
 typedef struct DynString
 {
@@ -32,21 +67,7 @@ void DynStringChcat(DynString* pstr, const int ch);
 void DynStringRealloc(DynString* pstr, const int newsize);
 
 
-/************定义动态数组*******/
-typedef struct DynArray
-{
-	int count;
-	int capacity;
-	void** data;
-}DynArray;
-/************动态数组函数*****/
-void DynArrayInit(DynArray* parr, const int size);
-void DynArrayRealloc(DynArray* parr, const int newsize);
-void DynArrayAdd(DynArray* parr, void* data);
-void DynArrayFree(DynArray* parr);
-int  DynArrayFind(DynArray* parr, const int data);
-void DynArrayDelete(DynArray* parr, const int i);
-/************单词编码**********/
+
 enum e_TokenCode
 {
 	/* 运算符及分隔符 */
@@ -129,26 +150,26 @@ typedef struct TkWord
 
 #define CH_EOF (-1)						//文件尾部标识
 
-TkWord* TkwordInsert(char* p);
+TkWord* TkwordInsert(const char* p);
 TkWord* TkwordDirectInsert(TkWord* pWord);
-TkWord* TkwordFind(char* p, const int key);
+TkWord* TkwordFind(const char* p, const int key);
 
 
-void Getch(void);
+void  GetCh(void);
 void Preprocess(void);
 void ParseIdentifier(void);
 void ParseNum(void);
-void ParseString(void);
+void ParseString(const char sep);
 void InitLex(void);
 void GetToken(void);
-int IsDigit(char c);
-int IsNoDigit(char* c);
+int IsDigit(const char c);
+int IsNoDigit(const char c);
 void SkipWhiteSpace(void);
 void ParseComment(void);
 void ParseComment_2();
 char* GetTkstr(const int v);
 void TestLex(void);
-
+void ColorToken(const int lex_state);
 
 /***************引用变量****************************/
 extern TkWord* tk_hashtable[MAXKEY];	//单词哈希表
@@ -159,21 +180,11 @@ extern char ch;
 extern int tkvalue;
 extern int token;
 
-
-#define  OUT_FILE_SIZE 256      //输出文件名数组大小
-extern FILE* fin;				//源文件指针
-extern char* filename;				//源文件名
-extern int linenum;				//行号
-extern DynArray srcfiles;			//源文件数组
-extern char outfile[OUT_FILE_SIZE];		//输出文件名
-extern int outtype;          //输出文件类型
-extern float ViaCVersion; //编译器版本
-
 /***************错误处理*****************************/
 enum e_ErrorLevel
 {
-	LEVEL_WARNING,
-	LEVEL_ERROR
+	LEVEL_Warning,
+	LEVEL_Error
 };
 
 enum e_WorkStage
@@ -182,22 +193,16 @@ enum e_WorkStage
 	STAGE_LINK
 };
 
-void  Warning(char* fmt, ...);
-void  Error(char* fmt,...);
-void  Expect(char* msg);
+void  Warning(const char* fmt, ...);
+void  Error(const char* fmt,...);
+void  Expect(const char* msg);
 void  Skip(const int c);
-void  LinkError(char* fmt, ...);
-
-/***************词法处理函数********************/
-void ColorToken(const int lex_state);
-void Init(); 
-void Cleanup();
-void GetObjFname(const char* fname);
+void  LinkError(const char* fmt, ...);
 
 /*****************附加函数****************/
 void* MallocInit(const int size);
-int ElfHash(char* key);				// 字符哈希函数
-int CalcAlign(int n, int align);
+int ElfHash(const char* key);				// 字符哈希函数
+int CalcAlign(const int n, const int align);
 
 /********************end*******************/
 
@@ -209,11 +214,11 @@ typedef struct Stack
 	int size;
 }Stack;
 
-void StackInit(Stack* stack, int size);
-void* StackPush(Stack* stack, void* data, int size);
+void StackInit(Stack* stack, const int size);
+void* StackPush(Stack* stack, const void* data, const int size);
 void StackPop(Stack* stack);
-void* StackGetTop(Stack* stack);
-bool StackIsEmpty(Stack* stack);
+void* StackGetTop(const Stack* stack);
+bool StackIsEmpty(const Stack* stack);
 void StackDestroy(Stack* stack);
 /******************end*************************/
 
@@ -243,15 +248,15 @@ typedef struct Symbol
 	struct Symbol  *prev_tok;
 }Symbol;
 
-Symbol* StructSearch(int v);
-Symbol* SymSearch(int v);
-Symbol* SymDirectPush(Stack* stack, int v, Type* type, int c);
-Symbol* SymPush(int v, Type* type, int r, int c);
-Symbol* FuncSymPush(int v, Type *type);
-Symbol* VarSymPut(Type* type, int r, int v, int addr);
-Symbol* SecSymPut(char* sec, int c);
-void SymPop(Stack* stack, Symbol *b);
-int TypeSize(Type *t, int *a);
+Symbol* StructSearch(const int v);
+Symbol* SymSearch(const int v);
+Symbol* SymDirectPush(Stack* stack, const int v, const Type* type, const int c);
+Symbol* SymPush(const int v, const Type* type, const int r, const int c);
+Symbol* FuncSymPush(const int v,const Type *type);
+Symbol *VarSymPut(const Type *type, const int r, const int v, const int addr);
+Symbol* SecSymPut(const char* sec, const int c);
+void SymPop(Stack* ptop, const Symbol* b); //b可以为NULL
+int TypeSize(const Type* t, int* a);
 void MkPointer(Type* ptype);
 /********************end**********************/
 
@@ -301,18 +306,18 @@ extern pSection sec_text, sec_data, sec_bss, sec_idata, sec_rdata, sec_rel, sec_
 extern int nsec_image;
 
 void SectionRealloc(pSection sec, const int newsize);
-void*  SectionPtrAdd(const pSection sec, const int increment);
+void*  SectionPtrAdd(pSection sec, const int increment);
 Section* SectionNew(const char* name, const int characteristics);
 int CoffSymSearch(const pSection symtab, const char* name);
 char* CoffStrAdd(const pSection strtab, const char* name);
-int CoffSymAdd(const pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass);
+int CoffSymAdd(pSection symtab, const char* name, const int val, const int sec_index, const short type, const char StrorageClass);
 void CoffSymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass);
 void FreeSection(void);
-pSection NewCoffSymSection(const char* symtab_name, const int Characteristics, const char* strtab_name);
-void CoffElocDirectAdd(const int offset, const int cfsym, const char section, const char type);
-void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type);
+Section* NewCoffSymSection(char* symtab_name, const int Characteristics, char* strtab_name);
+void CoffRelocDirectAdd(const int offset, const int cfsym, const char section, const char type);
+void CoffRelocAdd(pSection sec, Symbol* sym, const int offset, const char type);
 void InitCoff(void);
-void Fpad(const FILE* fp, const int new_pos);
+void Fpad(FILE* fp, const int new_pos);
 void WriteObj(const char* name);
 /*********************end**************************/
 /*********************operand.h*********************/
@@ -346,7 +351,7 @@ enum  e_StorageClass
 {
 	ViaC_GLOBAL = 0x00f0,
 	ViaC_LOCAL = 0x00f1,
-	ViaC_LLOACL = 0x00f2,
+	ViaC_LLOCAL = 0x00f2,
 	ViaC_CMP = 0x00f3,
 	ViaC_VALMASK = 0x00ff, //存储地址掩码
 	ViaC_LVAL = 0x0100,//左值
@@ -379,12 +384,12 @@ extern int syntax_level;
 
 void TranslationUnit(void);
 void ExternalDeclaration(const int level);
-void Initializer(const Type* ptype, const int c, Section* psec); // 初值符
+void Initializer(Type* ptype, const int c, Section* psec); // 初值符
 int TypeSpecifier(Type* type);
 void StructSpecifier(Type* type);
 void StructDeclarationList(Type* type);
 void StructDeclaration(int* maxalign, int* offset, Symbol*** ps);
-void Declarator(Type* type, const int* v, const int* force_align);
+void Declarator(Type* type, int* v, int* force_align);
 void FunctionCallingConvention(int* fc);
 void StructMemberAlignment(int* force_align);
 void DirectDeclarator(Type* type, int* v, const int func_call);
@@ -394,8 +399,8 @@ void Funcbody(Symbol* sym);
 int IsTypeSpecifier(const int id);
 void Statement(int* bsym, int* csym);
 void CompoundStatement(int* bsym, int* csym);
-void IfStatement(const int* bsym, const int* csym);
-void ForStatement(const int* bsym, const int* csym);
+void IfStatement(int* bsym, int* csym);
+void ForStatement(int* bsym, int* csym);
 void ContinueStatement(int* csym);
 void BreakStatement(int* bsym);
 void ReturnStatement(void);
@@ -454,10 +459,10 @@ void GenByte(const char c);
 void GenPrefix(const char opcode); 
 void GenOpcode_1(const char opcode);
 void GenOpcode_2(const char first, const char end);
-void GenDword(unsigned int c);		
+void GenDwordd(unsigned int c);		
 void BackPatch(int t, const int a); 
 int MakeList(int add);  
-void GenAddr32(const int r, const Symbol* sym, const int c);
+void GenAddr32(const int r, Symbol* sym, const int c);
 void GenModrm(int mod, int reg_opcode, const int r_m, const Symbol* sym, const int c);
 void Load(const int r, Operand* opd);	
 void Store(const int r, Operand* opd); 
@@ -467,8 +472,8 @@ void Store_1(void);
 void GenAddsp(const int val);
 void GenCall(void);
 void GenInvoke(const int nb_args);
-void GenOpi_2(const int opc, const int op);
-void GenOpi_1(int op);
+void GenOpi_1_2(const int opc, const int op);
+void GenOpi_1_1(int op);
 Type* PointedType(Type* t);
 int PointedSize(Type* t);
 void GenOp(const int op);
@@ -480,7 +485,7 @@ void GenJmpBackWord(const int a);
 int GenJcc(int t);
 void GenProlog(Type* func_type);
 void GenEpilog();
-void InitVariable(const Type* ptype, const Section* psec, const int c, const int v);
+void InitVariable(Type* ptype, Section* psec, const int c, const int v);
 Section* AllocateStorage(Type* ptype, const int reg, const int has_init, const int v, int* addr);
 
 /***********************end*****************************/
@@ -515,6 +520,31 @@ typedef struct PEInfo
 	DynArray imps;
 }PEInfo;
 
+extern char* entry_symbol;
+extern DynArray arr_dll;
+extern DynArray arr_lib;
+extern char* lib_path;
+extern short subsystem;
+
+DWORD PeFileAlign(const DWORD addr);
+DWORD PeVirtualAlign(const DWORD addr);
+void PeSetDatadir(const int dir, const DWORD addr, const DWORD size);
+int LoadObjFile(const char* fname);
+char* GetLine(char* line, const int size, const FILE* fp);
+int PeLoadLibFile(char* fname);
+void GetEntryAddr(PEInfo* pe);
+void* GetLibPath();
+void AddRuntimeLibs();
+int PeFindImport(char* symbol);
+ImportSym* PeAddImport(PEInfo* pe, const int sym_index, const  char* name);
+int ResolveCoffsym(PEInfo* pe);
+int PutImportStr(Section* sec, const char* sym);
+void PeBuildImports(PEInfo* pe);
+int PeAssginAddress(PEInfo* pe);
+void RelocateSyms();
+void CoffRelocsFixup();
+int PeWrite(PEInfo* pe);
+int PeOutputFile(const char* filename);
 char* GetDllName(const char* libfile);
 #endif // viac.h_
 
