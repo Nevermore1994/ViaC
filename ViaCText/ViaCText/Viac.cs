@@ -1,263 +1,432 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Collections;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DMSkin;
 using System.Windows.Forms;
+using DMSkin.Metro.Controls;
+using DMSkin.Controls;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace ViaCText
 {
-    public partial class Viac : Form
+    public partial class ViaC : Form
     {
-        string path = null;
-        string isSaved = "N";
-        int initLengIt = 0;
-        string textstyle = "unicode";
-        
-        public Viac()
+        private int childFormNumber = 0;
+        /***********************当前窗口设定*************************/
+        //文件路径
+        private string path;
+        //编辑器的名字
+        private const string editorname = "ViaC编译器";
+        //当前活动的文件
+        private RichTextBox nowrich;
+        //默认文件名字
+        string defaultname;
+        //默认创建的个数
+        int defaultnum ;
+        Dictionary<int,bool> openrich;
+        //默认格式
+        /******************工具栏设置********************/
+        //当前编码格式
+        private string textstyle = "acsii";
+        //当前字体
+        private Font nowfont;
+        //当前字体颜色
+        private Color fontcolor = Color.Black;
+        int config = 001;
+        //当前所有的rich
+        List<RichTextBox> richs = new List<RichTextBox>( );
+        //所有的页
+        public List<TabPage> pages; 
+        private TabControl tab;
+        private string skin = "black.ssk";
+        private const string skinpath = "C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\Skins\\";
+        public ViaC()
         {
             InitializeComponent( );
         }
-        private void Viac_Load(object sender, EventArgs e)
+        private void Source()
         {
-            复制ToolStripMenuItem.Enabled = false;
-            粘贴ToolStripMenuItem.Enabled = false;
-            if (!string.IsNullOrEmpty(path))
-                OpenFile(".ViaC");
+            XmlDocument config = new XmlDocument( );
+            config.Load("C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\viac.config");
+            XmlNode root = config.SelectSingleNode("configuration");
+            XmlNodeList nodelist = root.ChildNodes;
+            XmlElement configskin = (XmlElement)nodelist[0];
+            int size = int.Parse(configskin.GetAttribute("skin"));
+            Set(size);
+            XmlElement configfont = (XmlElement)nodelist[1];
+            string fontname = configfont.GetAttribute("font");
+            float fontsize = float.Parse(configfont.GetAttribute("size"));
+            nowfont = new Font(fontname, fontsize);
+            string configcolor = configfont.GetAttribute("color");
+            fontcolor = Color.FromName(configcolor);
         }
-
-        private void OpenFile(string style)
+        private void Set(int num)
         {
-            try
+            config = num;
+            int [] res = new int[3];
+            res.Initialize();
+            int i = 2;
+            while(i >= 0)
             {
-                string extname = path.Substring(path.LastIndexOf("."));
-                if(extname.ToLower().Equals(style))
-                {
-                    if(textstyle.Equals("unicode"))
-                     richTextBox1.LoadFile(path, RichTextBoxStreamType.UnicodePlainText);
-                    else
-                        richTextBox1.LoadFile(path, RichTextBoxStreamType.PlainText);
-                }
-                Text = "ViaC编译器" + path;
+                res[i] = num % 10;
+                num /= 10;
+                --i;
             }
-            catch(Exception ex)
+           if(res[0] == 1)
             {
-                MessageBox.Show(ex.ToString(), "提示");
-            } 
-        }
-
-        private void ubicodeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textstyle = "unicode";
-            ubicodeToolStripMenuItem.Checked = true;
-            acsiiToolStripMenuItem.Checked = false;
-            if(!string.IsNullOrEmpty(path))
-                richTextBox1.LoadFile(path, RichTextBoxStreamType.UnicodePlainText);
-        }
-
-        private void acsiiToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textstyle = "ascii";
-            ubicodeToolStripMenuItem.Checked = false;
-            acsiiToolStripMenuItem.Checked = true;
-            if (!string.IsNullOrEmpty(path))
-                richTextBox1.LoadFile(path, RichTextBoxStreamType.PlainText);
-        }
-
-        private void viaC文件ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.openFileDialog1.ShowDialog( ) == DialogResult.OK)
+                skin = "sky.ssk";
+                skyToolStripMenuItem.Checked = true;
+                blackToolStripMenuItem.Checked = false;
+                grayToolStripMenuItem.Checked = false;
+            }
+           else if(res[1] == 1)
             {
-                path = this.openFileDialog1.FileName;
-                OpenFile(".viac");
+                skin = "black.ssk";
+                skyToolStripMenuItem.Checked = false;
+                blackToolStripMenuItem.Checked = true;
+                grayToolStripMenuItem.Checked = false;
+            }
+           else
+            {
+                skin = "blue.ssk";
+                skyToolStripMenuItem.Checked = false;
+                blackToolStripMenuItem.Checked = false;
+                grayToolStripMenuItem.Checked = true;
             }
         }
-
-        private void 头文件ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ViaC_Load(object sender, EventArgs e)
         {
-            if (this.openFileDialog1.ShowDialog( ) == DialogResult.OK)
-            {
-                path = this.openFileDialog1.FileName;
-                OpenFile(".h");
-            }
+            Source( );
+            skinEngine1.SkinFile = "C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\Skins\\" + skin;
+            tab = new SimpleTabControl( );
+            tab.Location = new Point(27, 55);
+            tab.Size = new Size(1000, 600);
+            this.Controls.Add(this.tab);
+            tab.Visible = false;
+            tab.Dock = DockStyle.Fill;
+            tab.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
+            Text = editorname;
+            path = null;
+            nowrich = null;
+            defaultname = "viac";
+            defaultnum = 1;
+            openrich = new Dictionary<int,bool>();
+            pages = new List<TabPage>( );
+            tab.DoubleClick += new EventHandler(TabPageDoubleCilck);
+
+          
+        }
+        private void ShowNewForm(object sender, EventArgs e)
+        {
+            string name = defaultname + defaultnum +"." + defaultname;
+            ++defaultnum;
+            RichTextBox text = CreateWindow(name);
         }
 
-        private void 其他ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenFile(object sender, EventArgs e)
         {
-            if (this.openFileDialog1.ShowDialog( ) == DialogResult.OK)
+            OpenFileDialog openFileDialog = new OpenFileDialog( );
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            openFileDialog.Filter = "ViaC文件(*.viac)|*viac|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
+            if (openFileDialog.ShowDialog(this) == DialogResult.OK)
             {
-                path = this.openFileDialog1.FileName;
-                OpenFile(".txt");
-            }
-        }
-
-        private void 保存ToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                saveFileDialog1.Title = "保存为";
-                if (saveFileDialog1.ShowDialog( ) == DialogResult.OK)
-                {
-                    path = saveFileDialog1.FileName;
-                    SaveFile( );
-                } 
-            }
-            else
-            {
-                string extname = path.Substring(path.LastIndexOf("."));
-                if(extname.ToLower().Equals(".txt") || extname.ToLower( ).Equals(".viac")||
-                    extname.ToLower( ).Equals(".c") || extname.ToLower( ).Equals(".c"))
-                {
-                    if (textstyle.Equals("ascii"))
-                        richTextBox1.SaveFile( path, RichTextBoxStreamType.RichText);
-                    else
-                        richTextBox1.SaveFile(path, RichTextBoxStreamType.UnicodePlainText);
-                }
-            }
-        }
-        private void SaveFile()
-        {
-            try
-            {
-                if (textstyle.Equals("ascii"))
-                    richTextBox1.SaveFile(path, RichTextBoxStreamType.RichText);
+               path = openFileDialog.FileName;
+                string filename = path.Substring(path.LastIndexOf('\\') + 1);
+                RichTextBox text = CreateWindow(filename);
+                if (textstyle.Equals("acsii"))
+                    text.LoadFile(path, RichTextBoxStreamType.PlainText);
                 else
-                    richTextBox1.SaveFile(path, RichTextBoxStreamType.UnicodePlainText);
+                    text.LoadFile(path, RichTextBoxStreamType.UnicodePlainText);
+                if (nowfont != null)
+                    text.Font = nowfont;
+                Text = editorname + path;
             }
-            catch
-            {
-                MessageBox.Show("保存失败","提示");
-            }
-           
         }
 
-       
-
-        private void 新建ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if( isSaved.Equals("N"))
+            SaveFileDialog saveFileDialog = new SaveFileDialog( );
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            saveFileDialog.Filter = "ViaC文件(*.viac)|*.viac|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
+            if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
             {
-                 DialogResult res = MessageBox.Show("文件没有保存", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if ( res == DialogResult.Yes)
+                string FileName = saveFileDialog.FileName;
+                path = FileName;
+                if (textstyle.Equals("acsii"))
+                    nowrich.SaveFile(path , RichTextBoxStreamType.PlainText);
+                else
+                    nowrich.SaveFile(path , RichTextBoxStreamType.UnicodePlainText);
+                string str = path.Substring(path.LastIndexOf("\\") + 1);
+                tab.SelectedTab.Text = str;
+                openrich.Remove((int)nowrich.Tag);
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (path != null)
+            {
+                if (textstyle.Equals("acsii"))
+                    nowrich.SaveFile(path, RichTextBoxStreamType.PlainText);
+                else
+                    nowrich.SaveFile(path, RichTextBoxStreamType.UnicodePlainText);
+                string str = tab.SelectedTab.Text;
+                tab.SelectedTab.Text = str.Substring(0, str.IndexOf('*'));
+                openrich.Remove((int)nowrich.Tag);
+            }
+
+            else
+            {
+                SaveAsToolStripMenuItem_Click(sender, e);
+            }
+        }
+
+        private void ExitToolsStripMenuItem_Click(object sender, EventArgs e)
+        {
+          
+            if (openrich.Count != 0)
+            {
+                DialogResult  res =   MessageBox.Show("是否保存修改？", "ViaC编译器提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if(res == DialogResult.Yes)
                 {
-                    richTextBox1.Clear( );
-                    initLengIt = richTextBox1.TextLength;
-                    保存ToolStripMenuItem1_Click(sender, e);
+                    saveToolStripMenuItem_Click(sender, e);
                 }
+               
             }
             else
             {
-                richTextBox1.Clear( );
-                Text = "ViaC编译器";
-                initLengIt = richTextBox1.TextLength;
+                this.Close( );
             }
         }
 
-        private void 另存为ToolStripMenuItem_Click_1(object sender, EventArgs e)
+        private void CutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            保存ToolStripMenuItem1_Click(sender, e);
+            nowrich.Cut( );
         }
 
-        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CopyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Copy( );
-        }
-        private void 粘贴ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Paste( );
-        }
-        private void 剪切ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Cut( );
-        }
-        private void 撤销ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Undo( );
+            nowrich.Copy( );
         }
 
-        private void 删除ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (richTextBox1.SelectedText != "")
+            nowrich.Paste( );
+        }
+        private void undoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            nowrich.Undo( );
+        }
+
+        private void redoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            nowrich.Redo( );
+        }
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            nowrich.SelectAll( );
+        }
+        private void ToolBarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStrip.Visible = toolBarToolStripMenuItem.Checked;
+        }
+
+        private void StatusBarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            statusStrip.Visible = statusBarToolStripMenuItem.Checked;
+        }
+
+        private void CascadeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.Cascade);
+        }
+
+        private void TileVerticalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.TileVertical);
+        }
+
+        private void TileHorizontalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.TileHorizontal);
+        }
+
+        private void ArrangeIconsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.ArrangeIcons);
+        }
+
+        private void CloseAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form childForm in MdiChildren)
             {
-                richTextBox1.SelectedText = "";
+                childForm.Close( );
             }
         }
-        private void 重做ToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void 字体设置ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Redo( );
-        }
-        private void 全选ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.HideSelection = false;
-            richTextBox1.SelectAll( );
-        }
-        private void 字体ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
+            if(fontDialog1.ShowDialog()  == DialogResult.OK)
             {
-                SetFont( );
+                nowfont = fontDialog1.Font;
+               
+                foreach (RichTextBox rich in richs)
+                {
+                    rich.Font = nowfont;
+                    rich.ForeColor = fontcolor;
+                }
+                SaveConfig(config);
             }
-            catch
-            {
-                MessageBox.Show("设置字体失败", "错误提示");
-            }
+          
         }
-        private void SetFont()
-        {
-            if(fontDialog1.ShowDialog() == DialogResult.OK)
-            {
-                richTextBox1.Font = fontDialog1.Font;
-            }
-        }
-        private void 复制本行ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-             
-        }
-        private void 颜色ToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void 字体颜色ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if(colorDialog1.ShowDialog() == DialogResult.OK)
             {
-                richTextBox1.SelectionColor = colorDialog1.Color;
+                fontcolor = colorDialog1.Color;
+                foreach (RichTextBox rich in richs)
+                {
+                    rich.ForeColor = fontcolor;
+                    rich.Font = nowfont;
+                }
+                SaveConfig(config);
             }
         }
-
-        private void 退出ToolStripMenuItem_Click(object sender, EventArgs e)
+        private RichTextBox CreateWindow(string name)
         {
-            if ( (isSaved.Equals("N")))
+            TabPage source = new TabPage(name);
+            source.AutoScroll = true;
+            tab.Controls.Add(source);
+            RichTextBox text = new RichTextBox( );
+            text.Size = source.Size;
+            text.Dock = DockStyle.Fill;
+            text.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
+            text.AcceptsTab = true;
+            text.TextChanged  += new System.EventHandler(this.richTextBox_TextChanged);
+            text.Tag = richs.Count;
+            text.Font = nowfont;
+            text.ForeColor = fontcolor;
+            text.MouseClick += new MouseEventHandler(TextCilck);
+            source.Controls.Add(text);
+            source.AutoScroll = true;   
+            source.Tag = pages.Count;
+           
+            tab.Visible = true;
+            text.Visible = true;
+            source.Show( );
+            nowrich = text;
+            tab.SelectedTab = source;
+            richs.Add(text);
+            pages.Add(source);
+            return text;
+        }
+
+        private void TextCilck(object sender, EventArgs e)
+        {
+            RichTextBox rich = (RichTextBox)sender;
+            nowrich = rich;
+            
+        }
+
+        private void TabPageDoubleCilck(object sender, EventArgs e)
+        {
+            int index = tab.SelectedIndex;
+            TabPage page = tab.TabPages[index];
+            if (openrich.ContainsKey((int)nowrich.Tag))
             {
-                DialogResult res = MessageBox.Show("文件没有保存", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult res = MessageBox.Show("是否保存修改？", "ViaC编译器提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (res == DialogResult.Yes)
                 {
-                    richTextBox1.Clear( );
-                    initLengIt = richTextBox1.TextLength;
-                    保存ToolStripMenuItem1_Click(sender, e);
+                    saveToolStripMenuItem_Click(sender, e);
+                    
+                }
+                openrich.Remove((int)nowrich.Tag); // 不管是否保存都要删除
+            }
+            if (tab.TabCount >0)
+            {
+                tab.TabPages.RemoveAt(index);
+            }
+            if(tab.TabCount == 0)
+            {
+                tab.Visible = false;
+            }
+            
+        }
+
+        private void richTextBox_TextChanged(object sender, EventArgs e)
+        {
+            
+            RichTextBox rich = (RichTextBox)sender;
+            if (openrich.ContainsKey((int)nowrich.Tag) == false)
+            {
+                openrich.Add((int)nowrich.Tag, false);
+                tab.SelectedTab.Text += "*";
+            }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void ViaC_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (openrich.Count != 0)
+            {
+                DialogResult res = MessageBox.Show("是否保存修改？", "ViaC编译器提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (res == DialogResult.Yes)
+                {
+                    saveToolStripMenuItem_Click(sender, e);
                 }
             }
-            else
-            {
-                Dispose( );
-                Close( );
-            }
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+
+
+        private void skyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            skin = "sky.ssk";
+            skyToolStripMenuItem.Checked = true;
+            blackToolStripMenuItem.Checked = false;
+            grayToolStripMenuItem.Checked = false;
+            skinEngine1.SkinFile = skinpath + skin;
+            config = 100;
+            SaveConfig(config);
         }
 
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        private void blackToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            isSaved = "N";
+            skin = "black.ssk";
+            skyToolStripMenuItem.Checked = false;
+            blackToolStripMenuItem.Checked = true;
+            grayToolStripMenuItem.Checked = false;
+            skinEngine1.SkinFile = skinpath + skin;
+            config = 010;
+            SaveConfig(config);
         }
 
-        private void saveFileDialog1_FileOk(object sender, CancelEventArgs e)
+        private void grayToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            isSaved = "Y";
+            skin = "blue.ssk";
+            skyToolStripMenuItem.Checked = false;
+            blackToolStripMenuItem.Checked = false;
+            grayToolStripMenuItem.Checked = true;
+            skinEngine1.SkinFile = skinpath + skin;
+            config = 001;
+            SaveConfig(config);
         }
-
- 
+        private void SaveConfig(int num)
+        {
+            var doc = new XDocument(
+                     new XElement("configuration", new XElement("style", new XAttribute("skin", num)),
+                       new XElement("font", new XAttribute("font", nowfont.Name), new XAttribute("size", nowfont.Size), new XAttribute("color", fontcolor.Name))
+                       )
+                      );
+            doc.Save("viac.config");
+        }
     }
 }

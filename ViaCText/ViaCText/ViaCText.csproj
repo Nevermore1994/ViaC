@@ -48,8 +48,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CSkin">
+      <HintPath>F:\迅雷下载\CSkin 16.1.14.2\CSkin 4.0\CSkin.dll</HintPath>
+    </Reference>
+    <Reference Include="DMSkin">
+      <HintPath>F:\迅雷下载\DMSkin-B316\DMSkin.dll</HintPath>
+    </Reference>
+    <Reference Include="FlatTabControl">
+      <HintPath>F:\迅雷下载\X86\1.0.0.0\FlatTabControl.dll</HintPath>
+    </Reference>
+    <Reference Include="IrisSkin4">
+      <HintPath>..\..\..\..\Desktop\IrisSkin4.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -61,16 +74,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Viac.cs">
+    <Compile Include="SimpleTabContrl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ViaC.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Viac.Designer.cs">
-      <DependentUpon>Viac.cs</DependentUpon>
+    <Compile Include="ViaC.Designer.cs">
+      <DependentUpon>ViaC.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Viac.resx">
-      <DependentUpon>Viac.cs</DependentUpon>
+    <EmbeddedResource Include="ViaC.resx">
+      <DependentUpon>ViaC.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -81,6 +97,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="viac.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

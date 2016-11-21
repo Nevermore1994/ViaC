@@ -16,7 +16,7 @@ namespace ViaCText
         {
             Application.EnableVisualStyles( );
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Viac( ));
+            Application.Run(new ViaC());
         }
     }
 }
