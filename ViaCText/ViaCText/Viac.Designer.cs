@@ -60,6 +60,14 @@
             this.字体设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.字体颜色ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.主题风格ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.skyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.blackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.grayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.编译器设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.默认文件名ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viacToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.newWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cascadeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,12 +95,13 @@
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.skinEngine1 = new Sunisoft.IrisSkin.SkinEngine();
-            this.skyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.blackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.grayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.linenumbox = new System.Windows.Forms.Label();
+            this.tab = new ViaCText.SimpleTabControl();
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip
@@ -339,7 +348,8 @@
             this.optionsToolStripMenuItem,
             this.字体设置ToolStripMenuItem,
             this.字体颜色ToolStripMenuItem,
-            this.主题风格ToolStripMenuItem});
+            this.主题风格ToolStripMenuItem,
+            this.编译器设置ToolStripMenuItem});
             this.toolsMenu.Name = "toolsMenu";
             this.toolsMenu.Size = new System.Drawing.Size(70, 24);
             this.toolsMenu.Text = "工具(&T)";
@@ -347,20 +357,20 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
             this.optionsToolStripMenuItem.Text = "选项(&O)";
             // 
             // 字体设置ToolStripMenuItem
             // 
             this.字体设置ToolStripMenuItem.Name = "字体设置ToolStripMenuItem";
-            this.字体设置ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.字体设置ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
             this.字体设置ToolStripMenuItem.Text = "字体设置";
             this.字体设置ToolStripMenuItem.Click += new System.EventHandler(this.字体设置ToolStripMenuItem_Click);
             // 
             // 字体颜色ToolStripMenuItem
             // 
             this.字体颜色ToolStripMenuItem.Name = "字体颜色ToolStripMenuItem";
-            this.字体颜色ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.字体颜色ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
             this.字体颜色ToolStripMenuItem.Text = "字体颜色";
             this.字体颜色ToolStripMenuItem.Click += new System.EventHandler(this.字体颜色ToolStripMenuItem_Click);
             // 
@@ -371,8 +381,68 @@
             this.blackToolStripMenuItem,
             this.grayToolStripMenuItem});
             this.主题风格ToolStripMenuItem.Name = "主题风格ToolStripMenuItem";
-            this.主题风格ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.主题风格ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
             this.主题风格ToolStripMenuItem.Text = "主题风格";
+            // 
+            // skyToolStripMenuItem
+            // 
+            this.skyToolStripMenuItem.Name = "skyToolStripMenuItem";
+            this.skyToolStripMenuItem.Size = new System.Drawing.Size(122, 26);
+            this.skyToolStripMenuItem.Text = "sky";
+            this.skyToolStripMenuItem.Click += new System.EventHandler(this.skyToolStripMenuItem_Click);
+            // 
+            // blackToolStripMenuItem
+            // 
+            this.blackToolStripMenuItem.Name = "blackToolStripMenuItem";
+            this.blackToolStripMenuItem.Size = new System.Drawing.Size(122, 26);
+            this.blackToolStripMenuItem.Text = "black";
+            this.blackToolStripMenuItem.Click += new System.EventHandler(this.blackToolStripMenuItem_Click);
+            // 
+            // grayToolStripMenuItem
+            // 
+            this.grayToolStripMenuItem.Name = "grayToolStripMenuItem";
+            this.grayToolStripMenuItem.Size = new System.Drawing.Size(122, 26);
+            this.grayToolStripMenuItem.Text = "gray";
+            this.grayToolStripMenuItem.Click += new System.EventHandler(this.grayToolStripMenuItem_Click);
+            // 
+            // 编译器设置ToolStripMenuItem
+            // 
+            this.编译器设置ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.默认文件名ToolStripMenuItem});
+            this.编译器设置ToolStripMenuItem.Name = "编译器设置ToolStripMenuItem";
+            this.编译器设置ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
+            this.编译器设置ToolStripMenuItem.Text = "编译器设置";
+            // 
+            // 默认文件名ToolStripMenuItem
+            // 
+            this.默认文件名ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cToolStripMenuItem,
+            this.viacToolStripMenuItem,
+            this.hToolStripMenuItem});
+            this.默认文件名ToolStripMenuItem.Name = "默认文件名ToolStripMenuItem";
+            this.默认文件名ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
+            this.默认文件名ToolStripMenuItem.Text = "默认文件名";
+            // 
+            // cToolStripMenuItem
+            // 
+            this.cToolStripMenuItem.Name = "cToolStripMenuItem";
+            this.cToolStripMenuItem.Size = new System.Drawing.Size(112, 26);
+            this.cToolStripMenuItem.Text = "c";
+            this.cToolStripMenuItem.Click += new System.EventHandler(this.cToolStripMenuItem_Click);
+            // 
+            // viacToolStripMenuItem
+            // 
+            this.viacToolStripMenuItem.Name = "viacToolStripMenuItem";
+            this.viacToolStripMenuItem.Size = new System.Drawing.Size(112, 26);
+            this.viacToolStripMenuItem.Text = "viac";
+            this.viacToolStripMenuItem.Click += new System.EventHandler(this.viacToolStripMenuItem_Click);
+            // 
+            // hToolStripMenuItem
+            // 
+            this.hToolStripMenuItem.Name = "hToolStripMenuItem";
+            this.hToolStripMenuItem.Size = new System.Drawing.Size(112, 26);
+            this.hToolStripMenuItem.Text = "h";
+            this.hToolStripMenuItem.Click += new System.EventHandler(this.hToolStripMenuItem_Click);
             // 
             // windowsMenu
             // 
@@ -587,32 +657,47 @@
             this.skinEngine1.SerialNumber = "";
             this.skinEngine1.SkinFile = null;
             // 
-            // skyToolStripMenuItem
+            // panel1
             // 
-            this.skyToolStripMenuItem.Name = "skyToolStripMenuItem";
-            this.skyToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.skyToolStripMenuItem.Text = "sky";
-            this.skyToolStripMenuItem.Click += new System.EventHandler(this.skyToolStripMenuItem_Click);
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.panel1.Controls.Add(this.linenumbox);
+            this.panel1.Location = new System.Drawing.Point(0, 58);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(32, 666);
+            this.panel1.TabIndex = 8;
             // 
-            // blackToolStripMenuItem
+            // linenumbox
             // 
-            this.blackToolStripMenuItem.Name = "blackToolStripMenuItem";
-            this.blackToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.blackToolStripMenuItem.Text = "black";
-            this.blackToolStripMenuItem.Click += new System.EventHandler(this.blackToolStripMenuItem_Click);
+            this.linenumbox.AutoEllipsis = true;
+            this.linenumbox.AutoSize = true;
+            this.linenumbox.Location = new System.Drawing.Point(3, 60);
+            this.linenumbox.Name = "linenumbox";
+            this.linenumbox.Size = new System.Drawing.Size(15, 60);
+            this.linenumbox.TabIndex = 0;
+            this.linenumbox.Text = "1\r\n2\r\n3\r\n4\r\n";
+            this.linenumbox.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // grayToolStripMenuItem
+            // tab
             // 
-            this.grayToolStripMenuItem.Name = "grayToolStripMenuItem";
-            this.grayToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.grayToolStripMenuItem.Text = "gray";
-            this.grayToolStripMenuItem.Click += new System.EventHandler(this.grayToolStripMenuItem_Click);
+            this.tab.Appearance = System.Windows.Forms.TabAppearance.Buttons;
+            this.tab.DM_UseCustomBackColor = true;
+            this.tab.DM_UseSelectable = true;
+            this.tab.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
+            this.tab.ItemSize = new System.Drawing.Size(100, 30);
+            this.tab.Location = new System.Drawing.Point(38, 92);
+            this.tab.Name = "tab";
+            this.tab.Size = new System.Drawing.Size(1278, 632);
+            this.tab.Style = DMSkin.Metro.MetroColorStyle.Lime;
+            this.tab.TabIndex = 10;
             // 
             // ViaC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1341, 752);
+            this.Controls.Add(this.tab);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.statusStrip);
@@ -630,6 +715,8 @@
             this.toolStrip.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -698,6 +785,14 @@
         private System.Windows.Forms.ToolStripMenuItem skyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blackToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem grayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 编译器设置ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 默认文件名ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viacToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hToolStripMenuItem;
+        private System.Windows.Forms.Panel panel1;
+        private SimpleTabControl tab;
+        private System.Windows.Forms.Label linenumbox;
     }
 }
 

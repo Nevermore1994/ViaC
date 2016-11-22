@@ -23,7 +23,7 @@ namespace ViaCText
         //当前活动的文件
         private RichTextBox nowrich;
         //默认文件名字
-        string defaultname;
+        public string defaultname;
         //默认创建的个数
         int defaultnum ;
         Dictionary<int,bool> openrich;
@@ -38,9 +38,6 @@ namespace ViaCText
         int config = 001;
         //当前所有的rich
         List<RichTextBox> richs = new List<RichTextBox>( );
-        //所有的页
-        public List<TabPage> pages; 
-        private TabControl tab;
         private string skin = "black.ssk";
         private const string skinpath = "C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\Skins\\";
         public ViaC()
@@ -62,6 +59,7 @@ namespace ViaCText
             nowfont = new Font(fontname, fontsize);
             string configcolor = configfont.GetAttribute("color");
             fontcolor = Color.FromName(configcolor);
+            defaultname = ((XmlElement)nodelist[2]).GetAttribute("name");
         }
         private void Set(int num)
         {
@@ -101,9 +99,7 @@ namespace ViaCText
         {
             Source( );
             skinEngine1.SkinFile = "C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\Skins\\" + skin;
-            tab = new SimpleTabControl( );
             tab.Location = new Point(27, 55);
-            tab.Size = new Size(1000, 600);
             this.Controls.Add(this.tab);
             tab.Visible = false;
             tab.Dock = DockStyle.Fill;
@@ -111,13 +107,11 @@ namespace ViaCText
             Text = editorname;
             path = null;
             nowrich = null;
-            defaultname = "viac";
             defaultnum = 1;
             openrich = new Dictionary<int,bool>();
-            pages = new List<TabPage>( );
-            tab.DoubleClick += new EventHandler(TabPageDoubleCilck);
-
-          
+            panel1.Visible = false;
+            linenumbox.Font = nowfont;
+            tab.DoubleClick += new EventHandler(TabPageDoubleCilck);     
         }
         private void ShowNewForm(object sender, EventArgs e)
         {
@@ -275,6 +269,7 @@ namespace ViaCText
                
                 foreach (RichTextBox rich in richs)
                 {
+                    linenumbox.Font = nowfont;
                     rich.Font = nowfont;
                     rich.ForeColor = fontcolor;
                 }
@@ -307,29 +302,54 @@ namespace ViaCText
             text.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
             text.AcceptsTab = true;
             text.TextChanged  += new System.EventHandler(this.richTextBox_TextChanged);
+            text.ScrollBars = RichTextBoxScrollBars.Both;
             text.Tag = richs.Count;
             text.Font = nowfont;
             text.ForeColor = fontcolor;
             text.MouseClick += new MouseEventHandler(TextCilck);
+            text.VScroll += new EventHandler(textVScroll);
             source.Controls.Add(text);
-            source.AutoScroll = true;   
-            source.Tag = pages.Count;
+            source.Tag = 0;
            
             tab.Visible = true;
             text.Visible = true;
             source.Show( );
+            panel1.Visible = true;
             nowrich = text;
             tab.SelectedTab = source;
             richs.Add(text);
-            pages.Add(source);
             return text;
+        }
+
+        private void textVScroll(object sender, EventArgs e)
+        {
+            int d = nowrich.GetPositionFromCharIndex(0).Y %
+                    (nowrich.Font.Height + 1);
+            linenumbox.Location = new Point(0, d);
+            PaintLine( );
         }
 
         private void TextCilck(object sender, EventArgs e)
         {
             RichTextBox rich = (RichTextBox)sender;
             nowrich = rich;
+            GetLine( );
+           
+        }
+        private void PaintLine()
+        {
+            int num = nowrich.Lines.Length;
+            if(num != (int)tab.SelectedTab.Tag)
+            {
+                tab.SelectedTab.Tag  = num;
+                linenumbox.Text = "";
+                for (int i = 1; i <= num; i++)
+                {
+                    linenumbox.Text += i + 1 + "\n";
+                }
+            }
             
+
         }
 
         private void TabPageDoubleCilck(object sender, EventArgs e)
@@ -359,13 +379,14 @@ namespace ViaCText
 
         private void richTextBox_TextChanged(object sender, EventArgs e)
         {
-            
             RichTextBox rich = (RichTextBox)sender;
             if (openrich.ContainsKey((int)nowrich.Tag) == false)
             {
                 openrich.Add((int)nowrich.Tag, false);
                 tab.SelectedTab.Text += "*";
             }
+          
+            PaintLine();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -383,6 +404,7 @@ namespace ViaCText
                     saveToolStripMenuItem_Click(sender, e);
                 }
             }
+            SaveConfig(config);
         }
 
 
@@ -423,10 +445,40 @@ namespace ViaCText
         {
             var doc = new XDocument(
                      new XElement("configuration", new XElement("style", new XAttribute("skin", num)),
-                       new XElement("font", new XAttribute("font", nowfont.Name), new XAttribute("size", nowfont.Size), new XAttribute("color", fontcolor.Name))
+                       new XElement("font", new XAttribute("font", nowfont.Name), new XAttribute("size", nowfont.Size), new XAttribute("color", fontcolor.Name)), 
+                       new XElement("default", new XAttribute("name", defaultname))
                        )
                       );
             doc.Save("viac.config");
         }
+
+        private void cToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            defaultname = "c";
+            SaveConfig(config);
+        }
+
+        private void viacToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            defaultname = "viac";
+            SaveConfig(config);
+        }
+
+        private void hToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            defaultname = "h";
+            SaveConfig(config);
+        }
+        private void GetLine()
+        {
+            int index = nowrich.GetFirstCharIndexOfCurrentLine( );
+          
+            int line = nowrich.GetLineFromCharIndex(index) + 1;
+            int column = nowrich.SelectionStart - index + 1;
+            this.toolStripStatusLabel.Text = "状态" + "   " + "行:" + line + "列" + column;
+           
+        }
+
+     
     }
 }

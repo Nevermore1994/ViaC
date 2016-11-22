@@ -74,6 +74,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NumberedTextBoxUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="NumberedTextBoxUC.designer.cs">
+      <DependentUpon>NumberedTextBoxUC.cs</DependentUpon>
+    </Compile>
     <Compile Include="SimpleTabContrl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -85,6 +91,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="NumberedTextBoxUC.resx">
+      <DependentUpon>NumberedTextBoxUC.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ViaC.resx">
       <DependentUpon>ViaC.cs</DependentUpon>
     </EmbeddedResource>
@@ -97,7 +106,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="viac.config" />
+    <None Include="viac.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -109,7 +120,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
