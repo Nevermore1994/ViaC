@@ -9,7 +9,7 @@
 FILE* fin = NULL;				//源文件指针
 char* filename = NULL;				//源文件名
 int linenum;				//行号
-DynArray srcfiles;			//源文件数组
+Array srcfiles;			//源文件数组
 char* outfile = NULL;		//输出文件名
 int outtype;          //输出文件类型
 float ViaCVersion = 1.00; //编译器版本
@@ -29,9 +29,9 @@ void* MallocInit(const int size)
 
 void Init(void)
 {
-	DynArrayInit(&srcfiles, 1);
-	DynArrayInit(&arr_lib, 4);
-	DynArrayInit(&arr_dll, 4);
+	ArrayInit(&srcfiles, 1);
+	ArrayInit(&arr_lib, 4);
+	ArrayInit(&arr_dll, 4);
 
 	InitLex();
 
@@ -68,7 +68,7 @@ void Cleanup(void)
 		free(tktable.data[i]);
 	}
 	free(tktable.data);
-	DynArrayFree(&arr_dll);
+	ArrayFree(&arr_dll);
 	if (srcfiles.data)
 	{
 		free(srcfiles.data);
@@ -98,13 +98,13 @@ int ProcessCommand(int argc, char** argv)
 				}
 				case 'c':
 				{
-					DynArrayAdd(&srcfiles, argv[++i]);
+					ArrayAdd(&srcfiles, argv[++i]);
 					outtype = OUTPUT_OBJ;
 					return 1;
 				}
 				case 'l':
 				{
-					DynArrayAdd(&arr_lib, &argv[i][2]);
+					ArrayAdd(&arr_lib, &argv[i][2]);
 					break;
 				}
 				case 'G':
@@ -132,7 +132,7 @@ int ProcessCommand(int argc, char** argv)
 		else
 		{
 
-			DynArrayAdd(&srcfiles, argv[i]);
+			ArrayAdd(&srcfiles, argv[i]);
 		}
 	}
 

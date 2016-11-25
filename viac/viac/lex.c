@@ -8,10 +8,10 @@
 
 typedef TkWord* pTkWord;
 
-DynArray tktable;
+Array tktable;
 TkWord* tk_hashtable[MAXKEY];
-DynString sourcestr;
-DynString tkstr;
+String sourcestr;
+String tkstr;
 char ch;
 int token;
 int tkvalue;
@@ -23,7 +23,7 @@ TkWord* TkwordDirectInsert(TkWord* tp)
 	tp->sym_id = NULL;
 	tp->sym_struct = NULL;
 
-	DynArrayAdd(&tktable, tp);
+	ArrayAdd(&tktable, tp);
 	keyno = ElfHash(tp->spelling);
 
 	tp->next = tk_hashtable[keyno];
@@ -64,7 +64,7 @@ TkWord* TkwordInsert(const char *p)
 		tp = (TkWord*)MallocInit(sizeof(TkWord) + length + 1);
 		tp->next = tk_hashtable[keyno];
 		tk_hashtable[keyno] = tp;
-		DynArrayAdd(&tktable, tp);
+		ArrayAdd(&tktable, tp);
 		tp->tkcode = tktable.count - 1;
 		s = (char *)tp + sizeof(TkWord);
 		tp->spelling = (char *)s;
@@ -142,7 +142,7 @@ void InitLex()
 		{ 0,			NULL,	    NULL,	        NULL,	NULL }
 	};
 
-	DynArrayInit(&tktable, 8);
+	ArrayInit(&tktable, 8);
 	for (tp = &keywords[0]; tp->spelling != NULL; tp++)
 		TkwordDirectInsert(tp);
 }
@@ -292,47 +292,47 @@ int IsDigit(const char c)
 
 void ParseIdentifier()
 {
-	DynStringReset(&tkstr);
-	DynStringChcat(&tkstr, ch);
+	StringReset(&tkstr);
+	StringChcat(&tkstr, ch);
 	 GetCh();
 	while (IsNoDigit(ch) || IsDigit(ch))
 	{
-		DynStringChcat(&tkstr, ch);
+		StringChcat(&tkstr, ch);
 		 GetCh();
 	}
-	DynStringChcat(&tkstr, '\0');
+	StringChcat(&tkstr, '\0');
 }
 
 
 void ParseNum()
 {
-	DynStringReset(&tkstr);
-	DynStringReset(&sourcestr);
+	StringReset(&tkstr);
+	StringReset(&sourcestr);
 	do
 	{
-		DynStringChcat(&tkstr, ch);
-		DynStringChcat(&sourcestr, ch);
+		StringChcat(&tkstr, ch);
+		StringChcat(&sourcestr, ch);
 		 GetCh();
 	} while (IsDigit(ch));
 	if (ch == '.')
 	{
 		do
 		{
-			DynStringChcat(&tkstr, ch);
-			DynStringChcat(&sourcestr, ch);
+			StringChcat(&tkstr, ch);
+			StringChcat(&sourcestr, ch);
 		} while (IsDigit(ch));
 	}
-	DynStringChcat(&tkstr, '\0');
-	DynStringChcat(&sourcestr, '\0');
+	StringChcat(&tkstr, '\0');
+	StringChcat(&sourcestr, '\0');
 	tkvalue = atoi(tkstr.data);
 }
 
 void ParseString(const char sep)
 {
 	char c;
-	DynStringReset(&tkstr);
-	DynStringReset(&sourcestr);
-	DynStringChcat(&sourcestr, sep);
+	StringReset(&tkstr);
+	StringReset(&sourcestr);
+	StringChcat(&sourcestr, sep);
 	 GetCh();
 	while (1)
 	{
@@ -340,7 +340,7 @@ void ParseString(const char sep)
 			break;
 		else if (ch == '\\')
 		{
-			DynStringChcat(&sourcestr, ch);
+			StringChcat(&sourcestr, ch);
 			 GetCh();
 			switch (ch)
 			{
@@ -389,20 +389,20 @@ void ParseString(const char sep)
 					}
 					break;
 			}
-			DynStringChcat(&tkstr, c);
-			DynStringChcat(&sourcestr, ch);
+			StringChcat(&tkstr, c);
+			StringChcat(&sourcestr, ch);
 			 GetCh();
 		}
 		else
 		{
-			DynStringChcat(&tkstr, ch);
-			DynStringChcat(&sourcestr, ch);
+			StringChcat(&tkstr, ch);
+			StringChcat(&sourcestr, ch);
 			 GetCh();
 		}
 	}
-	DynStringChcat(&tkstr, '\0');
-	DynStringChcat(&sourcestr, sep);
-	DynStringChcat(&sourcestr, '\0');
+	StringChcat(&tkstr, '\0');
+	StringChcat(&sourcestr, sep);
+	StringChcat(&sourcestr, '\0');
 	 GetCh();
 }
 

@@ -86,7 +86,7 @@ void* StackGetTop(const Stack* stack)
 	return NULL;
 }
 
-bool StackIsEmpty(const Stack* stack)
+BOOL StackIsEmpty(const Stack* stack)
 {
 	if (stack == NULL)
 	{

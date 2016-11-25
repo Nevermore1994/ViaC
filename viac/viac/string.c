@@ -7,7 +7,7 @@
 #include"viac.h"
 
 
-void DynStringInit(DynString* pstr, const int initsize)
+void StringInit(String* pstr, const int initsize)
 {
 	if (pstr != NULL)
 	{
@@ -22,7 +22,7 @@ void DynStringInit(DynString* pstr, const int initsize)
 }
 
 
-void DynStringFree(DynString* pstr)
+void StringFree(String* pstr)
 {
 	if (pstr != NULL)
 	{
@@ -35,7 +35,7 @@ void DynStringFree(DynString* pstr)
 }
 
 
-void DynStringRealloc(DynString* pstr, const int newsize)
+void StringRealloc(String* pstr, const int newsize)
 {
 	if (pstr != NULL)
 	{
@@ -56,14 +56,14 @@ void DynStringRealloc(DynString* pstr, const int newsize)
 	}
 }
 
-void DynStringChcat(DynString* pstr, const int ch)
+void StringChcat(String* pstr, const int ch)
 {
 	if (pstr != NULL)
 	{
 		int count = pstr->count + 1;
 		if (count > pstr->capacity)
 		{
-			DynStringRealloc(pstr, count);
+			StringRealloc(pstr, count);
 		}
 		((char*) pstr->data)[count - 1] = ch;
 		pstr->count = count;
@@ -71,11 +71,11 @@ void DynStringChcat(DynString* pstr, const int ch)
 }
 
 
-void DynStringReset(DynString* pstr)
+void StringReset(String* pstr)
 {
 	if (pstr != NULL)
 	{
-		DynStringFree(pstr);
-		DynStringInit(pstr, 8);
+		StringFree(pstr);
+		StringInit(pstr, 8);
 	}
 }

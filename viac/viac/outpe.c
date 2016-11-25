@@ -1,8 +1,8 @@
 #include "viac.h"
 
 char* entry_symbol = "_entry";
-DynArray arr_dll;
-DynArray arr_lib;
+Array arr_dll;
+Array arr_lib;
 char* lib_path;
 short subsystem;
 #define MAX_PATH  260
@@ -257,7 +257,7 @@ int PeLoadLibFile(char* fname)
 	if (fp)
 	{
 		dllname = GetDllName(libfile);
-		DynArrayAdd(&arr_dll, dllname);
+		ArrayAdd(&arr_dll, dllname);
 		while (1)
 		{
 			p = GetLine(line, sizeof(line), fp);
@@ -324,7 +324,7 @@ ImportSym* PeAddImport(PEInfo* pe, const int sym_index, const  char* name)
 	int dll_index = psym->Value;
 	if (0 == dll_index)
 		return NULL;
-	int i = DynArrayFind(&pe->imps, dll_index);
+	int i = ArrayFind(&pe->imps, dll_index);
 	ImportInfo* p;
 	ImportSym* s = NULL;
 	if (-1 != i)
@@ -334,12 +334,12 @@ ImportSym* PeAddImport(PEInfo* pe, const int sym_index, const  char* name)
 	else
 	{
 		p = MallocInit(sizeof(*p));
-		DynArrayInit(&p->imp_syms, 8);
+		ArrayInit(&p->imp_syms, 8);
 		p->dll_index = dll_index;
-		DynArrayAdd(&pe->imps, p);
+		ArrayAdd(&pe->imps, p);
 	}
 
-	i = DynArrayFind(&p->imp_syms, sym_index);
+	i = ArrayFind(&p->imp_syms, sym_index);
 	if (-1 != i)
 	{
 		return (ImportSym*)p->imp_syms.data[i];
@@ -347,7 +347,7 @@ ImportSym* PeAddImport(PEInfo* pe, const int sym_index, const  char* name)
 	else
 	{
 		s = MallocInit(sizeof(ImportSym) + strlen(name));
-		DynArrayAdd(&p->imp_syms, s);
+		ArrayAdd(&p->imp_syms, s);
 		strcpy_s((char*)&s->imp_sym.Name, strlen(name) + 1, name);
 		return s;
 	}
@@ -476,9 +476,9 @@ void PeBuildImports(PEInfo* pe)
 			ent_ptr += sizeof(DWORD);
 		}
 		dll_ptr += sizeof(IMAGE_IMPORT_DESCRIPTOR);
-		DynArrayFree(&p->imp_syms);
+		ArrayFree(&p->imp_syms);
 	}
-	DynArrayFree(&pe->imps);
+	ArrayFree(&pe->imps);
 }
 
 int PeAssginAddress(PEInfo* pe)
@@ -655,7 +655,7 @@ int PeOutputFile(const char* filename)
 	PEInfo pe;
 
 	memset(&pe, 0, sizeof(pe));
-	DynArrayInit(&pe.imps, 8);
+	ArrayInit(&pe.imps, 8);
 
 	pe.filename = filename;
 	AddRuntimeLibs();

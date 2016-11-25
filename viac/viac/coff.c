@@ -5,7 +5,7 @@
 *******************************************/
 #include"viac.h"
 
-DynArray sections;		 // 节数组
+Array sections;		 // 节数组
 pSection sec_text;		// 代码节
 pSection sec_data;		// 数据节	  
 pSection sec_bss;		// 未初始化数据节	  
@@ -60,7 +60,7 @@ Section* SectionNew(const char* name, const int characteristics)
 	psec->data_allocated = initsize; 
 	if (!(characteristics & IMAGE_SCN_LNK_REMOVE))
 		nsec_image++;
-	DynArrayAdd(&sections, psec);
+	ArrayAdd(&sections, psec);
 	return psec;
 }
 
@@ -149,7 +149,7 @@ void FreeSection(void)
 		}
 		free(sec->data);
 	}
-	DynArrayFree(&sections);
+	ArrayFree(&sections);
 }
 
 Section* NewCoffSymSection(char* symtab_name, const int Characteristics, char* strtab_name)
@@ -183,7 +183,7 @@ void CoffRelocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 
 void InitCoff(void)
 {
-	DynArrayInit(&sections, 8);
+	ArrayInit(&sections, 8);
 	nsec_image = 0; 
 
 	sec_text = SectionNew(".text", IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_CNT_CODE);

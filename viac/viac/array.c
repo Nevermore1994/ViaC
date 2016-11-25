@@ -7,7 +7,7 @@
 #include"viac.h"
 
 
-void DynArrayInit(DynArray* parr, const int size)
+void ArrayInit(Array* parr, const int size)
 {
 	if (parr != NULL)
 	{
@@ -21,7 +21,7 @@ void DynArrayInit(DynArray* parr, const int size)
 	}
 }
 
-void DynArrayRealloc(DynArray* parr, const int newsize)
+void ArrayRealloc(Array* parr, const int newsize)
 {
 	if (parr != NULL)
 	{
@@ -42,21 +42,21 @@ void DynArrayRealloc(DynArray* parr, const int newsize)
 	}
 }
 
-void DynArrayAdd(DynArray* parr,const void* data)
+void ArrayAdd(Array* parr,const void* data)
 {
 	if (parr != NULL)
 	{
 		const int count = parr->count + 1;
 		if ( (count * (int)sizeof(void*)) > parr->capacity)
 		{
-			DynArrayRealloc(parr, count * sizeof(void*) );
+			ArrayRealloc(parr, count * sizeof(void*) );
 		}
 		parr->data[count - 1] = data;
 		parr->count = count;
 	}
 }
 
-void DynArrayFree(DynArray* parr)
+void ArrayFree(Array* parr)
 {
 	if (parr != NULL)
 	{
@@ -72,7 +72,7 @@ void DynArrayFree(DynArray* parr)
 	}
 }
 
-int DynArrayFind(const DynArray* parr, const int data)
+int ArrayFind(const Array* parr, const int data)
 {
 	if (parr != NULL)
 	{
@@ -89,7 +89,7 @@ int DynArrayFind(const DynArray* parr, const int data)
 	return -1;
 }
 
-void DynArrayDelete(DynArray* parr, const int i)
+void ArrayDelete(Array* parr, const int i)
 {
 	if (parr->data [i])
 	{

@@ -5,7 +5,7 @@
 *******************************************/
 #include"viac.h"
 
-DynString tkstr;
+String tkstr;
 #define BUF_SIZE 1024
 #define ERR_SIZE 2048
 void HandleException(const int stage, const int level, const char* fmt, const va_list ap)
