@@ -160,7 +160,7 @@ Section* NewCoffSymSection(char* symtab_name, const int Characteristics, char* s
 	return sec;
 }
 
-void CoffElocDirectAdd(const int offset, const int cfsym, const char section, const char type)
+void CoffRelocDirectAdd(const int offset, const int cfsym, const char section, const char type)
 {
 	CoffReloc* rel = SectionPtrAdd(sec_rel, sizeof(CoffReloc));
 	rel->offset = offset; 
@@ -169,7 +169,7 @@ void CoffElocDirectAdd(const int offset, const int cfsym, const char section, co
 	rel->type = type;
 }
  
-void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type)
+void CoffRelocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 { 
 
 	if (!sym->c)
@@ -178,7 +178,7 @@ void CoffElocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 	}
 	char* name = (( TkWord* ) tktable.data [sym->v])->spelling;
 	int cfsym = CoffSymSearch(sec_symtab, name);
-	CoffElocDirectAdd(offset, cfsym, sec->index, type);
+	CoffRelocDirectAdd(offset, cfsym, sec->index, type);
 }
 
 void InitCoff(void)
