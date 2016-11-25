@@ -9,7 +9,7 @@ using DMSkin.Metro.Controls;
 using DMSkin.Controls;
 using System.Xml;
 using System.Xml.Linq;
-
+using ScintillaNET;
 namespace ViaCText
 {
     public partial class ViaC : Form
@@ -42,6 +42,7 @@ namespace ViaCText
         private const string skinpath = "C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\Skins\\";
         public ViaC()
         {
+           
             InitializeComponent( );
         }
         private void Source()
@@ -99,8 +100,6 @@ namespace ViaCText
         {
             Source( );
             skinEngine1.SkinFile = "C:\\Users\\Away\\Documents\\ViaC\\ViaCText\\ViaCText\\bin\\Debug\\Skins\\" + skin;
-            tab.Location = new Point(27, 55);
-            this.Controls.Add(this.tab);
             tab.Visible = false;
             tab.Dock = DockStyle.Fill;
             tab.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
@@ -109,9 +108,11 @@ namespace ViaCText
             nowrich = null;
             defaultnum = 1;
             openrich = new Dictionary<int,bool>();
+            linenumbox.Visible = false;
+            linenumbox.Font = new Font(nowfont.FontFamily, nowfont.Size + 2.0f);
+            tab.DoubleClick += new EventHandler(TabPageDoubleCilck);
             panel1.Visible = false;
-            linenumbox.Font = nowfont;
-            tab.DoubleClick += new EventHandler(TabPageDoubleCilck);     
+            panel1.AutoScroll = true;    
         }
         private void ShowNewForm(object sender, EventArgs e)
         {
@@ -269,7 +270,8 @@ namespace ViaCText
                
                 foreach (RichTextBox rich in richs)
                 {
-                    linenumbox.Font = nowfont;
+                   
+                    linenumbox.Font = new Font(nowfont.FontFamily, nowfont.Size + 2.0f);
                     rich.Font = nowfont;
                     rich.ForeColor = fontcolor;
                 }
@@ -294,9 +296,10 @@ namespace ViaCText
         private RichTextBox CreateWindow(string name)
         {
             TabPage source = new TabPage(name);
+            RichTextBox text = new RichTextBox( );
             source.AutoScroll = true;
             tab.Controls.Add(source);
-            RichTextBox text = new RichTextBox( );
+            Scintilla s = new Scintilla( );
             text.Size = source.Size;
             text.Dock = DockStyle.Fill;
             text.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
@@ -310,14 +313,18 @@ namespace ViaCText
             text.VScroll += new EventHandler(textVScroll);
             source.Controls.Add(text);
             source.Tag = 0;
-           
+
             tab.Visible = true;
             text.Visible = true;
             source.Show( );
-            panel1.Visible = true;
+
             nowrich = text;
             tab.SelectedTab = source;
+            linenumbox.Visible = true;
             richs.Add(text);
+            linenumbox.Text = "";
+            panel1.Visible = true;
+          //  DebugTextBox.Text = "";
             return text;
         }
 
@@ -327,6 +334,7 @@ namespace ViaCText
                     (nowrich.Font.Height + 1);
             linenumbox.Location = new Point(0, d);
             PaintLine( );
+            GetLine( );
         }
 
         private void TextCilck(object sender, EventArgs e)
@@ -338,18 +346,25 @@ namespace ViaCText
         }
         private void PaintLine()
         {
-            int num = nowrich.Lines.Length;
-            if(num != (int)tab.SelectedTab.Tag)
-            {
-                tab.SelectedTab.Tag  = num;
-                linenumbox.Text = "";
-                for (int i = 1; i <= num; i++)
-                {
-                    linenumbox.Text += i + 1 + "\n";
-                }
-            }
-            
+            Point pos = new Point(0, 0);
+            int firstIndex = nowrich.GetCharIndexFromPosition(pos);
+            int firstLine = nowrich.GetLineFromCharIndex(firstIndex);
 
+           
+            pos.X = ClientRectangle.Width;
+            pos.Y = ClientRectangle.Height;
+            int lastIndex = nowrich.GetCharIndexFromPosition(pos);
+            int lastLine = nowrich.GetLineFromCharIndex(lastIndex);
+
+          
+            pos = nowrich.GetPositionFromCharIndex(lastIndex);
+
+            linenumbox.Text = "";
+            for (int i = firstLine; i <= lastLine + 1; i++)
+            {
+                linenumbox.Text += i + 1 + "\n";
+            }
+            linenumbox.Location = new Point(0, tab.ItemSize.Height + 5);
         }
 
         private void TabPageDoubleCilck(object sender, EventArgs e)
@@ -373,6 +388,8 @@ namespace ViaCText
             if(tab.TabCount == 0)
             {
                 tab.Visible = false;
+                linenumbox.Visible = false;
+                panel1.Visible = false;
             }
             
         }
@@ -385,7 +402,7 @@ namespace ViaCText
                 openrich.Add((int)nowrich.Tag, false);
                 tab.SelectedTab.Text += "*";
             }
-          
+            GetLine( );
             PaintLine();
         }
 
@@ -479,6 +496,5 @@ namespace ViaCText
            
         }
 
-     
     }
 }

@@ -95,12 +95,18 @@
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.skinEngine1 = new Sunisoft.IrisSkin.SkinEngine();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.linenumbox = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.DebugTextBox = new System.Windows.Forms.RichTextBox();
             this.tab = new ViaCText.SimpleTabControl();
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
+            this.splitContainer.Panel1.SuspendLayout();
+            this.splitContainer.Panel2.SuspendLayout();
+            this.splitContainer.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -657,47 +663,69 @@
             this.skinEngine1.SerialNumber = "";
             this.skinEngine1.SkinFile = null;
             // 
-            // panel1
+            // splitContainer
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.panel1.Controls.Add(this.linenumbox);
-            this.panel1.Location = new System.Drawing.Point(0, 58);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(32, 666);
-            this.panel1.TabIndex = 8;
+            this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer.Location = new System.Drawing.Point(0, 55);
+            this.splitContainer.Name = "splitContainer";
+            // 
+            // splitContainer.Panel1
+            // 
+            this.splitContainer.Panel1.Controls.Add(this.linenumbox);
+            // 
+            // splitContainer.Panel2
+            // 
+            this.splitContainer.Panel2.Controls.Add(this.panel1);
+            this.splitContainer.Panel2.Controls.Add(this.tab);
+            this.splitContainer.Size = new System.Drawing.Size(1341, 672);
+            this.splitContainer.SplitterDistance = 27;
+            this.splitContainer.TabIndex = 12;
             // 
             // linenumbox
             // 
             this.linenumbox.AutoEllipsis = true;
             this.linenumbox.AutoSize = true;
-            this.linenumbox.Location = new System.Drawing.Point(3, 60);
+            this.linenumbox.Location = new System.Drawing.Point(9, 52);
             this.linenumbox.Name = "linenumbox";
-            this.linenumbox.Size = new System.Drawing.Size(15, 60);
+            this.linenumbox.Size = new System.Drawing.Size(0, 15);
             this.linenumbox.TabIndex = 0;
-            this.linenumbox.Text = "1\r\n2\r\n3\r\n4\r\n";
-            this.linenumbox.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.DebugTextBox);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 604);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1310, 68);
+            this.panel1.TabIndex = 1;
+            // 
+            // DebugTextBox
+            // 
+            this.DebugTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DebugTextBox.Location = new System.Drawing.Point(0, 0);
+            this.DebugTextBox.Name = "DebugTextBox";
+            this.DebugTextBox.ReadOnly = true;
+            this.DebugTextBox.Size = new System.Drawing.Size(1310, 68);
+            this.DebugTextBox.TabIndex = 0;
+            this.DebugTextBox.Text = "1\n2\n3\n4\n5\n6\n6";
             // 
             // tab
             // 
-            this.tab.Appearance = System.Windows.Forms.TabAppearance.Buttons;
-            this.tab.DM_UseCustomBackColor = true;
+            this.tab.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.tab.DM_UseSelectable = true;
             this.tab.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tab.ItemSize = new System.Drawing.Size(100, 30);
-            this.tab.Location = new System.Drawing.Point(38, 92);
+            this.tab.Location = new System.Drawing.Point(3, 3);
             this.tab.Name = "tab";
-            this.tab.Size = new System.Drawing.Size(1278, 632);
-            this.tab.Style = DMSkin.Metro.MetroColorStyle.Lime;
-            this.tab.TabIndex = 10;
+            this.tab.Size = new System.Drawing.Size(1295, 592);
+            this.tab.TabIndex = 0;
             // 
             // ViaC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1341, 752);
-            this.Controls.Add(this.tab);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.splitContainer);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.statusStrip);
@@ -715,8 +743,12 @@
             this.toolStrip.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            this.splitContainer.Panel1.ResumeLayout(false);
+            this.splitContainer.Panel1.PerformLayout();
+            this.splitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
+            this.splitContainer.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -790,9 +822,11 @@
         private System.Windows.Forms.ToolStripMenuItem cToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viacToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hToolStripMenuItem;
-        private System.Windows.Forms.Panel panel1;
-        private SimpleTabControl tab;
+        private System.Windows.Forms.SplitContainer splitContainer;
         private System.Windows.Forms.Label linenumbox;
+        private SimpleTabControl tab;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.RichTextBox DebugTextBox;
     }
 }
 

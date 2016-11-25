@@ -60,6 +60,10 @@
     <Reference Include="IrisSkin4">
       <HintPath>..\..\..\..\Desktop\IrisSkin4.dll</HintPath>
     </Reference>
+    <Reference Include="ScintillaNET, Version=2.2.3581.19319, Culture=neutral, PublicKeyToken=948d6c9751444115, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\ScintillaNET-master\ScintillaNET-master\src\ScintillaNET\bin\Debug\ScintillaNET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
@@ -74,12 +78,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NumberedTextBoxUC.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="NumberedTextBoxUC.designer.cs">
-      <DependentUpon>NumberedTextBoxUC.cs</DependentUpon>
-    </Compile>
     <Compile Include="SimpleTabContrl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -91,9 +89,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="NumberedTextBoxUC.resx">
-      <DependentUpon>NumberedTextBoxUC.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ViaC.resx">
       <DependentUpon>ViaC.cs</DependentUpon>
     </EmbeddedResource>
@@ -135,6 +130,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SciLexer.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
