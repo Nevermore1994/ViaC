@@ -328,7 +328,7 @@ void GenOpi_2(const int opc, const int op) //生成整数二元运算
 		GenModrm(ADDR_REG, fr, r, NULL, 0);
 	}
 	OperandPop();
-	if (op >= TK_EQ  && op <= TK_LEQ)
+	if (op >= TK_EQ  && op <= TK_GEQ)
 	{
 		optop->reg = ViaC_CMP;
 		switch (op)

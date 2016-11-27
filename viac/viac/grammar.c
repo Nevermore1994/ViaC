@@ -140,20 +140,13 @@ int TypeSpecifier(Type* type)
 			GetToken();
 			break;
 		}
-		case KW_INT:
-		{
-			t = T_INT;
-			type_found = 1;
-			syntax_state = SNTX_SP;
-			GetToken();
-			break;
-		}
 		case KW_SHORT:
 		{
 			t = T_SHORT;
 			type_found = 1;
 			syntax_state = SNTX_SP;
 			GetToken();
+			break;
 		}
 		case KW_VOID:
 		{
@@ -163,6 +156,16 @@ int TypeSpecifier(Type* type)
 			GetToken();
 			break;
 		}
+		case KW_INT:
+		{
+			t = T_INT;
+			type_found = 1;
+			syntax_state = SNTX_SP;
+			GetToken();
+			break;
+		}
+
+
 		case KW_STRUCT:
 		{
 			syntax_state = SNTX_SP;
@@ -777,6 +780,7 @@ void UnaryExpression(void)
 		{
 			GetToken();
 			UnaryExpression();
+			break;
 		}
 		case TK_MINUS:
 		{

@@ -445,13 +445,13 @@ void GetToken()
 		}
 		case '+':
 		{
-			 GetCh();
+			GetCh();
 			token = TK_PLUS;
 			break;
 		}
 		case '-':
 		{
-			 GetCh();
+			GetCh();
 			if (ch == '>')
 			{
 				token = TK_POINTSTO;
@@ -461,16 +461,16 @@ void GetToken()
 				token = TK_MINUS;
 			break;
 		}
-		case '%':
-		{
-			 GetCh();
-			token = TK_MOD;
-			break;
-		}
 		case '/':
 		{
-			 GetCh();
 			token = TK_DIVIDE;
+			GetCh();
+			break;
+		}
+		case '%':
+		{
+			token = TK_MOD;
+			GetCh();
 			break;
 		}
 		case '=':
@@ -504,13 +504,8 @@ void GetToken()
 		}
 		case '<':
 		{
-			 GetCh();
-			if (ch == '<')
-			{
-				Error("非法操作符");
-				//TODO:左移位操作符
-			}
-			else if (ch == '=')
+			GetCh();
+		   if (ch == '=')
 			{
 				token = TK_LEQ;
 				 GetCh();
@@ -522,12 +517,7 @@ void GetToken()
 		case '>':
 		{
 			 GetCh();
-			if (ch == '>')
-			{
-				Error("非法操作符");
-				//TODO:右移位操作符
-			}
-			else if (ch == '=')
+		    if (ch == '=')
 			{
 				token = TK_GEQ;
 				 GetCh();
@@ -561,35 +551,26 @@ void GetToken()
 		}
 		case '&':
 		{
-			token = TK_AND;
-			GetCh();
+		     token = TK_AND;
+			 GetCh();
 			break;
 		}
-		case '|':
+		case ';':
 		{
-			 GetCh();
-			if (ch == '|')
-			{
-				Error("不能识别的操作符");
-				//TODO:或逻辑操作符
-			}
-			else
-			{
-				Error("不能识别的操作符");
-				//TODO:或的逻辑操作符
-			}
+			token = TK_SEMICOLON;
+			GetCh();
 			break;
 		}
 		case '(':
 		{
 			token = TK_OPENPA;
-			GetCh();
+			 GetCh();
 			break;
 		}
 		case ')':
 		{
 			token = TK_CLOSEPA;
-			GetCh();
+			 GetCh();
 			break;
 		}
 		case '[':
@@ -616,12 +597,7 @@ void GetToken()
 			 GetCh();
 			break;
 		}
-		case ';':
-		{
-			token = TK_SEMICOLON;
-			 GetCh();
-			break;
-		}
+		
 		case '\n':
 		{
 			token = TK_SPACE;
@@ -630,7 +606,6 @@ void GetToken()
 		}
 		case ',':
 		{
-
 			token = TK_COMMA;
 			 GetCh();
 			break;

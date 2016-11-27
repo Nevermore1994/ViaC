@@ -67,7 +67,9 @@ void Indirection(void)
 	}
 	optop->type = *PointedType(&optop->type);
  
-	if ( (!(optop->type.t & T_ARRAY)  && ((optop->type.t)  &  T_BTYPE) ) != T_FUNC )
+	int arrayres = !(optop->type.t & T_ARRAY);
+	int typeres = ((optop->type.t) &  T_BTYPE) != T_FUNC;
+	if ( arrayres  && typeres  )
 	{
 		optop->reg |= ViaC_LVAL;
 	}
