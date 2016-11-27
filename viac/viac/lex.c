@@ -561,16 +561,8 @@ void GetToken()
 		}
 		case '&':
 		{
-			if (ch == '&')
-			{
-				Error("不能识别的操作符");
-				//TODO:与逻辑操作符
-			}
-			else
-			{
-				token = TK_AND;
-			}
-			 GetCh();
+			token = TK_AND;
+			GetCh();
 			break;
 		}
 		case '|':
@@ -591,13 +583,13 @@ void GetToken()
 		case '(':
 		{
 			token = TK_OPENPA;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case ')':
 		{
 			token = TK_CLOSEPA;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case '[':

@@ -808,6 +808,7 @@ void SizeofExpression(void)
 	Skip(TK_OPENPA);
 	TypeSpecifier(&type);
 
+	GetToken();
 	Skip(TK_CLOSEPA);
 
 	size = TypeSize(&type, &align);

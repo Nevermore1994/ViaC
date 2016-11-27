@@ -11,8 +11,7 @@ int main(const int argc, char** argv)
 	outtype = OUTPUT_EXE;
 	
 	subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
-	char* str[5] = { "viac","-lmsvcrt","-o","HelloWorld.exe","HelloWorld.c" };
-	int opind = ProcessCommand(5, str);
+	int opind = ProcessCommand(argc, argv);
 	if (opind == 0)
 	{
 		return 0;
