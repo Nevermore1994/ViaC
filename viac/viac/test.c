@@ -25,10 +25,12 @@ int main(const int argc, char** argv)
 		
 		ext = GetFileText(filename);
 		
-		if (!strcmp(ext, "viac"))
+		if (!strcmp(ext, "viac") || !strcmp(ext,"VIAC"))
 			Compile(filename);
-		else if (!strcmp(ext, "c"))
+		else if (!strcmp(ext, "c") || !strcmp(ext, "C"))
 			Compile(filename);
+		else
+			printf("编译失败，不支持的类型");
 		if (!strcmp(ext, "obj"))
 		{
 			LoadObjFile(filename);
@@ -47,5 +49,6 @@ int main(const int argc, char** argv)
 	}
 	Cleanup();
 	
+	printf("编译成功");
 	return 1;
 }
