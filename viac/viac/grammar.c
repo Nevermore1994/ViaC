@@ -127,6 +127,10 @@ void Initializer(Type* ptype, const int c, Section* psec) // 初值符
 
 int TypeSpecifier(Type* type)
 {
+	if (type == NULL)
+	{
+		Error("语义分析中有指针未初始化");
+	}
 	int  t, type_found = 0;
 	Type typel;
 	t = 0;
@@ -185,6 +189,10 @@ int TypeSpecifier(Type* type)
 
 void StructSpecifier(Type* type)
 {
+	if (type == NULL)
+	{
+		Error("语义分析中有指针未初始化");
+	}
 	int t;
 	Symbol* ps;
 	Type typel;
@@ -256,6 +264,10 @@ void StructDeclarationList(Type* type)
 
 void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 {
+	if (maxalign == NULL || offset == NULL || ps == NULL)
+	{
+			Error("语义分析中有指针未初始化");
+	}
 	int v, size, align;
 	Symbol* psym;
 	Type typel, btype;
@@ -299,6 +311,10 @@ void StructDeclaration(int* maxalign, int* offset, Symbol*** ps)
 
 void Declarator(Type* type, int* v, int* force_align)
 {
+	if (type == NULL)
+	{
+		Error("语义分析中有指针未初始化");
+	}
 	int fc;
 	while (token == TK_STAR)
 	{
@@ -312,7 +328,7 @@ void Declarator(Type* type, int* v, int* force_align)
 }
 
 
-void FunctionCallingConvention(int *fc)
+void FunctionCallingConvention(int *fc)  // fc可以为空
 {
 	*fc = KW_CDECL;
 	if (token == KW_CDECL || token == KW_STDCALL)
@@ -323,7 +339,7 @@ void FunctionCallingConvention(int *fc)
 	}
 }
 
-void StructMemberAlignment(int *force_align)
+void StructMemberAlignment(int* force_align) //force_align 可以为空
 {
 	int align = 1;
 	if (token == KW_ALIGN)
@@ -349,6 +365,10 @@ void StructMemberAlignment(int *force_align)
 
 void DirectDeclarator(Type* type, int* v, const int func_call)
 {
+	if (type == NULL)
+	{
+		Error("语义分析中有指针未初始化");
+	}
 	if (token >= TK_IDENT)
 	{
 		*v = token;
@@ -365,7 +385,7 @@ void DirectDeclaratorPostfix(Type* type, const int func_call)
 {
 	if (type == NULL)
 	{
-		Error("指针未初始化");
+		Error("语义分析中有指针未初始化");
 	}
 	int n;
 	Symbol *s;
@@ -393,12 +413,17 @@ void DirectDeclaratorPostfix(Type* type, const int func_call)
 
 void ParameterTypeList(Type *type, int func_call)
 {
+	if (type == NULL)
+	{
+		Error("语义分析中有指针未初始化");
+	}
 	int n;
-	Symbol **plast, *s, *first;
+	Symbol** plast = NULL;
+	Symbol*  s = NULL;
+	Symbol*  first = NULL;
 	Type pt;
 
 	GetToken();
-	first = NULL;
 	plast = &first;
 
 	while (token != TK_CLOSEPA)
@@ -517,7 +542,7 @@ void Statement(int* bsym, int* csym)
 
 void CompoundStatement(int* bsym, int* csym)
 {
-	Symbol* ps;
+	Symbol* ps = NULL;
 	ps = (Symbol*)StackGetTop(&LSYM);
 
 	syntax_state = SNTX_LF_HT;
@@ -539,33 +564,31 @@ void CompoundStatement(int* bsym, int* csym)
 
 void IfStatement(int* bsym, int* csym)
 {
-	int a, b;
+	int genforjcc, genforward;
 	syntax_state = SNTX_SP;
 	GetToken();
 	Skip(TK_OPENPA);
 	Expression();
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_CLOSEPA);
-	a = GenJcc(0);
+	genforjcc = GenJcc(0);
 	Statement(bsym, csym);
 	if (token == KW_ELSE)
 	{
 		syntax_state = SNTX_LF_HT;
 		GetToken();
 
-		b = GenJmpForWard(0);
-		BackPatch(a, ind);
+		genforward = GenJmpForWard(0);
+		BackPatch(genforjcc, ind);
 		Statement(bsym, csym);
-		BackPatch(b, ind);
+		BackPatch(genforward, ind);
 	}
 	else
-		BackPatch(a, ind);
+		BackPatch(genforjcc, ind);
 }
 
 void ForStatement(int* bsym, int* csym)
 {
-	int a, b, c, d, e;
-
 	GetToken();
 	Skip(TK_OPENPA);
 	if (token != TK_SEMICOLON && token != TK_SPACE)
@@ -577,14 +600,15 @@ void ForStatement(int* bsym, int* csym)
 		Skip(TK_SEMICOLON);
 	else if (token == TK_SPACE)
 		Skip(TK_SPACE);
-	d = ind;
-	c = ind;
-	a = 0;
-	b = 0;
+	int indone = ind;
+	int indtwo = ind;
+	int genforjcc = 0;
+	int temp = 0;  //中间变量储存
+	int genforward = 0;
 	if (token != TK_SEMICOLON && token != TK_SPACE)
 	{
 		Expression();
-		a = GenJcc(0);
+		genforjcc = GenJcc(0);
 	}
 
 	if (token == TK_SEMICOLON)
@@ -595,19 +619,19 @@ void ForStatement(int* bsym, int* csym)
 		Expect("缺少***");
 	if (token != TK_CLOSEPA)
 	{
-		e = GenJmpForWard(0);
-		c = ind;
+		genforward = GenJmpForWard(0);
+		indtwo = ind;
 		Expression();
 		OperandPop();
-		GenJmpBackWord(d);
-		BackPatch(e, ind);
+		GenJmpBackWord(indone);
+		BackPatch(genforward, ind);
 	}
 	syntax_state = SNTX_LF_HT;
 	Skip(TK_CLOSEPA);
-	Statement(&a, &b);  //拉链反填
-	GenJmpBackWord(c);
-	BackPatch(a, ind);
-	BackPatch(b, c);
+	Statement(&genforjcc, &temp);  //拉链反填
+	GenJmpBackWord(indtwo);
+	BackPatch(genforjcc, ind);
+	BackPatch(temp, indtwo);
 }
 
 void ContinueStatement(int* csym)
@@ -730,27 +754,27 @@ void RelationalExpression(void)
 
 void AdditiveExpression(void)
 {
-	int t;
+	int _token;
 	MultiplicativeExpression();
 	while (token == TK_PLUS || token == TK_MINUS)
 	{
-		t = token;
+		_token = token;
 		GetToken();
 		MultiplicativeExpression();
-		GenOp(t);
+		GenOp(_token);
 	}
 }
 
 void MultiplicativeExpression(void)
 {
-	int t;
+	int _token;
 	UnaryExpression();
 	while (token == TK_STAR || token == TK_DIVIDE || token == TK_MOD)
 	{
-		t = token;
+		_token = token;
 		GetToken();
 		UnaryExpression();
-		GenOp(t);
+		GenOp(_token);
 	}
 }
 
@@ -823,7 +847,7 @@ void SizeofExpression(void)
 
 void PostfixExpression(void)
 {
-	Symbol* ps;
+	Symbol* ps = NULL;
 	PrimaryExpression();
 	while (1)
 	{
@@ -933,19 +957,19 @@ void PrimaryExpression(void)
 
 void ArgumentExpressionList(void)
 {
-	Operand opd;
-	Symbol* s = NULL;
-	Symbol* sa = NULL;
-	int nb_args = 0;
-	s = optop->type.ref;
+	Symbol* ps = NULL;
+	ps = optop->type.ref;
 
 	GetToken();
 
-	sa = s->next;
-	nb_args = 0;
+	Symbol* sa = NULL;
+	sa = ps->next;
+	int nb_args = 0;
+
+	Operand opd;
 	opd.value = 0;
 	opd.reg = REG_IRET;
-	opd.type = s->type;
+	opd.type = ps->type;
 
 	if (token != TK_CLOSEPA)
 	{

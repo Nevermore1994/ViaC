@@ -77,43 +77,48 @@ Symbol *SymPush(const int v, const Type *type, const int r, const int c)
  
 Symbol* FuncSymPush(const int v, const Type *type)
 {
-	Symbol *s, **ps;
-	s = SymDirectPush(&GSYM, v, type, 0);
+	Symbol*  psym = NULL;
+	Symbol** ppsym = NULL;
+	psym = SymDirectPush(&GSYM, v, type, 0);
 
-	ps = &((TkWord*)tktable.data[v])->sym_id;
+	ppsym = &((TkWord*)tktable.data[v])->sym_id;
 	// 同名符号，函数符号放在最后-> ->...s
-	while (*ps != NULL)
-		ps = &(*ps)->prev_tok;
-	s->prev_tok = NULL;
-	*ps = s;
-	return s;
+	while (*ppsym != NULL)
+		ppsym = &(*ppsym)->prev_tok;
+	psym->prev_tok = NULL;
+	*ppsym = psym;
+	return psym;
 }
 
 Symbol *VarSymPut(const Type *type, const int r, const int v, const int addr)
 {
-	Symbol *sym = NULL;
+	if (type == NULL)
+		Error("symbol中有指针未初始化"); 
+	Symbol *psym = NULL;
 	if ((r & ViaC_VALMASK) == ViaC_LOCAL)			// 局部变量
 	{
 
-		sym = SymPush(v, type, r, addr);
+		psym = SymPush(v, type, r, addr);
 	}
 	else if (v && (r & ViaC_VALMASK) == ViaC_GLOBAL) // 全局变量
 	{
-		sym = SymSearch(v);
-		if (sym)
+		psym = SymSearch(v);
+		if (psym)
 			Error("%s重定义\n", ((TkWord*)tktable.data[v])->spelling);
 		else
 		{
-			sym = SymPush(v, type, r | ViaC_SYM, 0);
+			psym = SymPush(v, type, r | ViaC_SYM, 0);
 		}
 	}
 	//else 字符串常量符号
-	return sym;
+	return psym;
 }
 Symbol* SecSymPut(const char* sec, const int c)
 {
-	TkWord* tp;
-	Symbol* s; 
+	if (sec == NULL)
+		Error("symbol中有指针未初始化");
+	TkWord* tp = NULL;
+	Symbol* s = NULL; 
 	Type type;
 	type.t = T_INT;
 	tp = TkwordInsert(sec);
@@ -127,81 +132,84 @@ void SymPop(Stack* ptop, const Symbol* b) //b可以为NULL
 	if (ptop == NULL)
 		Error("指针未初始化");
 	int v;
-	Symbol *ps, **pps;
+	Symbol*  psym = NULL;
+	Symbol** ppsym = NULL;
 	TkWord *ts;
 	
-	ps = ( Symbol* ) StackGetTop(ptop);
-	while (ps != b)
+	psym = ( Symbol* ) StackGetTop(ptop);
+	while (psym != b)
 	{
-		v = ps->v; 
+		v = psym->v; 
 		if ((v & ViaC_STRUCT) || v < ViaC_ANOM)
 		{
 			ts = ( TkWord* ) tktable.data [v & ~ViaC_STRUCT];
 			if (v & ViaC_STRUCT)
-				pps = &ts->sym_struct;
+				ppsym = &ts->sym_struct;
 			else
-				pps = &ts->sym_id;
-			*pps = ps->prev_tok;
+				ppsym = &ts->sym_id;
+			*ppsym = psym->prev_tok;
 		}
 		StackPop(ptop);
-		ps = ( Symbol* ) StackGetTop(ptop);
+		psym = ( Symbol* ) StackGetTop(ptop);
 	}
 }
 
 void MkPointer(Type* ptype)
 {
-	Symbol* psym;
+	Symbol* psym = NULL;
 	psym = SymPush(ViaC_ANOM, ptype, 0, -1);
 	ptype->t = T_PTR; 
 	ptype->ref = psym;
 }
  
-int TypeSize(const Type* t, int* a)
+int TypeSize(const Type* ptype, int* pint)
 {
-	Symbol* ps; 
+	if (ptype == NULL)
+		Error("symbol有指针未初始化");
+	Symbol* psym; 
 	int bt;
 	int PTR_SIZE = 4;
 
-	bt = t->t & T_BTYPE; 
+	bt = ptype->t & T_BTYPE; 
 	switch (bt)
 	{
 		case T_STRUCT:
 		{
-			ps = t->ref;
-			*a = ps->r;
-			return ps->c;
+			psym = ptype->ref;
+			*pint = psym->r;
+			return psym->c;
 		}
 		case T_PTR:
 		{
-			if (t->t & T_ARRAY)
+			if (ptype->t & T_ARRAY)
 			{
-				ps = t->ref;
-				return TypeSize(&ps->type, a) * (ps->c);
+				psym = ptype->ref;
+				return TypeSize(&psym->type, pint) * (psym->c);
 			}
 			else
 			{
-				*a = PTR_SIZE;
+				*pint = PTR_SIZE;
 				return PTR_SIZE;
 			}
 		}
 		case T_INT:
 		{
-			*a = 4;
+			*pint = 4;
 			return 4;
 		}
 		case T_CHAR:
 		{
-			*a = 1;
+			*pint = 1;
 			return 1;
 		}
 		case T_SHORT:
 		{
-			*a = 2;
+			*pint = 2;
 			return 2;
 		} 
 		default:
 		{
-			*a = 1; 
+			*pint = 1; 
 			return 1;
 		}
 	}

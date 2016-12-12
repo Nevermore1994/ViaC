@@ -8,6 +8,8 @@
 
 int ElfHash(const char* key)
 {
+	if (key == NULL)
+		Error("字符哈希函数中指针未初始化");
 	int h = 0;
 	int g;
 	while (*key)

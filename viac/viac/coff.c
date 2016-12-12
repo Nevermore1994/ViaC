@@ -39,18 +39,26 @@ void SectionRealloc(pSection sec, const int newsize)
 
 void*  SectionPtrAdd(pSection sec, const int increment)
 {
-	int offset = sec->data_offset;
-	int offset1 = increment + offset;
-	if (offset1 > sec->data_allocated)
+	if (sec == NULL)
 	{
-		SectionRealloc(sec, offset1);
+		Error("coff中的指针未初始化");
 	}
-	sec->data_offset = offset1;
-	return sec->data + offset;
+	int oldoffset = sec->data_offset;
+	int newoffset = increment + oldoffset;
+	if (newoffset > sec->data_allocated)
+	{
+		SectionRealloc(sec, newoffset);
+	}
+	sec->data_offset = newoffset;
+	return sec->data + oldoffset;
 }
 
 Section* SectionNew(const char* name, const int characteristics)
 {
+	if (name == NULL)
+	{
+		Error("coff中的指针未初始化");
+	}
 	int initsize = 8;
 	Section* psec = (Section*)MallocInit(sizeof(Section));
 	strcpy_s((char*)psec->sh.Name, IMAGE_SIZEOF_SHORT_NAME, name);
@@ -66,6 +74,10 @@ Section* SectionNew(const char* name, const int characteristics)
 
 int CoffSymSearch(const pSection symtab, const char* name)
 {
+	if (symtab == NULL)
+	{
+		Error("coff中的指针未初始化");
+	}
 	int keyno = ElfHash(name);
 	pSection strtab = symtab->plink;
 	int cs = symtab->hashtab [keyno];
@@ -121,6 +133,10 @@ int CoffSymAdd(pSection symtab, const char* name, const int val, const int sec_i
 
 void CoffSymAddUpdate(Symbol* ps, const int val, const int sec_index, const short type, const char StroageClass)
 {
+	if (ps == NULL)
+	{
+		Error("coff中的指针未初始化");
+	}
 	char* name = NULL; 
 	CoffSym* cfsym = NULL;
 	if (!ps->c)
@@ -154,6 +170,10 @@ void FreeSection(void)
 
 Section* NewCoffSymSection(char* symtab_name, const int Characteristics, char* strtab_name)
 {
+	if (symtab_name == NULL || strtab_name == NULL)
+	{
+		Error("coff中的指针未初始化");
+	}
 	Section* sec = SectionNew(symtab_name, Characteristics);
 	sec->plink = SectionNew(strtab_name, Characteristics);
 	sec->hashtab = MallocInit(sizeof(int) * MAXKEY);
@@ -171,7 +191,10 @@ void CoffRelocDirectAdd(const int offset, const int cfsym, const char section, c
  
 void CoffRelocAdd(pSection sec, Symbol* sym, const int offset, const char type)
 { 
-
+	if (sec == NULL || sym == NULL)
+	{
+		Error("coff中的指针未初始化");
+	}
 	if (!sym->c)
 	{
 		CoffSymAddUpdate(sym, 0, IMAGE_SYM_UNDEFINED, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);

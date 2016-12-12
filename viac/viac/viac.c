@@ -141,7 +141,7 @@ int ProcessCommand(int argc, char** argv)
 
 char* GetFileText(char* fname)
 {
-	char* p;
+	char* p = NULL;
 	p = strrchr(fname, '.');
 	return p + 1;
 }
@@ -163,5 +163,7 @@ void Compile(char* fname)
 
 int CalcAlign(const int n, const int align)
 {
-	return ((n + align - 1)  &  (~(align - 1)));
+	int num = n + align - 1;
+	int res = ~(align - 1);
+	return (num & res);
 }

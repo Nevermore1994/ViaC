@@ -288,7 +288,7 @@ void GetEntryAddr(PEInfo* pe)
 	pe->entry_addr = addr;
 }
 
-void* GetLibPath()
+void* GetLibPath(void)
 {
 	char path[MAX_PATH];
 	char* p;
@@ -299,7 +299,7 @@ void* GetLibPath()
 	return _strdup(path);
 }
 
-void AddRuntimeLibs()
+void AddRuntimeLibs(void)
 {
 	int i;
 	int pe_type = 0;
@@ -513,7 +513,7 @@ int PeAssginAddress(PEInfo* pe)
 	return 0;
 }
 
-void RelocateSyms()
+void RelocateSyms(void)
 {
 	CoffSym* sym_end = (CoffSym*)(sec_symtab->data + sec_symtab->data_offset);
 	CoffSym* sym;
@@ -525,7 +525,7 @@ void RelocateSyms()
 	}
 }
 
-void CoffRelocsFixup()
+void CoffRelocsFixup(void)
 {
 	Section* sr = sec_rel;
 	CoffReloc* rel_end = (CoffReloc*)(sr->data + sr->data_offset);

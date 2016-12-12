@@ -426,15 +426,20 @@ void GenOpi_1(int op) //生成整数运算
 	}
 }
 
-Type* PointedType(Type* t) //返回T指针所指向的数据类型
+Type* PointedType(Type* type) //返回T指针所指向的数据类型
 {
-	return &t->ref->type;
+	if (type != NULL)
+		return &type->ref->type;
+	else
+		return NULL;
 }
 
-int PointedSize(Type* t) //返回指针的尺寸
+int PointedSize(Type* type) //返回指针的尺寸
 {
+	if (type == NULL)
+		Error("gencode中有指针未初始化");
 	int align;
-	Type* ptype = PointedType(t);
+	Type* ptype = PointedType(type);
 	return TypeSize(ptype, &align);
 }
 
@@ -494,7 +499,7 @@ void GenOp(const int op)
 int AllocateReg(const int rc) //寄存器分配
 {
 	int reg;
-	Operand* p;
+	Operand* p = NULL;
 	int used;
 
 	for (reg = 0; reg <= REG_EBX; reg++)
@@ -540,10 +545,12 @@ void SpillReg(int reg) //将‘r’溢出到内存栈中，并且标记释放‘r’寄存器的操作数
 			ptype = &popd->type;
 			if (popd->reg & ViaC_LVAL)
 				ptype = &int_type;
+
 			size = TypeSize(ptype, &align);
 			loc = CalcAlign(loc - size, align);
 			OperandAssign(&opd, ptype->t, ViaC_LOCAL | ViaC_LVAL, loc);
 			Store(reg, &opd);
+
 			if (popd->reg & ViaC_LVAL)
 			{
 				popd->reg = (popd->reg &  ~(ViaC_VALMASK)) | ViaC_LLOCAL;
@@ -583,6 +590,7 @@ void GenJmpBackWord(const int a) //生成向低地址跳转的指令
 {
 	int reg;
 	reg = a - ind - 2;
+
 	if (reg == (char)reg)
 	{
 		GenOpcode_1(0xeb);
@@ -668,8 +676,6 @@ void GenProlog(Type* func_type)
 
 void GenEpilog() //生成结尾代码
 {
-	int v, saved_ind, opc;
-
 	GenOpcode_1(0x8b);
 	GenModrm(ADDR_REG, REG_ESP, REG_EBP, NULL, 0);
 
@@ -686,8 +692,8 @@ void GenEpilog() //生成结尾代码
 		GenByte(func_ret_sub >> 8);
 	}
 
-	v = CalcAlign(-loc, 4);
-	saved_ind = ind;
+	int calc = CalcAlign(-loc, 4);
+	int saved_ind = ind;
 	ind = func_begin_ind;
 
 	GenOpcode_1(0x50 + REG_EBP);
@@ -696,16 +702,16 @@ void GenEpilog() //生成结尾代码
 	GenModrm(ADDR_REG, REG_ESP, REG_EBP, NULL, 0);
 
 	GenOpcode_1(0x81);
-	opc = 5;
+	int opc = 5;
 	GenModrm(ADDR_REG, opc, REG_ESP, NULL, 0);
-	GenDword(v);
+	GenDword(calc);
 	ind = saved_ind;
 }
 
 void InitVariable(Type* ptype, Section* psec, const int c, const int v) //变量初始化
 {
 	int bt;
-	void* ptr;
+	void* ptr = NULL;
 
 	if (psec)
 	{

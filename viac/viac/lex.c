@@ -17,24 +17,28 @@ int token;
 int tkvalue;
 
 
-TkWord* TkwordDirectInsert(TkWord* tp)
+TkWord* TkwordDirectInsert(TkWord* ptw)
 {
+	if (ptw == NULL)
+		Error("语法分析器中有指针未初始化");
 	int keyno;
-	tp->sym_id = NULL;
-	tp->sym_struct = NULL;
+	ptw->sym_id = NULL;
+	ptw->sym_struct = NULL;
 
-	ArrayAdd(&tktable, tp);
-	keyno = ElfHash(tp->spelling);
+	ArrayAdd(&tktable, ptw);
+	keyno = ElfHash(ptw->spelling);
 
-	tp->next = tk_hashtable[keyno];
-	tk_hashtable[keyno] = tp;
-	return tp;
+	ptw->next = tk_hashtable[keyno];
+	tk_hashtable[keyno] = ptw;
+	return ptw;
 }
 
 
 
 TkWord* TkwordFind(const char *p, const int keyno)
 {
+	if (p == NULL)
+		Error("语法分析器中有指针未初始化");
 	TkWord *tp = NULL, *tp1;
 	for (tp1 = tk_hashtable[keyno]; tp1; tp1 = tp1->next)
 	{
@@ -50,24 +54,26 @@ TkWord* TkwordFind(const char *p, const int keyno)
 
 TkWord* TkwordInsert(const char *p)
 {
-	TkWord*  tp;
-	int keyno;
-	char   *s;
-	char *end;
-	int length;
+	if (p == NULL)
+		Error("语法分析器中有指针未初始化");
 
-	keyno = ElfHash(p);
-	tp = TkwordFind(p, keyno);
-	if (tp == NULL)
+	int keyno = ElfHash(p);
+	
+	TkWord* ptw = NULL;
+	ptw = TkwordFind(p, keyno);
+
+	char* s = NULL;
+	char* end = NULL;
+	if (ptw == NULL)
 	{
-		length = strlen(p);
-		tp = (TkWord*)MallocInit(sizeof(TkWord) + length + 1);
-		tp->next = tk_hashtable[keyno];
-		tk_hashtable[keyno] = tp;
-		ArrayAdd(&tktable, tp);
-		tp->tkcode = tktable.count - 1;
-		s = (char *)tp + sizeof(TkWord);
-		tp->spelling = (char *)s;
+		int length = strlen(p);
+		ptw = (TkWord*)MallocInit(sizeof(TkWord) + length + 1);
+		ptw->next = tk_hashtable[keyno];
+		tk_hashtable[keyno] = ptw;
+		ArrayAdd(&tktable, ptw);
+		ptw->tkcode = tktable.count - 1;
+		s = (char *)ptw + sizeof(TkWord);
+		ptw->spelling = (char *)s;
 		for (end = p + length; p < end; ++p)
 		{
 			*s = *p;
@@ -75,10 +81,10 @@ TkWord* TkwordInsert(const char *p)
 		}
 		*s = (char) '\0';
 
-		tp->sym_id = NULL;
-		tp->sym_struct = NULL;
+		ptw->sym_id = NULL;
+		ptw->sym_struct = NULL;
 	}
-	return tp;
+	return ptw;
 }
 
 void  GetCh()
@@ -88,7 +94,7 @@ void  GetCh()
 
 void InitLex()
 {
-	TkWord* tp;
+	TkWord* tp = NULL;
 	static TkWord keywords[] = {
 		{ TK_PLUS,		NULL,	  "+",	            NULL,	NULL },
 		{ TK_MINUS,		NULL,	  "-",	            NULL,	NULL },
@@ -164,7 +170,7 @@ char* GetTkstr(const int c)
 		return ((TkWord*)tktable.data[c])->spelling;
 }
 
-void Preprocess()
+void Preprocess(void)
 {
 	while (1)
 	{
@@ -199,7 +205,7 @@ void Preprocess()
 	}
 }
 
-void ParseComment_2()
+void ParseComment_2(void)
 {
 	 GetCh();
 	while (1)
@@ -223,9 +229,9 @@ void ParseComment_2()
 }
 
 
-void ParseComment()
+void ParseComment(void)
 {
-	 GetCh();
+	GetCh();
 	while (1)
 	{
 		while (1)
@@ -257,7 +263,7 @@ void ParseComment()
 	}
 }
 
-void SkipWhiteSpace()
+void SkipWhiteSpace(void)
 {
 	while (ch == ' ' || ch == '\t' || ch == '\r')
 	{
@@ -290,7 +296,7 @@ int IsDigit(const char c)
 }
 
 
-void ParseIdentifier()
+void ParseIdentifier(void)
 {
 	StringReset(&tkstr);
 	StringChcat(&tkstr, ch);
@@ -304,7 +310,7 @@ void ParseIdentifier()
 }
 
 
-void ParseNum()
+void ParseNum(void)
 {
 	StringReset(&tkstr);
 	StringReset(&sourcestr);
@@ -408,7 +414,7 @@ void ParseString(const char sep)
 
 
 
-void GetToken()
+void GetToken(void)
 {
 	Preprocess();
 	switch (ch)
@@ -674,7 +680,7 @@ void ColorToken(const int lex_state)
 }
 
 
-void TestLex()
+void TestLex(void)
 {
 	do
 	{
