@@ -410,7 +410,7 @@ void GenOpi_1(int op) //生成整数运算
 			GenOpcode_1(0xf7);
 			GenModrm(ADDR_REG, opc, fr, NULL, 0);
 
-			if (op == TK_AND)
+			if (op == TK_MOD)
 				r = REG_EDX;
 			else
 				r = REG_EAX;
