@@ -181,7 +181,11 @@ int TypeSpecifier(Type* type)
 			break;
 		}
 		default:
+		{
+			GetToken();
 			break;
+		}
+			
 	}
 	type->t = t;
 	return type_found;
@@ -836,7 +840,7 @@ void SizeofExpression(void)
 	Skip(TK_OPENPA);
 	TypeSpecifier(&type);
 
-	GetToken();
+	
 	Skip(TK_CLOSEPA);
 
 	size = TypeSize(&type, &align);
