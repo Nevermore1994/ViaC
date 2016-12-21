@@ -119,7 +119,7 @@ int ProcessCommand(int argc, char** argv)
 				}
 				case 'h':
 				{
-					printf("usage: scc [-c infile] [-o outfile] [-llib] [infile1 infile2...] \n");
+					printf("usage: viac [-c infile] [-o outfile] [-llib] [infile1 infile2...] \n");
 					return 0;
 				}
 				default:
@@ -131,7 +131,6 @@ int ProcessCommand(int argc, char** argv)
 		}
 		else
 		{
-
 			ArrayAdd(&srcfiles, argv[i]);
 		}
 	}
