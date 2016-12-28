@@ -9,7 +9,7 @@
 typedef TkWord* pTkWord;
 
 Array tktable;
-TkWord* tk_hashtable[MAXKEY];
+pTkWord tk_hashtable[MAXKEY];
 String sourcestr;
 String tkstr;
 char ch;
@@ -17,7 +17,7 @@ int token;
 int tkvalue;
 
 
-TkWord* TkwordDirectInsert(TkWord* ptw)
+pTkWord TkwordDirectInsert(pTkWord ptw)
 {
 	if (ptw == NULL)
 		Error("语法分析器中有指针未初始化");
@@ -35,11 +35,12 @@ TkWord* TkwordDirectInsert(TkWord* ptw)
 
 
 
-TkWord* TkwordFind(const char *p, const int keyno)
+pTkWord TkwordFind(const char* p, const int keyno)
 {
 	if (p == NULL)
 		Error("语法分析器中有指针未初始化");
-	TkWord *tp = NULL, *tp1;
+	pTkWord tp = NULL;
+	pTkWord tp1 = NULL;
 	for (tp1 = tk_hashtable[keyno]; tp1; tp1 = tp1->next)
 	{
 		if (!strcmp(p, tp1->spelling))
@@ -52,14 +53,14 @@ TkWord* TkwordFind(const char *p, const int keyno)
 }
 
 
-TkWord* TkwordInsert(const char *p)
+pTkWord TkwordInsert(const char* p)
 {
 	if (p == NULL)
 		Error("语法分析器中有指针未初始化");
 
 	int keyno = ElfHash(p);
 	
-	TkWord* ptw = NULL;
+	pTkWord ptw = NULL;
 	ptw = TkwordFind(p, keyno);
 
 	char* s = NULL;
@@ -67,13 +68,13 @@ TkWord* TkwordInsert(const char *p)
 	if (ptw == NULL)
 	{
 		int length = strlen(p);
-		ptw = (TkWord*)MallocInit(sizeof(TkWord) + length + 1);
+		ptw = (pTkWord)MallocInit(sizeof(TkWord) + length + 1);
 		ptw->next = tk_hashtable[keyno];
 		tk_hashtable[keyno] = ptw;
 		ArrayAdd(&tktable, ptw);
 		ptw->tkcode = tktable.count - 1;
-		s = (char *)ptw + sizeof(TkWord);
-		ptw->spelling = (char *)s;
+		s = (char*)ptw + sizeof(TkWord);
+		ptw->spelling = (char*)s;
 		for (end = p + length; p < end; ++p)
 		{
 			*s = *p;
@@ -94,7 +95,7 @@ void  GetCh()
 
 void InitLex()
 {
-	TkWord* tp = NULL;
+	pTkWord tp = NULL;
 	static TkWord keywords[] = {
 		{ TK_PLUS,		NULL,	  "+",	            NULL,	NULL },
 		{ TK_MINUS,		NULL,	  "-",	            NULL,	NULL },
@@ -167,7 +168,7 @@ char* GetTkstr(const int c)
 	else if (c >= TK_CINT && c <= TK_CSTR)
 		return sourcestr.data;
 	else
-		return ((TkWord*)tktable.data[c])->spelling;
+		return ((pTkWord)tktable.data[c])->spelling;
 }
 
 void Preprocess(void)
@@ -435,7 +436,7 @@ void GetToken(void)
 		case 'Y':	case 'Z':
 		case '_':
 		{
-			TkWord* tp;
+			pTkWord tp;
 			ParseIdentifier();
 			tp = TkwordInsert(tkstr.data);
 			token = tp->tkcode;
