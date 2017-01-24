@@ -55,8 +55,8 @@ namespace viacode
         private int findstart = 0;
         private int findend = 0;
         //定义的版本
-        private float releaseversion = 0.1028f;
-        private float debugversion = 0.1029f;
+        private float releaseversion = 0.1078f;
+        private float debugversion = 0.1079f;
 
         //当前使用的版本
         private float version;
@@ -64,7 +64,7 @@ namespace viacode
         //当前使用的模式
         private bool isproject = false;
         //当前界面偏移量
-        private int local = 0;
+        //private int local = 0;
         private TreeView projectview = new TreeView( );  //树状图
 
         //所有打开的项目
@@ -83,13 +83,12 @@ namespace viacode
         {
 
             ViaCodepath = Directory.GetCurrentDirectory( );
-           
-            skinpath = ViaCodepath + "\\skins";
-            
 
             version = debugversion;
+
             Source( );
-            skinEngine1.SkinFile = "Skins\\" + skin;
+            skinpath = ViaCodepath + "\\skins\\";
+            skinEngine1.SkinFile = skinpath + skin;
 
             SetSize(isproject);
             tab.Visible = false;
