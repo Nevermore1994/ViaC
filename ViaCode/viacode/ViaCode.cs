@@ -982,13 +982,14 @@ namespace viacode
 
         private void SetFindStyle()
         {
-
+            //todo::
         }
 
         private void SelectBox_SelectedIndexChanged(object sender, EventArgs e)
         {
              ComboBox selectbox = (ComboBox) sender;
              Find findform = (Find)selectbox.Parent;
+             //todo ::更正写法
              if (selectbox.SelectedIndex == 0 && selectbox.SelectedIndex != findindex)
              {
                 findform.findbutton.MouseClick += FindDown_MouseClick;
@@ -1096,8 +1097,9 @@ namespace viacode
 
         private void Findbox_TextChanged(object sender, EventArgs e)
         {
-             RichTextBox text = (RichTextBox)sender;
+            RichTextBox text = (RichTextBox)sender;
             FindClearFlags( );
+            //todo
             findstring = text.Text;
             findend = nowtext.filetext.TextLength;
         }
