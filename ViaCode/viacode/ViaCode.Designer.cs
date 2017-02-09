@@ -106,7 +106,7 @@ namespace viacode
             this.debugBox = new System.Windows.Forms.RichTextBox();
             this.fontDialog = new System.Windows.Forms.FontDialog();
             this.colorDialog = new System.Windows.Forms.ColorDialog();
-            this.skinEngine1 = new Sunisoft.IrisSkin.SkinEngine();
+            this.ViaCskinEngine = new Sunisoft.IrisSkin.SkinEngine();
             this.TempBox = new System.Windows.Forms.RichTextBox();
             this.foldMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.添加文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -760,14 +760,14 @@ namespace viacode
             this.debugBox.Text = "";
             this.toolTip.SetToolTip(this.debugBox, "Debug提示框");
             // 
-            // skinEngine1
+            // ViaCskinEngine
             // 
-            this.skinEngine1.@__DrawButtonFocusRectangle = true;
-            this.skinEngine1.DisabledButtonTextColor = System.Drawing.Color.Gray;
-            this.skinEngine1.DisabledMenuFontColor = System.Drawing.SystemColors.GrayText;
-            this.skinEngine1.InactiveCaptionColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.skinEngine1.SerialNumber = "";
-            this.skinEngine1.SkinFile = null;
+            this.ViaCskinEngine.@__DrawButtonFocusRectangle = true;
+            this.ViaCskinEngine.DisabledButtonTextColor = System.Drawing.Color.Gray;
+            this.ViaCskinEngine.DisabledMenuFontColor = System.Drawing.SystemColors.GrayText;
+            this.ViaCskinEngine.InactiveCaptionColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.ViaCskinEngine.SerialNumber = "";
+            this.ViaCskinEngine.SkinFile = null;
             // 
             // TempBox
             // 
@@ -1005,7 +1005,7 @@ namespace viacode
         private System.Windows.Forms.ToolStripMenuItem hToolStripMenuItem;
         private System.Windows.Forms.FontDialog fontDialog;
         private System.Windows.Forms.ColorDialog colorDialog;
-        private Sunisoft.IrisSkin.SkinEngine skinEngine1;
+        private Sunisoft.IrisSkin.SkinEngine ViaCskinEngine;
         private System.Windows.Forms.RichTextBox TempBox;
         private System.Windows.Forms.ToolStripMenuItem 重复ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 查找ToolStripMenuItem;

@@ -21,7 +21,7 @@ namespace viacode
     {
 
         /// <summary>
-        /// Todo  把新建文件独立为一个窗口
+        /// Todo  头文件机制
         /// Todo  
         /// </summary>
         private string ViaCodepath = null;
@@ -52,7 +52,7 @@ namespace viacode
 
         //查找字符串
         private string findstring = null;
-        private int findstart = 0;
+        private int findstart ;
         private int findend = 0;
         //定义的版本
         private float releaseversion = 0.1078f;
@@ -88,7 +88,7 @@ namespace viacode
 
             Source( );
             skinpath = ViaCodepath + "\\skins\\";
-            skinEngine1.SkinFile = skinpath + skin;
+            ViaCskinEngine.SkinFile = skinpath + skin;
 
             SetSize(isproject);
             tab.Visible = false;
@@ -275,7 +275,7 @@ namespace viacode
             }
             catch (IOException io)
             {
-                MessageBox.Show("加载文件失败！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("加载文件失败！错误代码: " + io.Source, "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         private void Project_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -593,7 +593,6 @@ namespace viacode
                 nowtext.Issave = false;
             }
             GetLine( );
-
         }
         #endregion
         /***************************窗口创建函数**************************************************************/
@@ -960,48 +959,108 @@ namespace viacode
                 nowtext.filetext.InsertText(nowtext.filetext.SelectionEnd, "\n" + nowtext.filetext.SelectedText);
         }
 
+        private int findindex = 0;
         private void 查找ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (nowtext != null)
             {
                 TempBox.Text = nowtext.filetext.Text;
-                findstart = 0;
 
-                Form findform = new Form( );
-                findform.Size = new Size(200, 150);
-                findform.Text = "查找";
-                findform.MaximizeBox = false;
-                findform.MinimizeBox = false;
+                Find findform = new Find(ViaCodepath);
+                
 
-                TextBox findbox = new TextBox( );
-                findbox.Size = new Size(150, 100);
-                findbox.Visible = true;
-                findbox.Location = new Point(25, 20);
-                findbox.TextChanged += Findbox_TextChanged;
-
-                Button find = new Button( );
-                find.Size = new Size(80, 20);
-                find.Location = new Point(20, 70);
-                find.Text = "查找下一个";
-                find.MouseClick += Find_MouseClick;
-                Button findall = new Button( );
-                findall.Size = new Size(80, 20);
-                findall.Location = new Point(110, 70);
-                findall.Text = "查找全部";
-                findall.MouseClick += Findall_MouseClick;
-
-                findform.Controls.Add(find);
-                findform.Controls.Add(findall);
-                findform.Controls.Add(findbox);
-                findform.Show( );
+                findform.richTextBox.TextChanged += Findbox_TextChanged;
+                findform.richTextBox.Focus( );
+                findform.findallbutton.MouseClick += Findall_MouseClick;
+                findindex =  findform.selectBox.SelectedIndex;
+                findform.selectBox.SelectedIndexChanged += SelectBox_SelectedIndexChanged;
                 findform.FormClosed += Findform_FormClosed;
+                findform.Show( );
             }
 
         }
 
+        private void SetFindStyle()
+        {
+
+        }
+
+        private void SelectBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+             ComboBox selectbox = (ComboBox) sender;
+             Find findform = (Find)selectbox.Parent;
+             if (selectbox.SelectedIndex == 0 && selectbox.SelectedIndex != findindex)
+             {
+                findform.findbutton.MouseClick += FindDown_MouseClick;
+                findform.findbutton.MouseClick -= FindUp_MouseClick;
+                findindex = 0;
+
+                findstart = 0;
+                findend = nowtext.filetext.TextLength;
+            } 
+             else if(selectbox.SelectedIndex == 1 && selectbox.SelectedIndex != findindex)
+            {
+                findform.findbutton.MouseClick += FindUp_MouseClick;
+                findform.findbutton.MouseClick -= FindDown_MouseClick;
+                findindex = 1;
+
+                findstart = nowtext.filetext.TextLength;
+                findend = nowtext.filetext.TextLength;
+            }
+                
+        }
+
+        private void FindClearFlags()
+        {
+            nowtext.filetext.Text = "";
+            nowtext.filetext.Text = TempBox.Text;
+        }
         private void Findform_FormClosed(object sender, FormClosedEventArgs e)
         {
-            nowtext.filetext.Text = TempBox.Text;
+            FindClearFlags( );
+        }
+
+        private void FindUp_MouseClick(object sender, MouseEventArgs e)
+        {
+            FindClearFlags( );
+            const int NUM = 8;
+
+            // Remove all uses of our indicator
+            nowtext.filetext.IndicatorCurrent = NUM;
+            nowtext.filetext.IndicatorClearRange(findstart, findend);
+
+            // Update indicator appearance
+            nowtext.filetext.Indicators[NUM].Style = IndicatorStyle.StraightBox;
+            nowtext.filetext.Indicators[NUM].Under = true;
+            nowtext.filetext.Indicators[NUM].ForeColor = Color.Red;
+            nowtext.filetext.Indicators[NUM].OutlineAlpha = 50;
+            nowtext.filetext.Indicators[NUM].Alpha = 30;
+
+            // Search the document
+            nowtext.filetext.TargetStart = findstart;
+            nowtext.filetext.TargetEnd = findend;
+
+            nowtext.filetext.SearchFlags = SearchFlags.None;
+            while (nowtext.filetext.SearchInTarget(findstring) == -1)
+            {
+                if (nowtext.filetext.TargetStart > 0)
+                    -- nowtext.filetext.TargetStart;
+            }
+             
+            if(nowtext.filetext.SearchInTarget(findstring) != -1)
+            {
+                nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
+                nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
+
+                findstart = nowtext.filetext.TargetStart;
+                MessageBox.Show(nowtext.filetext.TargetStart + "");
+                findend = nowtext.filetext.TargetEnd - findstring.Length;
+            }
+            if ( nowtext.filetext.SearchInTarget(findstring) == -1 )
+            {
+                findstart = nowtext.filetext.TextLength;
+                MessageBox.Show("查找完成！", "ViaC Warning");
+            }
         }
 
         private void Findall_MouseClick(object sender, MouseEventArgs e)
@@ -1015,7 +1074,7 @@ namespace viacode
             // Update indicator appearance
             nowtext.filetext.Indicators[NUM].Style = IndicatorStyle.StraightBox;
             nowtext.filetext.Indicators[NUM].Under = true;
-            nowtext.filetext.Indicators[NUM].ForeColor = Color.Green;
+            nowtext.filetext.Indicators[NUM].ForeColor = Color.Red;
             nowtext.filetext.Indicators[NUM].OutlineAlpha = 50;
             nowtext.filetext.Indicators[NUM].Alpha = 30;
 
@@ -1027,22 +1086,25 @@ namespace viacode
             {
                 // Mark the search results with the current indicator
                 nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
-
+               
                 // Search the remainder of the document
                 nowtext.filetext.TargetStart = nowtext.filetext.TargetEnd;
                 nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
             }
+            MessageBox.Show(findstring + "查找完成", "ViaC Warning");
         }
 
         private void Findbox_TextChanged(object sender, EventArgs e)
         {
-            TextBox text = (TextBox)sender;
+             RichTextBox text = (RichTextBox)sender;
+            FindClearFlags( );
             findstring = text.Text;
             findend = nowtext.filetext.TextLength;
         }
 
-        private void Find_MouseClick(object sender, MouseEventArgs e)
+        private void FindDown_MouseClick(object sender, MouseEventArgs e)
         {
+            FindClearFlags( );
             const int NUM = 8;
 
             // Remove all uses of our indicator
@@ -1065,12 +1127,17 @@ namespace viacode
             {
                 // Mark the search results with the current indicator
                 nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
+                nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
 
                 // Search the remainder of the document
                 findstart = nowtext.filetext.TargetEnd;
                 findend = nowtext.filetext.TextLength;
             }
-
+            if (nowtext.filetext.SearchInTarget(findstring) == -1)
+            {
+                findstart = 0;
+                MessageBox.Show("查找完成！", "ViaC Warning");
+            }
         }
 
         private void CascadeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1130,7 +1197,7 @@ namespace viacode
             skyToolStripMenuItem.Checked = true;
             blackToolStripMenuItem.Checked = false;
             grayToolStripMenuItem.Checked = false;
-            skinEngine1.SkinFile = skinpath + skin;
+            ViaCskinEngine.SkinFile = skinpath + skin;
             config = 100;
             SaveApplicationConfig(config);
         }
@@ -1141,7 +1208,7 @@ namespace viacode
             skyToolStripMenuItem.Checked = false;
             blackToolStripMenuItem.Checked = true;
             grayToolStripMenuItem.Checked = false;
-            skinEngine1.SkinFile = skinpath + skin;
+            ViaCskinEngine.SkinFile = skinpath + skin;
             config = 010;
             SaveApplicationConfig(config);
         }
@@ -1152,7 +1219,7 @@ namespace viacode
             skyToolStripMenuItem.Checked = false;
             blackToolStripMenuItem.Checked = false;
             grayToolStripMenuItem.Checked = true;
-            skinEngine1.SkinFile = skinpath + skin;
+            ViaCskinEngine.SkinFile = skinpath + skin;
             config = 001;
             SaveApplicationConfig(config);
         }

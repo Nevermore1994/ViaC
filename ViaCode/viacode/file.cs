@@ -9,7 +9,7 @@ namespace viacode
 {
     class file
     {
-        private bool _isbool;
+        private bool _issave;
         private string _name;
         public TreeNode fileinfo;
         public file(Scintilla _text)
@@ -22,11 +22,11 @@ namespace viacode
         {
             set
             {
-                _isbool = value;
+                _issave = value;
             }
             get
             {
-                return _isbool;
+                return _issave;
             }
         }
 
