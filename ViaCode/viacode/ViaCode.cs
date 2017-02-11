@@ -1069,7 +1069,7 @@ namespace viacode
                 nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
 
                 // Search the remainder of the document
-                findstart = nowtext.filetext.TargetEnd;
+                findstart = nowtext.filetext.TargetEnd + replacestring.Length;
                 findend = nowtext.filetext.TextLength;
                 TempBox.Text = nowtext.filetext.Text;
             }
@@ -1111,7 +1111,7 @@ namespace viacode
                 nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
             }
             TempBox.Text = nowtext.filetext.Text;
-            MessageBox.Show("替换完成", "ViaC 提示");
+            MessageBox.Show("替换完成！", "ViaC 提示");
         }
 
         private void Findbox_TextChanged(object sender, EventArgs e)
