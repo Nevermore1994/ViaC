@@ -29,21 +29,21 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Find));
-            this.richTextBox = new System.Windows.Forms.RichTextBox();
+            this.findText = new System.Windows.Forms.RichTextBox();
             this.findbutton = new System.Windows.Forms.Button();
             this.findallbutton = new System.Windows.Forms.Button();
             this.replacebutton = new System.Windows.Forms.Button();
             this.selectBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
-            // richTextBox
+            // findText
             // 
-            this.richTextBox.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.richTextBox.Location = new System.Drawing.Point(30, 30);
-            this.richTextBox.Name = "richTextBox";
-            this.richTextBox.Size = new System.Drawing.Size(403, 36);
-            this.richTextBox.TabIndex = 0;
-            this.richTextBox.Text = "";
+            this.findText.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.findText.Location = new System.Drawing.Point(30, 30);
+            this.findText.Name = "findText";
+            this.findText.Size = new System.Drawing.Size(403, 36);
+            this.findText.TabIndex = 0;
+            this.findText.Text = "";
             // 
             // findbutton
             // 
@@ -100,7 +100,7 @@
             this.Controls.Add(this.replacebutton);
             this.Controls.Add(this.findallbutton);
             this.Controls.Add(this.findbutton);
-            this.Controls.Add(this.richTextBox);
+            this.Controls.Add(this.findText);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Name = "Find";
@@ -113,7 +113,7 @@
         #endregion
 
         public System.Windows.Forms.Button replacebutton;
-        public System.Windows.Forms.RichTextBox richTextBox;
+        public System.Windows.Forms.RichTextBox findText;
         public System.Windows.Forms.Button findbutton;
         public System.Windows.Forms.Button findallbutton;
         public System.Windows.Forms.ComboBox selectBox;

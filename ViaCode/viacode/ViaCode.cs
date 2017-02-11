@@ -50,10 +50,7 @@ namespace viacode
         //文档属性
         private const string fileclass = "ViaC文件(*.viac)|*.viac|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
 
-        //查找字符串
-        private string findstring = null;
-        private int findstart ;
-        private int findend = 0;
+       
         //定义的版本
         private float releaseversion = 0.1078f;
         private float debugversion = 0.1079f;
@@ -79,6 +76,7 @@ namespace viacode
             InitializeComponent( );
         }
 
+       
         private void ViaC_Load(object sender, EventArgs e)
         {
 
@@ -118,13 +116,11 @@ namespace viacode
             {
                 if (alltexts.Count > 0)
                 {
-                    TabPage selectpage = tab.SelectedTab;
-                    nowtext = FindFile(selectpage.Name);
+                    SetNowtext( );
                 }
             }
             else if(e.Button == MouseButtons.Right)
             {
-                
                 Point pos = Cursor.Position;
                 tab.SelectedTab.ContextMenuStrip.Show(pos);
             }
@@ -256,6 +252,16 @@ namespace viacode
         }
         /*********************************控件响应函数******************************************/
         #region
+        private void SetNowtext()  //严格要求路径和名字均要匹配
+        {
+            nowtext = FindFile(tab.SelectedTab.Name, tab.SelectedTab.Text);
+        }
+
+        private void SetNowtextOnlyPath() //仅仅要求路径
+        {
+            nowtext = FindFile(tab.SelectedTab.Name);
+        }
+
         private void LoadFile(string filename)
         {
             try
@@ -278,6 +284,7 @@ namespace viacode
                 MessageBox.Show("加载文件失败！错误代码: " + io.Source, "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
         private void Project_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             TreeNode nownode = projectview.SelectedNode;
@@ -366,15 +373,21 @@ namespace viacode
             {
                 TabPage selectpage = tab.SelectedTab;
                 if(selectpage != null)
-                    nowtext = FindFile(selectpage.Name);
+                {
+                    SetNowtext( );
+                }     
             }
-
+          
         }
 
         private void CloseFile()
         {
+            SetNowtextOnlyPath( );
             if (nowtext == null)
+            {
+                MessageBox.Show("未打开任何文件!", "ViaC Warning");
                 return;
+            }
             if (nowtext.Issave == false)
             {
                 DialogResult diares = MessageBox.Show("是否保存修改？", "ViaC编译器提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -408,8 +421,14 @@ namespace viacode
 
                 alltexts.Clear( );
             }
-            if (tab.SelectedTab != null)
-                 nowtext = FindFile(tab.SelectedTab.Name);
+            else
+            {
+                tab.SelectedIndex = 0;
+                SetNowtext( );
+                MessageBox.Show(tab.SelectedTab.Text);
+            }
+               
+            MessageBox.Show(tab.TabPages.Count + "", alltexts.Count + "");
         }
         
         private void Tab_DoubleClick(object sender, MouseEventArgs e)
@@ -491,9 +510,12 @@ namespace viacode
 
         private void Scintilla_CharAdded(object sender, CharAddedEventArgs e)
         {
+            SetNowtextOnlyPath( );
+
             var currentPos = nowtext.filetext.CurrentPosition;
             var wordStartPos = nowtext.filetext.WordStartPosition(currentPos, true);
-
+            
+            
 
             var lenEntered = currentPos - wordStartPos;
             if (lenEntered > 0)
@@ -502,8 +524,8 @@ namespace viacode
             }
             GetLine( );
             Scintilla text = (Scintilla)sender;
-            nowtext = FindFile(tab.SelectedTab.Name);
-            if(nowtext.Issave == true)
+           
+            if (nowtext.Issave == true)
             {
                 nowtext.Issave = false;
                 nowtext.Parent.Text += "*";
@@ -586,7 +608,7 @@ namespace viacode
             const int padding = 2;
             text.Margins[0].Width = text.TextWidth(Style.LineNumber, new string('9', maxLineNumberCharLength + 1)) + padding;
             text.Tag = maxLineNumberCharLength;
-            nowtext = FindFile(tab.SelectedTab.Name);
+            SetNowtext( );
             if(nowtext.Issave == true)
             {
                 nowtext.Parent.Text += "*";
@@ -696,7 +718,7 @@ namespace viacode
             string name = defaultname + defaultnum + "." + defaultname;
             ++defaultnum;
 
-            CreateWindow(name);
+            nowtext = CreateWindow(name);
         }
 
         private void 文件ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -704,7 +726,7 @@ namespace viacode
             string name = defaultname + defaultnum + "." + defaultname;
             ++defaultnum;
 
-            CreateWindow(name);
+           nowtext = CreateWindow(name);
         }
 
         private void 项目ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -766,6 +788,7 @@ namespace viacode
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if(!isproject && nowtext == null)
             {
                 MessageBox.Show("未打开任何的文件！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -876,18 +899,21 @@ namespace viacode
 
         private void ToolBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
                 toolStrip.Visible = toolBarToolStripMenuItem.Checked;
         }
 
         private void StatusBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
                 statusStrip.Visible = statusBarToolStripMenuItem.Checked;
         }
 
         private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.Paste( );
@@ -903,6 +929,7 @@ namespace viacode
 
         private void CopyToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.Copy( );
@@ -917,6 +944,7 @@ namespace viacode
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.Undo( );
@@ -932,6 +960,7 @@ namespace viacode
 
         private void CutToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.Cut( );
@@ -947,6 +976,7 @@ namespace viacode
 
         private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.SelectAll( );
@@ -955,77 +985,66 @@ namespace viacode
 
         private void 重复ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetNowtext( );
             if (nowtext != null)
                 nowtext.filetext.InsertText(nowtext.filetext.SelectionEnd, "\n" + nowtext.filetext.SelectedText);
         }
 
         private int findindex = 0;
+        //查找字符串
+        private string findstring = null;
+        private int findstart = 0;
+        private int findend = 0;
+        //替换字符串
+        private string replacestring = null;
+        Find findform;
         private void 查找ToolStripMenuItem_Click(object sender, EventArgs e)
         {
+          /*  if(findform != null)
+            {
+                findform.Dispose( );
+                findform.Close( );
+            }*/
+           
             if (nowtext != null)
             {
                 TempBox.Text = nowtext.filetext.Text;
 
-                Find findform = new Find(ViaCodepath);
+                findform = new Find(ViaCodepath);
                 
-
-                findform.richTextBox.TextChanged += Findbox_TextChanged;
-                findform.richTextBox.Focus( );
+                findform.findText.TextChanged += Findbox_TextChanged;
+                findform.findText.Focus( );
                 findform.findallbutton.MouseClick += Findall_MouseClick;
+            
                 findindex =  findform.selectBox.SelectedIndex;
                 findform.selectBox.SelectedIndexChanged += SelectBox_SelectedIndexChanged;
+                findform.replacebutton.MouseClick += Replacebutton_MouseClick;
+                
                 findform.FormClosed += Findform_FormClosed;
                 findform.Show( );
             }
 
         }
 
-        private void SetFindStyle()
+
+        private void Replacebutton_MouseClick(object sender, MouseEventArgs e)
         {
-            //todo::
+            findform.replaceall.MouseClick += Replaceall_MouseClick;
+            findform.replaceone.MouseClick += Replaceone_MouseClick;
+            findform.replacetext.TextChanged += Replacetext_TextChanged;
         }
 
-        private void SelectBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void Replacetext_TextChanged(object sender, EventArgs e)
         {
-             ComboBox selectbox = (ComboBox) sender;
-             Find findform = (Find)selectbox.Parent;
-             //todo ::更正写法
-             if (selectbox.SelectedIndex == 0 && selectbox.SelectedIndex != findindex)
-             {
-                findform.findbutton.MouseClick += FindDown_MouseClick;
-                findform.findbutton.MouseClick -= FindUp_MouseClick;
-                findindex = 0;
-
-                findstart = 0;
-                findend = nowtext.filetext.TextLength;
-            } 
-             else if(selectbox.SelectedIndex == 1 && selectbox.SelectedIndex != findindex)
-            {
-                findform.findbutton.MouseClick += FindUp_MouseClick;
-                findform.findbutton.MouseClick -= FindDown_MouseClick;
-                findindex = 1;
-
-                findstart = nowtext.filetext.TextLength;
-                findend = nowtext.filetext.TextLength;
-            }
-                
+            replacestring = findform.replacetext.Text;
         }
 
-        private void FindClearFlags()
-        {
-            nowtext.filetext.Text = "";
-            nowtext.filetext.Text = TempBox.Text;
-        }
-        private void Findform_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            FindClearFlags( );
-        }
-
-        private void FindUp_MouseClick(object sender, MouseEventArgs e)
+        private void Replaceone_MouseClick(object sender, MouseEventArgs e)
         {
             FindClearFlags( );
             const int NUM = 8;
 
+            SetNowtext( );
             // Remove all uses of our indicator
             nowtext.filetext.IndicatorCurrent = NUM;
             nowtext.filetext.IndicatorClearRange(findstart, findend);
@@ -1037,37 +1056,166 @@ namespace viacode
             nowtext.filetext.Indicators[NUM].OutlineAlpha = 50;
             nowtext.filetext.Indicators[NUM].Alpha = 30;
 
-            // Search the document
             nowtext.filetext.TargetStart = findstart;
             nowtext.filetext.TargetEnd = findend;
 
             nowtext.filetext.SearchFlags = SearchFlags.None;
-            while (nowtext.filetext.SearchInTarget(findstring) == -1)
+            if (nowtext.filetext.SearchInTarget(findstring) != -1)
             {
-                if (nowtext.filetext.TargetStart > 0)
-                    -- nowtext.filetext.TargetStart;
-            }
-             
-            if(nowtext.filetext.SearchInTarget(findstring) != -1)
-            {
+                // Mark the search results with the current indicator
                 nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
                 nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
+                nowtext.filetext.ReplaceSelection(replacestring);
+                nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
 
-                findstart = nowtext.filetext.TargetStart;
-                MessageBox.Show(nowtext.filetext.TargetStart + "");
-                findend = nowtext.filetext.TargetEnd - findstring.Length;
+                // Search the remainder of the document
+                findstart = nowtext.filetext.TargetEnd;
+                findend = nowtext.filetext.TextLength;
+                TempBox.Text = nowtext.filetext.Text;
             }
-            if ( nowtext.filetext.SearchInTarget(findstring) == -1 )
+            else
             {
-                findstart = nowtext.filetext.TextLength;
-                MessageBox.Show("查找完成！", "ViaC Warning");
+                findstart = 0;
+                MessageBox.Show("替换完成!", "ViaC 提示");
             }
+        }
+
+        private void Replaceall_MouseClick(object sender, MouseEventArgs e)
+        {
+            FindClearFlags( );
+            const int NUM = 8;
+
+            SetNowtext( );
+            // Remove all uses of our indicator
+            nowtext.filetext.IndicatorCurrent = NUM;
+            nowtext.filetext.IndicatorClearRange(findstart, findend);
+
+            // Update indicator appearance
+            nowtext.filetext.Indicators[NUM].Style = IndicatorStyle.StraightBox;
+            nowtext.filetext.Indicators[NUM].Under = true;
+            nowtext.filetext.Indicators[NUM].ForeColor = Color.Red;
+            nowtext.filetext.Indicators[NUM].OutlineAlpha = 50;
+            nowtext.filetext.Indicators[NUM].Alpha = 30;
+
+            nowtext.filetext.TargetStart = 0;
+            nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
+            nowtext.filetext.SearchFlags = SearchFlags.None;
+            while (nowtext.filetext.SearchInTarget(findstring) != -1)
+            {
+                // Mark the search results with the current indicator
+                nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
+                nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
+                nowtext.filetext.ReplaceSelection(replacestring);
+                // Search the remainder of the document
+                nowtext.filetext.TargetStart = nowtext.filetext.TargetEnd;
+                nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
+            }
+            TempBox.Text = nowtext.filetext.Text;
+            MessageBox.Show("替换完成", "ViaC 提示");
+        }
+
+        private void Findbox_TextChanged(object sender, EventArgs e)
+        {
+            SetNowtext( );
+            RichTextBox text = (RichTextBox)sender;
+            FindClearFlags( );
+            findstring = text.Text;
+            findend = nowtext.filetext.TextLength;
+            SetFindStyle( );
+        }
+
+        private void SetFindStyle()
+        {
+            SetNowtext( );
+            if(findform.selectBox.SelectedIndex == 0)
+            {
+                if (findstart == nowtext.filetext.TextLength)
+                {
+                    findstart = 0;
+                }
+                else
+                {
+                    findstart = findstart + findstring.Length;
+                }
+                findend = nowtext.filetext.TextLength;
+            }
+            else if(findform.selectBox.SelectedIndex == 1)
+            {
+                if (findstart == 0)
+                {
+                    findstart = nowtext.filetext.TextLength;
+                    findend = nowtext.filetext.TextLength;
+                }
+                else
+                {
+                    findend = findstart - findstring.Length;
+
+                }
+            }
+        }
+
+        private void SelectBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetNowtext( );
+             ComboBox selectbox = (ComboBox) sender;
+             Find findform = (Find)selectbox.Parent;
+             if(selectbox.SelectedIndex != findindex)
+             {
+                if (selectbox.SelectedIndex == 0)
+                {
+                    findform.findbutton.MouseClick += FindDown_MouseClick;
+                    findform.findbutton.MouseClick -= FindUp_MouseClick;
+                    findindex = 0;
+
+                    if (findstart == nowtext.filetext.TextLength)
+                    {
+                        findstart = 0;
+                    }
+                    else if(findstring != null)
+                    {
+                        findstart = findstart + findstring.Length;
+                    }
+                
+                    findend = nowtext.filetext.TextLength;
+                }
+                else if (selectbox.SelectedIndex == 1)
+                {
+                    findform.findbutton.MouseClick += FindUp_MouseClick;
+                    findform.findbutton.MouseClick -= FindDown_MouseClick;
+                    findindex = 1;
+
+                    if (findstart == 0)
+                    {
+                        findstart = nowtext.filetext.TextLength;
+                        findend = nowtext.filetext.TextLength;
+                    }
+                    else if(findstring != null)
+                    {
+                        findstart = findstart - findstring.Length;
+                        findend = findstart;
+                    }
+                   
+                }
+
+            }
+
+        }
+
+        private void FindClearFlags()
+        {
+            nowtext.filetext.Text = TempBox.Text;
+        }
+
+        private void Findform_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            FindClearFlags( );
         }
 
         private void Findall_MouseClick(object sender, MouseEventArgs e)
         {
             const int NUM = 8;
 
+            SetNowtext( );
             // Remove all uses of our indicator
             nowtext.filetext.IndicatorCurrent = NUM;
             nowtext.filetext.IndicatorClearRange(0, nowtext.filetext.TextLength);
@@ -1095,13 +1243,50 @@ namespace viacode
             MessageBox.Show(findstring + "查找完成", "ViaC Warning");
         }
 
-        private void Findbox_TextChanged(object sender, EventArgs e)
+        private void FindUp_MouseClick(object sender, MouseEventArgs e)
         {
-            RichTextBox text = (RichTextBox)sender;
             FindClearFlags( );
-            //todo
-            findstring = text.Text;
-            findend = nowtext.filetext.TextLength;
+            const int NUM = 8;
+
+            SetNowtext( );
+            // Remove all uses of our indicator
+            nowtext.filetext.IndicatorCurrent = NUM;
+            nowtext.filetext.IndicatorClearRange(findstart, findend);
+
+            // Update indicator appearance
+            nowtext.filetext.Indicators[NUM].Style = IndicatorStyle.StraightBox;
+            nowtext.filetext.Indicators[NUM].Under = true;
+            nowtext.filetext.Indicators[NUM].ForeColor = Color.Red;
+            nowtext.filetext.Indicators[NUM].OutlineAlpha = 50;
+            nowtext.filetext.Indicators[NUM].Alpha = 30;
+
+            // Search the document
+            nowtext.filetext.TargetStart = findstart;
+            nowtext.filetext.TargetEnd = findend;
+
+            nowtext.filetext.SearchFlags = SearchFlags.None;
+            while (nowtext.filetext.SearchInTarget(findstring) == -1)
+            {
+                if (nowtext.filetext.TargetStart > 0)
+                    -- nowtext.filetext.TargetStart;
+                else
+                    break;
+            }
+             
+            if(nowtext.filetext.SearchInTarget(findstring) != -1)
+            {
+                nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
+                nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
+
+                findstart = nowtext.filetext.TargetStart;
+              
+                findend = nowtext.filetext.TargetEnd - findstring.Length;
+            }
+            else
+            {
+                findstart = nowtext.filetext.TextLength;
+                MessageBox.Show("查找完成！", "ViaC Warning");
+            }
         }
 
         private void FindDown_MouseClick(object sender, MouseEventArgs e)
@@ -1109,6 +1294,7 @@ namespace viacode
             FindClearFlags( );
             const int NUM = 8;
 
+            SetNowtext( );
             // Remove all uses of our indicator
             nowtext.filetext.IndicatorCurrent = NUM;
             nowtext.filetext.IndicatorClearRange(findstart, findend);
@@ -1135,7 +1321,7 @@ namespace viacode
                 findstart = nowtext.filetext.TargetEnd;
                 findend = nowtext.filetext.TextLength;
             }
-            if (nowtext.filetext.SearchInTarget(findstring) == -1)
+            else 
             {
                 findstart = 0;
                 MessageBox.Show("查找完成！", "ViaC Warning");
@@ -1334,10 +1520,14 @@ namespace viacode
 
         private void GetLine() //光标状态函数
         {
-
-            int line = nowtext.filetext.CurrentLine + 1;
-            int row = nowtext.filetext.GetColumn(nowtext.filetext.CurrentPosition);
-            this.toolStripStatusLabel.Text = "状态" + "   " + "行:" + line +"      列:"+ row;
+            SetNowtextOnlyPath( );
+            if (nowtext != null)
+            {
+                int line = nowtext.filetext.CurrentLine + 1;
+                int row = nowtext.filetext.GetColumn(nowtext.filetext.CurrentPosition);
+                this.toolStripStatusLabel.Text = "状态" + "   " + "行:" + line + "      列:" + row;
+            }
+           
         }
     
         /**********************************以下是DLL调用*****************************************************/
@@ -1649,7 +1839,7 @@ namespace viacode
         }
         #endregion
         /***************************************以下是项目功能函数***************************************************/
-        private file FindFile(string filename)
+        private file FindFile(string filepath, string filename)
         {
             file resfile = null;
             
@@ -1657,13 +1847,30 @@ namespace viacode
             {
                 foreach(file nowfile in alltexts)
                 {
-                    if(nowfile.Parent.Name.Equals(filename))
+                    if(nowfile.Parent.Name.Equals(filepath) && nowfile.Parent.Text.Equals(filename))
                     {
                         resfile = nowfile;
                         return resfile;
                     }
                 }
             } 
+            return resfile;
+        }
+        private file FindFile(string filepath)
+        {
+            file resfile = null;
+
+            if (alltexts.Count > 0)
+            {
+                foreach (file nowfile in alltexts)
+                {
+                    if (nowfile.Parent.Name.Equals(filepath))
+                    {
+                        resfile = nowfile;
+                        return resfile;
+                    }
+                }
+            }
             return resfile;
         }
         /***************************************以下是文件XML保存函数************************************************/

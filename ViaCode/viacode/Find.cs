@@ -35,8 +35,9 @@ namespace viacode
             find_2 = Image.FromFile(imagepath + "find_2.bmp");
 
             replacetext = new RichTextBox( );
-            replacetext.Size = richTextBox.Size;
-            replacetext.Location = new Point(richTextBox.Location.X, richTextBox.Location.Y + 8 + richTextBox.Size.Height);
+            replacetext.Size = findText.Size;
+            replacetext.Font = findText.Font;
+            replacetext.Location = new Point(findText.Location.X, findText.Location.Y + 8 + findText.Size.Height);
             replacetext.Visible = false;
             
             replaceone = new Button( );
