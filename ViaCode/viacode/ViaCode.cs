@@ -1225,7 +1225,7 @@ namespace viacode
             nowtext.filetext.Indicators[NUM].Under = true;
             nowtext.filetext.Indicators[NUM].ForeColor = Color.Red;
             nowtext.filetext.Indicators[NUM].OutlineAlpha = 50;
-            nowtext.filetext.Indicators[NUM].Alpha = 30;
+            nowtext.filetext.Indicators[NUM].Alpha = 100;
 
             // Search the document
             nowtext.filetext.TargetStart = 0;
