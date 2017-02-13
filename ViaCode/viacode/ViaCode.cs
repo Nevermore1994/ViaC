@@ -1107,7 +1107,7 @@ namespace viacode
                 nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
                 nowtext.filetext.ReplaceSelection(replacestring);
                 // Search the remainder of the document
-                nowtext.filetext.TargetStart = nowtext.filetext.TargetEnd;
+                nowtext.filetext.TargetStart = nowtext.filetext.TargetEnd + replacestring.Length;
                 nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
             }
             TempBox.Text = nowtext.filetext.Text;
