@@ -75,6 +75,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_A14220C698894273930AFD6E2E7C318E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_A3DA701721EA494E8372062814AF4C5E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -454,6 +460,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A14220C698894273930AFD6E2E7C318E"
+            {
+            "SourcePath" = "8:..\\bin\\Release\\viac.config"
+            "TargetName" = "8:viac.config"
+            "Tag" = "8:"
+            "Folder" = "8:_51BBE821C7DD4D9FAA17F9EF7FD0F7A4"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A3DA701721EA494E8372062814AF4C5E"
             {
             "SourcePath" = "8:..\\bin\\Release\\lib\\msvcrt.slib"
@@ -718,6 +744,28 @@
                     }
                 }
             }
+            "{1525181F-901A-416C-8A58-119130FE478E}:_51BBE821C7DD4D9FAA17F9EF7FD0F7A4"
+            {
+            "Name" = "8:#1914"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:SystemFolder"
+                "Folders"
+                {
+                }
+            }
+            "{1525181F-901A-416C-8A58-119130FE478E}:_C686EDAD376C4AB8977C49E0C69EC04A"
+            {
+            "Name" = "8:#1921"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:StartMenuFolder"
+                "Folders"
+                {
+                }
+            }
             "{1525181F-901A-416C-8A58-119130FE478E}:_D316F63053BD48188EE446C9B86D59AA"
             {
             "Name" = "8:#1919"
@@ -745,15 +793,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ViaC编译器"
-        "ProductCode" = "8:{80596FA3-B8EB-4B26-B3BC-D4636AD276FE}"
-        "PackageCode" = "8:{C3494C9E-4E54-495A-9EA9-F17E11AF0AA5}"
+        "ProductCode" = "8:{6E2C0A9B-D094-4FCD-99AB-3F2BCCC87657}"
+        "PackageCode" = "8:{61C0754B-4415-4BE3-A711-CE51A1060F07}"
         "UpgradeCode" = "8:{65643538-ABFE-4FDD-9EE5-C7462A77E832}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:Default Company Name"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -765,7 +813,7 @@
         "ARPURLINFOABOUT" = "8:"
         "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:0"
-        "SearchPath" = "8:"
+        "SearchPath" = "8:..\\..\\..\\..\\..\\..\\..\\Windows\\System32"
         "UseSystemSearchPath" = "11:TRUE"
         "TargetPlatform" = "3:0"
         "PreBuildEvent" = "8:"
@@ -866,9 +914,9 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_999CB722FA704C2E951314FA0C6977BB"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_575CCA0E7A92465EA7C8C9C7BACA6BF0"
             {
-            "Name" = "8:viacode"
+            "Name" = "8:ViaCode"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -876,6 +924,20 @@
             "Transitive" = "11:FALSE"
             "Target" = "8:_1844B1E2C69247ACAD0BB292058CE5A4"
             "Folder" = "8:_382B36067E6141D8987BB0601AFFE6EF"
+            "WorkingFolder" = "8:_3E44B4C5B8DC4BF58842C4F66E7E5266"
+            "Icon" = "8:_9E51E0EF0EFB4D1498F914E895F1B305"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_999CB722FA704C2E951314FA0C6977BB"
+            {
+            "Name" = "8:ViaCode"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_1844B1E2C69247ACAD0BB292058CE5A4"
+            "Folder" = "8:_C686EDAD376C4AB8977C49E0C69EC04A"
             "WorkingFolder" = "8:_3E44B4C5B8DC4BF58842C4F66E7E5266"
             "Icon" = "8:_9E51E0EF0EFB4D1498F914E895F1B305"
             "Feature" = "8:"
