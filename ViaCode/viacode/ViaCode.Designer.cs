@@ -124,6 +124,7 @@ namespace viacode
             this.tabMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.关闭ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.保存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -800,14 +801,14 @@ namespace viacode
             // 新建文件ToolStripMenuItem
             // 
             this.新建文件ToolStripMenuItem.Name = "新建文件ToolStripMenuItem";
-            this.新建文件ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
+            this.新建文件ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.新建文件ToolStripMenuItem.Text = "新建文件";
             this.新建文件ToolStripMenuItem.Click += new System.EventHandler(this.新建文件ToolStripMenuItem_Click);
             // 
             // 现有文件ToolStripMenuItem
             // 
             this.现有文件ToolStripMenuItem.Name = "现有文件ToolStripMenuItem";
-            this.现有文件ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
+            this.现有文件ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.现有文件ToolStripMenuItem.Text = "现有文件";
             this.现有文件ToolStripMenuItem.Click += new System.EventHandler(this.现有文件ToolStripMenuItem_Click);
             // 
@@ -902,6 +903,14 @@ namespace viacode
             this.保存ToolStripMenuItem.Size = new System.Drawing.Size(114, 26);
             this.保存ToolStripMenuItem.Text = "保存";
             this.保存ToolStripMenuItem.Click += new System.EventHandler(this.保存ToolStripMenuItem_Click);
+            // 
+            // imageList
+            // 
+            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList.Images.SetKeyName(0, "Openfold.jpg");
+            this.imageList.Images.SetKeyName(1, "close.jpg");
+            this.imageList.Images.SetKeyName(2, "file.png");
             // 
             // ViaCode
             // 
@@ -1036,6 +1045,7 @@ namespace viacode
         private System.Windows.Forms.ContextMenuStrip tabMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem 关闭ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 保存ToolStripMenuItem;
+        private System.Windows.Forms.ImageList imageList;
     }
 }
 

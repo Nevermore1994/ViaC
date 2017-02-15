@@ -105,9 +105,16 @@ namespace viacode
 
             compiler = new System.Diagnostics.Process( );
             projects = new List<Project>( ); //所有项目
+            
             projectview = new TreeView( ); //树状图
+            projectview.Visible = false;
+            projectview.StateImageList = imageList;
+            //projectview.StateImageList
+            projectview.ImageList = imageList;
+            projectview.NodeMouseClick += Project_NodeMouseClick;
+            projectview.NodeMouseDoubleClick += Project_NodeMouseDoubleClick;
+            this.Controls.Add(projectview);
 
-           
         }
 
         private void Tab_MouseClick(object sender, MouseEventArgs e)
@@ -170,12 +177,16 @@ namespace viacode
             foreach( XmlNode foldnode in root.ChildNodes)
             {
                 TreeNode fold = new TreeNode( );
+                fold.ImageIndex = 0;
+                fold.SelectedImageIndex= 1;
                 fold.Tag = "fold";
                 fold.Text = foldnode.Name;
                 foreach(XmlNode filenode in foldnode.ChildNodes)
                 {
                     string tempname = filenode.Name;
                     TreeNode file = new TreeNode( );
+                    file.SelectedImageIndex = 2;
+                    file.ImageIndex = 2; 
                     file.Tag = "file";
                     file.Text =tempname.Substring(tempname.IndexOf("viac")+ 4);
                     file.Name = ((XmlElement)filenode).GetAttribute("path");
@@ -202,9 +213,6 @@ namespace viacode
                 projectview.Size = new Size(local, 575);
                 projectview.Location = new Point(5, 55);
                 projectview.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom ;
-                projectview.NodeMouseClick += Project_NodeMouseClick; ;
-                projectview.NodeMouseDoubleClick += Project_NodeMouseDoubleClick;
-                this.Controls.Add(projectview);
                 projectview.Enabled = true;
                 projectview.Visible = false;
 
@@ -397,9 +405,13 @@ namespace viacode
                 }
                 else if(isproject && diares == DialogResult.No)
                 {
-                    TreeNode parent =  nowtext.fileinfo.Parent;
-                    parent.Nodes.Remove(nowtext.fileinfo);
-                    SaveProjectConfig( );
+                    if(nowtext.Name != null)
+                    {
+                        TreeNode parent = nowtext.fileinfo.Parent;
+                        parent.Nodes.Remove(nowtext.fileinfo);
+                        SaveProjectConfig( );
+                    }
+                    
                 }
                 nowtext.Issave = true;
             }
@@ -425,10 +437,8 @@ namespace viacode
             {
                 tab.SelectedIndex = 0;
                 SetNowtext( );
-                MessageBox.Show(tab.SelectedTab.Text);
             }
                
-            MessageBox.Show(tab.TabPages.Count + "", alltexts.Count + "");
         }
         
         private void Tab_DoubleClick(object sender, MouseEventArgs e)
@@ -841,6 +851,7 @@ namespace viacode
                 //项目里名字也要改变
                 if(isproject)
                 {
+                    SetNowtext( );
                     nowtext.fileinfo.Text = str;
                     nowtext.fileinfo.Name = FileName;
                     SaveProjectConfig( );
@@ -849,6 +860,7 @@ namespace viacode
             }
             else if(isproject )
             {
+                SetNowtext( );
                 TreeNode parent = nowtext.fileinfo.Parent;
                 parent.Nodes.Remove(nowtext.fileinfo);
 
@@ -1000,12 +1012,7 @@ namespace viacode
         Find findform;
         private void 查找ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-          /*  if(findform != null)
-            {
-                findform.Dispose( );
-                findform.Close( );
-            }*/
-           
+         
             if (nowtext != null)
             {
                 TempBox.Text = nowtext.filetext.Text;
@@ -1701,6 +1708,8 @@ namespace viacode
                 }
                     
                 TreeNode newfold = new TreeNode(foldpath.Substring(foldpath.LastIndexOf("\\") + 1));
+                newfold.SelectedImageIndex = 1;
+                newfold.ImageIndex = 0;
                 newfold.Name = foldpath;
                 newfold.Tag = "fold";
                 nowproject.info.Nodes.Add(newfold);
@@ -1736,6 +1745,8 @@ namespace viacode
                 LoadFile(filepath);
 
                 TreeNode newfile = new TreeNode(filepath.Substring(filepath.LastIndexOf("\\") + 1));
+                newfile.ImageIndex = 2;
+                newfile.SelectedImageIndex = 2;
                 newfile.Name = filepath;
                 newfile.Tag = "file";
                 nowtext.fileinfo = newfile;
@@ -1746,7 +1757,7 @@ namespace viacode
             }
             filedialog.Dispose( );
         }
-
+        /**/
         private void 新建文件ToolStripMenuItem_Click(object sender, EventArgs e)
         {
              string name = defaultname + defaultnum + "." + defaultname;
@@ -1762,6 +1773,8 @@ namespace viacode
                 return;
             nowtext = CreateWindow(name);
             TreeNode newfile = new TreeNode();
+            newfile.ImageIndex = 2;
+            newfile.SelectedImageIndex = 2;
             newfile.Name = path + "\\" + name;
             newfile.Tag = "file";
             newfile.Text = name;
