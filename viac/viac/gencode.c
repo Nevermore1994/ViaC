@@ -92,7 +92,7 @@ void GenModrm(int mod, int reg_opcode, const int r_m, const Symbol* psym, const 
 	{
 		GenByte(mod | reg_opcode | (r_m & ViaC_VALMASK));
 	}
-	else if ((r_m | ViaC_VALMASK) == ViaC_GLOBAL)
+	else if ((r_m & ViaC_VALMASK) == ViaC_GLOBAL)
 	{
 		GenByte(0x05 | reg_opcode); //直接寻址
 		GenAddr32(r_m, psym, c);
@@ -217,9 +217,9 @@ int Load_1(const int rc, Operand* opd) //将栈顶的操作数加载到‘rc’寄存器中
 }
 
 void Load_2(const int lrc, const int rrc) //分别将栈顶的操作数加载带lrc，次栈顶加载到rrc
-{
-	Load_1(lrc, &optop[-1]);
+{	
 	Load_1(rrc, optop);
+	Load_1(lrc, &optop[-1]);
 }
 
 void Store_1(void) //将栈顶的操作数存入次栈顶的操作中
@@ -523,7 +523,7 @@ int AllocateReg(const int rc) //寄存器分配
 		if (reg < ViaC_GLOBAL && (rc & REG_ANY || reg == rc))
 		{
 			SpillReg(reg);
-			return -1;
+			return reg;
 		}
 	}
 
@@ -757,7 +757,7 @@ void InitVariable(Type* ptype, Section* psec, const int c, const int v) //变量初
 			GenDword(optop->type.ref->c);
 			GenOpcode_1(0xB8 + REG_ESI);
 			GenAddr32(optop->reg, optop->sym, optop->value);
-			OperandPop();
+			OperandSwap();
 
 			GenOpcode_1(0x80);
 			GenModrm(ADDR_OTHER, REG_EDI, ViaC_LOCAL, optop->sym, optop->value);
