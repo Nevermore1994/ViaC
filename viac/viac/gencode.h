@@ -41,7 +41,7 @@ void GenByte(const char c);
 void GenPrefix(const char opcode);
 void GenOpcode_1(const char opcode);
 void GenOpcode_2(const char first, const char end);
-void GenDwordd(unsigned int c);
+void GenDword(unsigned int c);
 void BackPatch(int t, const int a);
 int MakeList(int add);
 void GenAddr32(const int r, Symbol* sym, const int c);
