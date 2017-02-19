@@ -25,7 +25,7 @@ namespace viacode
         /// Todo  
         /// </summary>
         private string ViaCodepath = null;
- 
+
         //默认文件名字
         public string defaultname;
         private int defaultnum = 1;
@@ -50,7 +50,7 @@ namespace viacode
         //文档属性
         private const string fileclass = "ViaC文件(*.viac)|*.viac|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
 
-       
+
         //定义的版本
         private float releaseversion = 0.1078f;
         private float debugversion = 0.1079f;
@@ -70,13 +70,13 @@ namespace viacode
         private Project nowproject;
         //当前选择的文件node
         private TreeNode selectnode = null;
-        
+
         public ViaCode()
         {
             InitializeComponent( );
         }
 
-       
+
         private void ViaC_Load(object sender, EventArgs e)
         {
 
@@ -105,11 +105,10 @@ namespace viacode
 
             compiler = new System.Diagnostics.Process( );
             projects = new List<Project>( ); //所有项目
-            
+
             projectview = new TreeView( ); //树状图
             projectview.Visible = false;
             projectview.StateImageList = imageList;
-            //projectview.StateImageList
             projectview.ImageList = imageList;
             projectview.NodeMouseClick += Project_NodeMouseClick;
             projectview.NodeMouseDoubleClick += Project_NodeMouseDoubleClick;
@@ -119,14 +118,14 @@ namespace viacode
 
         private void Tab_MouseClick(object sender, MouseEventArgs e)
         {
-             if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
             {
                 if (alltexts.Count > 0)
                 {
                     SetNowtext( );
                 }
             }
-            else if(e.Button == MouseButtons.Right)
+            else if (e.Button == MouseButtons.Right)
             {
                 Point pos = Cursor.Position;
                 tab.SelectedTab.ContextMenuStrip.Show(pos);
@@ -155,7 +154,7 @@ namespace viacode
 
         private void LoadProject(string filepath)
         {
-           
+
             isproject = true;
             if (filepath == null)
                 return;
@@ -167,30 +166,30 @@ namespace viacode
                 SetSize(isproject);
 
 
-            Project newpro = new Project(filepath,false);
+            Project newpro = new Project(filepath, false);
 
             nowproject = newpro;
             projectview.Nodes.Add(nowproject.info);
             projectview.SelectedNode = nowproject.info;
 
             XmlNode root = loadproject.SelectSingleNode("viac" + filename);
-            foreach( XmlNode foldnode in root.ChildNodes)
+            foreach (XmlNode foldnode in root.ChildNodes)
             {
                 TreeNode fold = new TreeNode( );
                 fold.ImageIndex = 0;
-                fold.SelectedImageIndex= 1;
+                fold.SelectedImageIndex = 1;
                 fold.Tag = "fold";
                 fold.Text = foldnode.Name;
-                foreach(XmlNode filenode in foldnode.ChildNodes)
+                foreach (XmlNode filenode in foldnode.ChildNodes)
                 {
                     string tempname = filenode.Name;
                     TreeNode file = new TreeNode( );
                     file.SelectedImageIndex = 2;
-                    file.ImageIndex = 2; 
+                    file.ImageIndex = 2;
                     file.Tag = "file";
-                    file.Text =tempname.Substring(tempname.IndexOf("viac")+ 4);
+                    file.Text = tempname.Substring(tempname.IndexOf("viac") + 4);
                     file.Name = ((XmlElement)filenode).GetAttribute("path");
-                    
+
                     fold.Nodes.Add(file);
                     nowproject.filelist.Add(file.Name);
                 }
@@ -205,14 +204,14 @@ namespace viacode
         private void SetSize(bool isproject)  //重新绘制界面尺寸
         {
             int local = 0;
-            if(isproject)
+            if (isproject)
             {
                 local = 100;
-                
-                
+
+
                 projectview.Size = new Size(local, 575);
                 projectview.Location = new Point(5, 55);
-                projectview.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom ;
+                projectview.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom;
                 projectview.Enabled = true;
                 projectview.Visible = false;
 
@@ -222,7 +221,7 @@ namespace viacode
 
             tab.Size = new Size(940 - local, 400);
             tab.Location = new Point(10 + local, 55);
-        } 
+        }
 
         private void Set(int num)  //设置界面
         {
@@ -274,7 +273,7 @@ namespace viacode
         {
             try
             {
-                if(!File.Exists(filename))
+                if (!File.Exists(filename))
                 {
                     MessageBox.Show("文件不存在！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -296,10 +295,10 @@ namespace viacode
         private void Project_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             TreeNode nownode = projectview.SelectedNode;
-            if (nownode!= null && nownode.Tag.Equals("file"))
+            if (nownode != null && nownode.Tag.Equals("file"))
             {
                 file resfile = FindFile(nownode.Name);
-                if(resfile != null)
+                if (resfile != null)
                 {
                     tab.SelectedTab = resfile.Parent;
                     nowtext = resfile;
@@ -309,15 +308,15 @@ namespace viacode
                     nowtext = CreateWindow(nownode.Name);
                     nowtext.Parent.Name = nownode.Name;
                     LoadFile(nownode.Name);
-            
+
                     nowtext.filetext.Text = TempBox.Text;
                     nowtext.Issave = true;
                 }
-               
+
             }
-            if(nownode.Tag.Equals("project"))
+            if (nownode.Tag.Equals("project"))
             {
-               
+
                 projects.Remove(nowproject);
                 projectview.Nodes.Remove(nowproject.info);
 
@@ -333,15 +332,15 @@ namespace viacode
         private void Project_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             TreeNode node = ((TreeView)sender).SelectedNode;
-            if(e.Button == MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
-               
+
                 Point pos = new Point(e.Node.Bounds.X + e.Node.Bounds.Width, e.Node.Bounds.Y + e.Node.Bounds.Height / 2);
                 if (node.Tag.Equals("project"))
                 {
-                    foreach(Project pro in projects)
+                    foreach (Project pro in projects)
                     {
-                        if(pro.info.Equals(node))
+                        if (pro.info.Equals(node))
                         {
                             nowproject = pro;
                             break;
@@ -349,7 +348,7 @@ namespace viacode
                     }
                     node.ContextMenuStrip = projectMenuStrip;
                 }
-                else if(node.Tag.Equals("fold"))
+                else if (node.Tag.Equals("fold"))
                 {
                     node.ContextMenuStrip = foldMenuStrip;
                 }
@@ -361,12 +360,12 @@ namespace viacode
 
                 node.ContextMenuStrip.Show(pos);
             }
-            
+
         }
 
         private void Project_MouseClick(object sender, MouseEventArgs e)
         {
-            
+
         }
 
         private void DebugBox_TextChanged(object sender, EventArgs e)
@@ -380,12 +379,12 @@ namespace viacode
             if (alltexts.Count > 0)
             {
                 TabPage selectpage = tab.SelectedTab;
-                if(selectpage != null)
+                if (selectpage != null)
                 {
                     SetNowtext( );
-                }     
+                }
             }
-          
+
         }
 
         private void CloseFile()
@@ -403,22 +402,22 @@ namespace viacode
                 {
                     saveToolStripMenuItem_Click(null, null);
                 }
-                else if(isproject && diares == DialogResult.No)
+                else if (isproject && diares == DialogResult.No)
                 {
-                    if(nowtext.Name != null)
+                    if (nowtext.Name != null)
                     {
                         TreeNode parent = nowtext.fileinfo.Parent;
                         parent.Nodes.Remove(nowtext.fileinfo);
                         SaveProjectConfig( );
                     }
-                    
+
                 }
                 nowtext.Issave = true;
             }
 
             if (tab.TabCount > 0 && alltexts.Count > 0)
             {
-                if(tab.SelectedTab !=null)
+                if (tab.SelectedTab != null)
                 {
                     alltexts.Remove(FindFile(tab.SelectedTab.Name));
                 }
@@ -438,12 +437,12 @@ namespace viacode
                 tab.SelectedIndex = 0;
                 SetNowtext( );
             }
-               
+
         }
-        
+
         private void Tab_DoubleClick(object sender, MouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
                 CloseFile( );
             else
             {
@@ -454,7 +453,7 @@ namespace viacode
 
         #endregion
         //编辑器模板
-        private const string templatestr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" + "    res = main();\n" + "    printf(\"\\n输入任意字符后结束...\\n\");\n" + "    getchar();\n"  + "    exit(res);\n" + "end\n";
+        private const string templatestr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" + "    res = main();\n" + "    printf(\"\\n输入任意字符后结束...\\n\");\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
 
 
         /***************************************以下是Scintilla有关的函数*********************************/
@@ -494,7 +493,7 @@ namespace viacode
             scintilla.Styles[Style.BraceBad].ForeColor = Color.Red;
             scintilla.ZoomIn( ); //增加 
             scintilla.ZoomOut( ); //减少 
-                 
+
 
             scintilla.UpdateUI += new EventHandler<UpdateUIEventArgs>(BraceMatching);
             scintilla.CharAdded += Scintilla_CharAdded;
@@ -524,8 +523,8 @@ namespace viacode
 
             var currentPos = nowtext.filetext.CurrentPosition;
             var wordStartPos = nowtext.filetext.WordStartPosition(currentPos, true);
-            
-            
+
+
 
             var lenEntered = currentPos - wordStartPos;
             if (lenEntered > 0)
@@ -534,7 +533,7 @@ namespace viacode
             }
             GetLine( );
             Scintilla text = (Scintilla)sender;
-           
+
             if (nowtext.Issave == true)
             {
                 nowtext.Issave = false;
@@ -619,7 +618,7 @@ namespace viacode
             text.Margins[0].Width = text.TextWidth(Style.LineNumber, new string('9', maxLineNumberCharLength + 1)) + padding;
             text.Tag = maxLineNumberCharLength;
             SetNowtext( );
-            if(nowtext.Issave == true)
+            if (nowtext.Issave == true)
             {
                 nowtext.Parent.Text += "*";
                 nowtext.Issave = false;
@@ -631,18 +630,18 @@ namespace viacode
         #region
         private void CreatrProjectWindow(string filepath)
         {
-            if(projectview.Nodes.Count == 0)
+            if (projectview.Nodes.Count == 0)
                 SetSize(isproject);
 
-            Project newpro = new Project(filepath,true);
-            
+            Project newpro = new Project(filepath, true);
+
             projectview.Nodes.Add(newpro.info);
             projectview.SelectedNode = newpro.info;
             newpro.info.EnsureVisible( );
-            
+
             TreeNode cfile = new TreeNode("源文件");
             cfile.Tag = "fold";
-            cfile.Name = newpro.dirpath + "\\" +"源文件";
+            cfile.Name = newpro.dirpath + "\\" + "源文件";
             Directory.CreateDirectory(cfile.Name);
 
             TreeNode hfile = new TreeNode("头文件");
@@ -652,7 +651,7 @@ namespace viacode
 
             TreeNode ofile = new TreeNode("其他文件");
             ofile.Tag = "fold";
-            ofile.Name = newpro.dirpath+ "\\"  + "其他文件";
+            ofile.Name = newpro.dirpath + "\\" + "其他文件";
             Directory.CreateDirectory(ofile.Name);
 
             projectview.SelectedNode.Nodes.Add(cfile);
@@ -684,7 +683,7 @@ namespace viacode
             {
                 tabPage.Name = "null";
                 tabPage.Tag = Environment.CurrentDirectory + name;
-               
+
             }
             else
             {
@@ -693,14 +692,14 @@ namespace viacode
             }
             tabPage.ContextMenuStrip = tabMenuStrip;
             tabPage.MouseClick += TabPage_MouseClick;
-            
+
             tabPage.Controls.Add(nowtext.filetext);
             nowtext.Parent = tabPage;   //需要设置
-            
+
             tabPage.Show( );
             tabPage.AutoScroll = true;
 
-            
+
             tab.Controls.Add(tabPage);
             tab.SelectedTab = tabPage;
             tab.Visible = true;
@@ -714,7 +713,7 @@ namespace viacode
 
         private void TabPage_MouseClick(object sender, MouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
                 Point pos = new Point(e.X, e.Y);
                 tab.SelectedTab.ContextMenuStrip.Show(pos);
@@ -736,7 +735,7 @@ namespace viacode
             string name = defaultname + defaultnum + "." + defaultname;
             ++defaultnum;
 
-           nowtext = CreateWindow(name);
+            nowtext = CreateWindow(name);
         }
 
         private void 项目ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -744,17 +743,17 @@ namespace viacode
             SaveFileDialog prodialog = new SaveFileDialog( );
             prodialog.Title = " ViaC项目新建";
             prodialog.Filter = "ViaC项目(*.viacproject)|*.viacproject";
-            if(prodialog.ShowDialog() == DialogResult.OK)
+            if (prodialog.ShowDialog( ) == DialogResult.OK)
             {
-                string  proname = prodialog.FileName;
-                string directory = proname.Substring(0, proname.LastIndexOf('.') );
-                if( !Directory.Exists(directory) )
+                string proname = prodialog.FileName;
+                string directory = proname.Substring(0, proname.LastIndexOf('.'));
+                if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
-                
+
                 isproject = true;
-                if(projectview.Nodes.Count == 0)
+                if (projectview.Nodes.Count == 0)
                     SetSize(isproject);
                 CreatrProjectWindow(proname);
             }
@@ -799,15 +798,15 @@ namespace viacode
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetNowtext( );
-            if(!isproject && nowtext == null)
+            if (!isproject && nowtext == null)
             {
                 MessageBox.Show("未打开任何的文件！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            if(isproject)
+            if (isproject)
             {
                 SaveProjectConfig( );
             }
-            if (nowtext !=null && !nowtext.Parent.Name.Equals("null") )
+            if (nowtext != null && !nowtext.Parent.Name.Equals("null"))
             {
                 TempBox.Text = nowtext.filetext.Text;
                 if (codestyle.Equals("acsii"))
@@ -823,7 +822,7 @@ namespace viacode
                 }
                 nowtext.Issave = true;
             }
-            else if(nowtext != null)
+            else if (nowtext != null)
             {
                 SaveAsToolStripMenuItem_Click(null, null);
             }
@@ -849,7 +848,7 @@ namespace viacode
                 nowtext.Parent.Name = FileName;
 
                 //项目里名字也要改变
-                if(isproject)
+                if (isproject)
                 {
                     SetNowtext( );
                     nowtext.fileinfo.Text = str;
@@ -858,7 +857,7 @@ namespace viacode
                 }
                 nowtext.Issave = true;
             }
-            else if(isproject )
+            else if (isproject)
             {
                 SetNowtext( );
                 TreeNode parent = nowtext.fileinfo.Parent;
@@ -882,7 +881,7 @@ namespace viacode
                         {
                             saveToolStripMenuItem_Click(null, null);
                         }
-                       
+
                     }
                 }
             }
@@ -890,8 +889,8 @@ namespace viacode
             {
                 foreach (Project pro in projects)
                 {
-                     nowproject = pro;
-                     CloseProject( );
+                    nowproject = pro;
+                    CloseProject( );
                 }
             }
 
@@ -1009,30 +1008,64 @@ namespace viacode
         private int findend = 0;
         //替换字符串
         private string replacestring = null;
+
+        private SearchFlags findmodel = SearchFlags.None;
+        private int findmodelindex = 0;
         Find findform;
         private void 查找ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-         
+
             if (nowtext != null)
             {
+                if(findform != null)
+                {
+                    findform.Close( );
+                }
                 TempBox.Text = nowtext.filetext.Text;
 
                 findform = new Find(ViaCodepath);
-                
+
                 findform.findText.TextChanged += Findbox_TextChanged;
                 findform.findText.Focus( );
+
                 findform.findallbutton.MouseClick += Findall_MouseClick;
-            
-                findindex =  findform.selectBox.SelectedIndex;
+                findform.selectModel.SelectedIndexChanged += SelectModel_SelectedIndexChanged;
                 findform.selectBox.SelectedIndexChanged += SelectBox_SelectedIndexChanged;
                 findform.replacebutton.MouseClick += Replacebutton_MouseClick;
-                
+         
                 findform.FormClosed += Findform_FormClosed;
+
+                findindex = findform.selectBox.SelectedIndex;
+                findmodelindex = findform.selectModel.SelectedIndex;
+
                 findform.Show( );
             }
 
         }
 
+        private void SelectModel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (findform.selectModel.SelectedIndex != findmodelindex)
+            {
+                if (findform.selectModel.SelectedIndex == 0)
+                {
+                    findmodel = SearchFlags.None;
+                }
+                else if (findform.selectModel.SelectedIndex == 1)
+                {
+                    findmodel = SearchFlags.WholeWord;
+                }
+                FindClearFlags( );
+                findmodelindex = findform.selectModel.SelectedIndex;
+            }
+           
+        }
+
+        private void SeleteModel_MouseClick(object sender, MouseEventArgs e)
+        {
+           
+           
+        }
 
         private void Replacebutton_MouseClick(object sender, MouseEventArgs e)
         {
@@ -1066,7 +1099,7 @@ namespace viacode
             nowtext.filetext.TargetStart = findstart;
             nowtext.filetext.TargetEnd = findend;
 
-            nowtext.filetext.SearchFlags = SearchFlags.None;
+            nowtext.filetext.SearchFlags = findmodel;
             if (nowtext.filetext.SearchInTarget(findstring) != -1)
             {
                 // Mark the search results with the current indicator
@@ -1106,7 +1139,7 @@ namespace viacode
 
             nowtext.filetext.TargetStart = 0;
             nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
-            nowtext.filetext.SearchFlags = SearchFlags.None;
+            nowtext.filetext.SearchFlags = findmodel;
             while (nowtext.filetext.SearchInTarget(findstring) != -1)
             {
                 // Mark the search results with the current indicator
@@ -1134,7 +1167,7 @@ namespace viacode
         private void SetFindStyle()
         {
             SetNowtext( );
-            if(findform.selectBox.SelectedIndex == 0)
+            if (findform.selectBox.SelectedIndex == 0)
             {
                 if (findstart == nowtext.filetext.TextLength)
                 {
@@ -1146,7 +1179,7 @@ namespace viacode
                 }
                 findend = nowtext.filetext.TextLength;
             }
-            else if(findform.selectBox.SelectedIndex == 1)
+            else if (findform.selectBox.SelectedIndex == 1)
             {
                 if (findstart == 0)
                 {
@@ -1160,50 +1193,54 @@ namespace viacode
                 }
             }
         }
+        private void FindInit()
+        {
+            #region
+            if (findform.selectBox.SelectedIndex == 0)
+            {
+                findform.findbutton.MouseClick += FindDown_MouseClick;
+                findform.findbutton.MouseClick -= FindUp_MouseClick;
+                findindex = 0;
 
+                if (findstart == nowtext.filetext.TextLength)
+                {
+                    findstart = 0;
+                }
+                else if (findstring != null)
+                {
+                    findstart = findstart + findstring.Length;
+                }
+
+                findend = nowtext.filetext.TextLength;
+            }
+            else if (findform.selectBox.SelectedIndex == 1)
+            {
+                findform.findbutton.MouseClick += FindUp_MouseClick;
+                findform.findbutton.MouseClick -= FindDown_MouseClick;
+                findindex = 1;
+
+                if (findstart == 0)
+                {
+                    findstart = nowtext.filetext.TextLength;
+                    findend = nowtext.filetext.TextLength;
+                }
+                else if (findstring != null)
+                {
+                    findstart = findstart - findstring.Length;
+                    findend = findstart;
+                }
+
+            }
+            #endregion
+        }
         private void SelectBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             SetNowtext( );
-             ComboBox selectbox = (ComboBox) sender;
-             Find findform = (Find)selectbox.Parent;
-             if(selectbox.SelectedIndex != findindex)
-             {
-                if (selectbox.SelectedIndex == 0)
-                {
-                    findform.findbutton.MouseClick += FindDown_MouseClick;
-                    findform.findbutton.MouseClick -= FindUp_MouseClick;
-                    findindex = 0;
-
-                    if (findstart == nowtext.filetext.TextLength)
-                    {
-                        findstart = 0;
-                    }
-                    else if(findstring != null)
-                    {
-                        findstart = findstart + findstring.Length;
-                    }
-                
-                    findend = nowtext.filetext.TextLength;
-                }
-                else if (selectbox.SelectedIndex == 1)
-                {
-                    findform.findbutton.MouseClick += FindUp_MouseClick;
-                    findform.findbutton.MouseClick -= FindDown_MouseClick;
-                    findindex = 1;
-
-                    if (findstart == 0)
-                    {
-                        findstart = nowtext.filetext.TextLength;
-                        findend = nowtext.filetext.TextLength;
-                    }
-                    else if(findstring != null)
-                    {
-                        findstart = findstart - findstring.Length;
-                        findend = findstart;
-                    }
-                   
-                }
-
+            ComboBox selectbox = (ComboBox)sender;
+            Find findform = (Find)selectbox.Parent;
+            if (selectbox.SelectedIndex != findindex)
+            {
+                FindInit( );
             }
 
         }
@@ -1237,12 +1274,12 @@ namespace viacode
             // Search the document
             nowtext.filetext.TargetStart = 0;
             nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
-            nowtext.filetext.SearchFlags = SearchFlags.None;
+            nowtext.filetext.SearchFlags = findmodel;
             while (nowtext.filetext.SearchInTarget(findstring) != -1)
             {
                 // Mark the search results with the current indicator
                 nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
-               
+
                 // Search the remainder of the document
                 nowtext.filetext.TargetStart = nowtext.filetext.TargetEnd;
                 nowtext.filetext.TargetEnd = nowtext.filetext.TextLength;
@@ -1271,22 +1308,22 @@ namespace viacode
             nowtext.filetext.TargetStart = findstart;
             nowtext.filetext.TargetEnd = findend;
 
-            nowtext.filetext.SearchFlags = SearchFlags.None;
+            nowtext.filetext.SearchFlags = findmodel;
             while (nowtext.filetext.SearchInTarget(findstring) == -1)
             {
                 if (nowtext.filetext.TargetStart > 0)
-                    -- nowtext.filetext.TargetStart;
+                    --nowtext.filetext.TargetStart;
                 else
                     break;
             }
-             
-            if(nowtext.filetext.SearchInTarget(findstring) != -1)
+
+            if (nowtext.filetext.SearchInTarget(findstring) != -1)
             {
                 nowtext.filetext.IndicatorFillRange(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd - nowtext.filetext.TargetStart);
                 nowtext.filetext.SetSelection(nowtext.filetext.TargetStart, nowtext.filetext.TargetEnd);
 
                 findstart = nowtext.filetext.TargetStart;
-              
+
                 findend = nowtext.filetext.TargetEnd - findstring.Length;
             }
             else
@@ -1317,7 +1354,7 @@ namespace viacode
             nowtext.filetext.TargetStart = findstart;
             nowtext.filetext.TargetEnd = findend;
 
-            nowtext.filetext.SearchFlags = SearchFlags.None;
+            nowtext.filetext.SearchFlags = findmodel;
             if (nowtext.filetext.SearchInTarget(findstring) != -1)
             {
                 // Mark the search results with the current indicator
@@ -1328,7 +1365,7 @@ namespace viacode
                 findstart = nowtext.filetext.TargetEnd;
                 findend = nowtext.filetext.TextLength;
             }
-            else 
+            else
             {
                 findstart = 0;
                 MessageBox.Show("查找完成！", "ViaC Warning");
@@ -1534,9 +1571,9 @@ namespace viacode
                 int row = nowtext.filetext.GetColumn(nowtext.filetext.CurrentPosition);
                 this.toolStripStatusLabel.Text = "状态" + "   " + "行:" + line + "      列:" + row;
             }
-           
+
         }
-    
+
         /**********************************以下是DLL调用*****************************************************/
         #region
         [DllImport("cdll.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
@@ -1551,7 +1588,7 @@ namespace viacode
         private int generateres = 0;  //默认产生失败
         private string viacpath = "cd "; //编译器的路径
 
-        private string  Compile(string path)
+        private string Compile(string path)
         {
 
             string headfile = null;
@@ -1568,13 +1605,13 @@ namespace viacode
                     sr = new StreamReader(path, Encoding.Unicode);
                 string line;
 
-                while ((line = sr.ReadLine()) != null)
+                while ((line = sr.ReadLine( )) != null)
                 {
                     if (line.Contains("#"))
                     {
                         string head = line.Substring(line.IndexOf("\"") + 1);
                         head = head.Substring(0, head.IndexOf(".viah"));
-                        switch(head)
+                        switch (head)
                         {
                             case "io":
                                 {
@@ -1584,7 +1621,7 @@ namespace viacode
                             case "math":
                                 {
                                     headfile += "-lmath" + " ";
-                                    break;                                    
+                                    break;
                                 }
                             case "windows":
                                 {
@@ -1592,7 +1629,7 @@ namespace viacode
                                     break;
                                 }
                         }
-                
+
                     }
                 }
                 sr.Close( ); //记得释放资源
@@ -1602,9 +1639,9 @@ namespace viacode
                 MessageBox.Show("请先保存文件", "viac warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             #endregion
-            
+
             generateres = 0; //返回标志。如果是1的话，那么就是成功了
-            
+
             /**********************如果已存在了进程，则需要将其kill**************************/
             Process[] ps = Process.GetProcesses( );
             foreach (Process item in ps)
@@ -1615,7 +1652,7 @@ namespace viacode
                 }
             }
             /********************得到文件路径**************************************/
-            string exeres = path.Substring(0,path.LastIndexOf('.') + 1);
+            string exeres = path.Substring(0, path.LastIndexOf('.') + 1);
             exeres += "exe";
             string[] argv = new string[5];
             argv[0] = "viac";
@@ -1627,40 +1664,40 @@ namespace viacode
 
             /************************************以下是输入至CMD进程中的参数*******************************************/
             #region
-              string command = argv[0] + " " + argv[1] + " " + argv[2] + " " + argv[3] + " " + argv[4];
-              compiler.StartInfo.FileName = "cmd.exe";
-              compiler.StartInfo.UseShellExecute = false;    
-              compiler.StartInfo.RedirectStandardInput = true;
-              compiler.StartInfo.RedirectStandardOutput = true;
-              compiler.StartInfo.RedirectStandardError = true;
-              compiler.StartInfo.CreateNoWindow = true;
-              compiler.Start( );
+            string command = argv[0] + " " + argv[1] + " " + argv[2] + " " + argv[3] + " " + argv[4];
+            compiler.StartInfo.FileName = "cmd.exe";
+            compiler.StartInfo.UseShellExecute = false;
+            compiler.StartInfo.RedirectStandardInput = true;
+            compiler.StartInfo.RedirectStandardOutput = true;
+            compiler.StartInfo.RedirectStandardError = true;
+            compiler.StartInfo.CreateNoWindow = true;
+            compiler.Start( );
 
-              viacpath = "cd " + ViaCodepath;
-              compiler.StandardInput.WriteLine(viacpath);  //open path
+            viacpath = "cd " + ViaCodepath;
+            compiler.StandardInput.WriteLine(viacpath);  //open path
 
-              compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
-              compiler.StandardInput.AutoFlush = true;  //立即输出
+            compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
+            compiler.StandardInput.AutoFlush = true;  //立即输出
 
-              compiler.WaitForExit( );
-              string output = compiler.StandardOutput.ReadToEnd( );
-              compiler.Close( ); //释放资源
+            compiler.WaitForExit( );
+            string output = compiler.StandardOutput.ReadToEnd( );
+            compiler.Close( ); //释放资源
 
-              if (output.Contains("编译成功"))
-              {
-                  generateres = 1;  //生成成功
-              }
-              else
-              {
-                  output += "编译失败";
-              }
+            if (output.Contains("编译成功"))
+            {
+                generateres = 1;  //生成成功
+            }
+            else
+            {
+                output += "编译失败";
+            }
 
-              debugBox.Text = output;
+            debugBox.Text = output;
             #endregion
 
             return exeres;
         }
-        
+
         /*************************************以下关于项目模块函数***********************************************/
         #region
         private void CloseProject()
@@ -1668,7 +1705,7 @@ namespace viacode
             foreach (TabPage page in tab.TabPages)
             {
                 file resfile = FindFile(page.Name);
-                if ( resfile !=  null)
+                if (resfile != null)
                 {
                     nowtext = resfile;
                     CloseFile( );
@@ -1698,15 +1735,15 @@ namespace viacode
             FolderBrowserDialog folddialog = new FolderBrowserDialog( );
             folddialog.SelectedPath = nowproject.dirpath;
             folddialog.ShowNewFolderButton = true;
-            if ( folddialog.ShowDialog() == DialogResult.OK)
+            if (folddialog.ShowDialog( ) == DialogResult.OK)
             {
                 string foldpath = folddialog.SelectedPath;
                 DirectoryInfo direct = new DirectoryInfo(foldpath);
-                if(!direct.Exists)
+                if (!direct.Exists)
                 {
                     direct.Create( );
                 }
-                    
+
                 TreeNode newfold = new TreeNode(foldpath.Substring(foldpath.LastIndexOf("\\") + 1));
                 newfold.SelectedImageIndex = 1;
                 newfold.ImageIndex = 0;
@@ -1733,11 +1770,11 @@ namespace viacode
             {
                 string filepath = filedialog.FileName;
 
-                if(FindFile(filepath) != null)
+                if (FindFile(filepath) != null)
                 {
-                    if(MessageBox.Show("该文件已在项目中！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning) == DialogResult.OK)
+                    if (MessageBox.Show("该文件已在项目中！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning) == DialogResult.OK)
                     {
-                        
+
                         return;  //已经在项目中的不能重复添加
                     }
                 }
@@ -1760,19 +1797,19 @@ namespace viacode
         /**/
         private void 新建文件ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-             string name = defaultname + defaultnum + "." + defaultname;
-             ++defaultnum;
-            
-            
-           string path = null;
-            if(projectview.SelectedNode.Tag.Equals("fold"))
+            string name = defaultname + defaultnum + "." + defaultname;
+            ++defaultnum;
+
+
+            string path = null;
+            if (projectview.SelectedNode.Tag.Equals("fold"))
             {
                 path = projectview.SelectedNode.Name;
             }
             if (path == null)
                 return;
             nowtext = CreateWindow(name);
-            TreeNode newfile = new TreeNode();
+            TreeNode newfile = new TreeNode( );
             newfile.ImageIndex = 2;
             newfile.SelectedImageIndex = 2;
             newfile.Name = path + "\\" + name;
@@ -1844,7 +1881,7 @@ namespace viacode
                 }
                 catch
                 {
-                    MessageBox.Show("文件不存在或是文件正在被使用！", "ViaC Warning" , MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("文件不存在或是文件正在被使用！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 node.Nodes.Remove(nownode);
             }
@@ -1855,18 +1892,18 @@ namespace viacode
         private file FindFile(string filepath, string filename)
         {
             file resfile = null;
-            
-            if(alltexts.Count > 0)
+
+            if (alltexts.Count > 0)
             {
-                foreach(file nowfile in alltexts)
+                foreach (file nowfile in alltexts)
                 {
-                    if(nowfile.Parent.Name.Equals(filepath) && nowfile.Parent.Text.Equals(filename))
+                    if (nowfile.Parent.Name.Equals(filepath) && nowfile.Parent.Text.Equals(filename))
                     {
                         resfile = nowfile;
                         return resfile;
                     }
                 }
-            } 
+            }
             return resfile;
         }
         private file FindFile(string filepath)
@@ -1912,9 +1949,9 @@ namespace viacode
                 }
 
                 List<XElement> allxml = new List<XElement>( );
-                for(int i=0; i<nownode.Nodes.Count; ++i)
+                for (int i = 0; i < nownode.Nodes.Count; ++i)
                 {
-                    allxml.Add(new XElement(nownode.Nodes[i].Text, GetXel(nownode.Nodes[i].Nodes) ));
+                    allxml.Add(new XElement(nownode.Nodes[i].Text, GetXel(nownode.Nodes[i].Nodes)));
                 }
                 XDocument doc = new XDocument(new XElement("viac" + nownode.Text + ".viacproject", allxml));
 
@@ -1925,8 +1962,8 @@ namespace viacode
 
         private List<XElement> GetXel(TreeNodeCollection nodes)
         {
-            List<XElement> resxml = new List<XElement>();
-            if(nodes.Count > 0)
+            List<XElement> resxml = new List<XElement>( );
+            if (nodes.Count > 0)
             {
                 foreach (TreeNode node in nodes)
                 {
@@ -1941,6 +1978,6 @@ namespace viacode
 
         #endregion
 
-      
+
     }
 }

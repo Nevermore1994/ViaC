@@ -258,8 +258,9 @@ namespace viacode
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(194, 26);
-            this.exitToolStripMenuItem.Text = "退出(&X)";
+            this.exitToolStripMenuItem.Text = "退出";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolsStripMenuItem_Click);
             // 
             // editMenu
@@ -801,14 +802,14 @@ namespace viacode
             // 新建文件ToolStripMenuItem
             // 
             this.新建文件ToolStripMenuItem.Name = "新建文件ToolStripMenuItem";
-            this.新建文件ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.新建文件ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
             this.新建文件ToolStripMenuItem.Text = "新建文件";
             this.新建文件ToolStripMenuItem.Click += new System.EventHandler(this.新建文件ToolStripMenuItem_Click);
             // 
             // 现有文件ToolStripMenuItem
             // 
             this.现有文件ToolStripMenuItem.Name = "现有文件ToolStripMenuItem";
-            this.现有文件ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.现有文件ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
             this.现有文件ToolStripMenuItem.Text = "现有文件";
             this.现有文件ToolStripMenuItem.Click += new System.EventHandler(this.现有文件ToolStripMenuItem_Click);
             // 
