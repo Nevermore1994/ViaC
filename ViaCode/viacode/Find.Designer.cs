@@ -34,6 +34,7 @@
             this.findallbutton = new System.Windows.Forms.Button();
             this.replacebutton = new System.Windows.Forms.Button();
             this.selectBox = new System.Windows.Forms.ComboBox();
+            this.selectModel = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // findText
@@ -86,16 +87,34 @@
             this.selectBox.Items.AddRange(new object[] {
             "下一个",
             "上一个"});
-            this.selectBox.Location = new System.Drawing.Point(30, 119);
+            this.selectBox.Location = new System.Drawing.Point(30, 124);
             this.selectBox.Name = "selectBox";
             this.selectBox.Size = new System.Drawing.Size(121, 28);
             this.selectBox.TabIndex = 5;
+            // 
+            // selectModel
+            // 
+            this.selectModel.AutoCompleteCustomSource.AddRange(new string[] {
+            "非全字匹配",
+            "全字匹配"});
+            this.selectModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.selectModel.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.selectModel.FormattingEnabled = true;
+            this.selectModel.ItemHeight = 20;
+            this.selectModel.Items.AddRange(new object[] {
+            "非全字匹配",
+            "全字匹配"});
+            this.selectModel.Location = new System.Drawing.Point(300, 124);
+            this.selectModel.Name = "selectModel";
+            this.selectModel.Size = new System.Drawing.Size(121, 28);
+            this.selectModel.TabIndex = 6;
             // 
             // Find
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(532, 253);
+            this.Controls.Add(this.selectModel);
             this.Controls.Add(this.selectBox);
             this.Controls.Add(this.replacebutton);
             this.Controls.Add(this.findallbutton);
@@ -118,5 +137,6 @@
         public System.Windows.Forms.Button findbutton;
         public System.Windows.Forms.Button findallbutton;
         public System.Windows.Forms.ComboBox selectBox;
+        public System.Windows.Forms.ComboBox selectModel;
     }
 }

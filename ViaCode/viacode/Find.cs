@@ -57,6 +57,7 @@ namespace viacode
             this.Controls.Add(replaceall);
 
             selectBox.SelectedIndex = 0;
+            selectModel.SelectedIndex = 0;
             replacebutton.Image = find_1;
         }
  
@@ -83,6 +84,7 @@ namespace viacode
 
             this.Size = new Size(Size.Width, Size.Height + localsize);
             selectBox.Location = new Point(selectBox.Location.X, selectBox.Location.Y + localsize);
+            selectModel.Location = new Point(selectModel.Location.X, selectModel.Location.Y + localsize);
             findallbutton.Location = new Point(findallbutton.Location.X, findallbutton.Location.Y + localsize);
             findbutton.Location = new Point(findbutton.Location.X, findbutton.Location.Y + localsize);
         }
