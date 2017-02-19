@@ -12,6 +12,7 @@ namespace viacode
         public TreeNode _info = new TreeNode();
         
         public List<string> filelist = new List<string>();
+        public List<OpenFile> openlist = new List<OpenFile>( );
         public string dirpath;
         public string projectname;
         public Project(string path, bool isnew)
