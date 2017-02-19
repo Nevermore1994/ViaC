@@ -38,11 +38,11 @@ namespace viacode
         //当前的设置属性
         private int config = 001;
         //当前代码输入框
-        private file nowtext;
+        private OpenFile nowtext;
         //当前页面的最后括号
         private int lastCaretPos = 0;
         //所有的页面
-        private List<file> alltexts;
+        private List<OpenFile> alltexts;
         //皮肤设置
         private string skin = "black.ssk";
         //皮肤路径
@@ -101,7 +101,7 @@ namespace viacode
 
             toolStripStatusLabel.ForeColor = Color.Black;
 
-            alltexts = new List<file>( );
+            alltexts = new List<OpenFile>( );
 
             compiler = new System.Diagnostics.Process( );
             projects = new List<Project>( ); //所有项目
@@ -183,15 +183,15 @@ namespace viacode
                 foreach (XmlNode filenode in foldnode.ChildNodes)
                 {
                     string tempname = filenode.Name;
-                    TreeNode file = new TreeNode( );
-                    file.SelectedImageIndex = 2;
-                    file.ImageIndex = 2;
-                    file.Tag = "file";
-                    file.Text = tempname.Substring(tempname.IndexOf("viac") + 4);
-                    file.Name = ((XmlElement)filenode).GetAttribute("path");
+                    TreeNode OpenFile = new TreeNode( );
+                    OpenFile.SelectedImageIndex = 2;
+                    OpenFile.ImageIndex = 2;
+                    OpenFile.Tag = "file";
+                    OpenFile.Text = tempname.Substring(tempname.IndexOf("viac") + 4);
+                    OpenFile.Name = ((XmlElement)filenode).GetAttribute("path");
 
-                    fold.Nodes.Add(file);
-                    nowproject.filelist.Add(file.Name);
+                    fold.Nodes.Add(OpenFile);
+                    nowproject.filelist.Add(OpenFile.Name);
                 }
                 nowproject.info.Nodes.Add(fold);
             }
@@ -261,12 +261,7 @@ namespace viacode
         #region
         private void SetNowtext()  //严格要求路径和名字均要匹配
         {
-            nowtext = FindFile(tab.SelectedTab.Name, tab.SelectedTab.Text);
-        }
-
-        private void SetNowtextOnlyPath() //仅仅要求路径
-        {
-            nowtext = FindFile(tab.SelectedTab.Name);
+            nowtext = FindOpenFile(tab.SelectedTab);
         }
 
         private void LoadFile(string filename)
@@ -297,7 +292,7 @@ namespace viacode
             TreeNode nownode = projectview.SelectedNode;
             if (nownode != null && nownode.Tag.Equals("file"))
             {
-                file resfile = FindFile(nownode.Name);
+                OpenFile resfile = FindFile(nownode.Name);
                 if (resfile != null)
                 {
                     tab.SelectedTab = resfile.Parent;
@@ -311,10 +306,12 @@ namespace viacode
 
                     nowtext.filetext.Text = TempBox.Text;
                     nowtext.Issave = true;
+
+                    nowproject.openlist.Add(nowtext);
                 }
 
             }
-            if (nownode.Tag.Equals("project"))
+            else if (nownode.Tag.Equals("project"))
             {
 
                 projects.Remove(nowproject);
@@ -389,7 +386,7 @@ namespace viacode
 
         private void CloseFile()
         {
-            SetNowtextOnlyPath( );
+            SetNowtext( );
             if (nowtext == null)
             {
                 MessageBox.Show("未打开任何文件!", "ViaC Warning");
@@ -519,7 +516,7 @@ namespace viacode
 
         private void Scintilla_CharAdded(object sender, CharAddedEventArgs e)
         {
-            SetNowtextOnlyPath( );
+            SetNowtext( );
 
             var currentPos = nowtext.filetext.CurrentPosition;
             var wordStartPos = nowtext.filetext.WordStartPosition(currentPos, true);
@@ -667,7 +664,7 @@ namespace viacode
             SaveProjectConfig( );
         }
 
-        private file CreateWindow(string filename)
+        private OpenFile CreateWindow(string filename)
         {
             int isnew = filename.LastIndexOf('\\');
             string name = filename.Substring(isnew + 1);
@@ -675,7 +672,7 @@ namespace viacode
             Scintilla Myediter = new Scintilla( );
             InitScintilla(Myediter);
 
-            nowtext = new file(Myediter);
+            nowtext = new OpenFile(Myediter);
             nowtext.Issave = true;
             TabPage tabPage = new TabPage( );
             tabPage.Text = name;
@@ -850,10 +847,12 @@ namespace viacode
                 //项目里名字也要改变
                 if (isproject)
                 {
-                    SetNowtext( );
-                    nowtext.fileinfo.Text = str;
-                    nowtext.fileinfo.Name = FileName;
-                    SaveProjectConfig( );
+                    if(nowtext.fileinfo !=  null)
+                    {
+                        nowtext.fileinfo.Text = str;
+                        nowtext.fileinfo.Name = FileName;
+                        SaveProjectConfig( );
+                    }
                 }
                 nowtext.Issave = true;
             }
@@ -872,7 +871,7 @@ namespace viacode
         {
             if (!isproject)
             {
-                foreach (file page in alltexts)
+                foreach (OpenFile page in alltexts)
                 {
                     if (page.Issave == false)
                     {
@@ -1402,7 +1401,7 @@ namespace viacode
             if (fontDialog.ShowDialog( ) == DialogResult.OK)
             {
                 nowfont = fontDialog.Font;
-                foreach (file text in alltexts)
+                foreach (OpenFile text in alltexts)
                 {
                     text.filetext.Font = nowfont;
                 }
@@ -1415,7 +1414,7 @@ namespace viacode
             if (colorDialog.ShowDialog( ) == DialogResult.OK)
             {
                 fontcolor = colorDialog.Color;
-                foreach (file text in alltexts)
+                foreach (OpenFile text in alltexts)
                 {
                     text.filetext.CaretForeColor = fontcolor;
                 }
@@ -1564,7 +1563,7 @@ namespace viacode
 
         private void GetLine() //光标状态函数
         {
-            SetNowtextOnlyPath( );
+            SetNowtext( );
             if (nowtext != null)
             {
                 int line = nowtext.filetext.CurrentLine + 1;
@@ -1702,25 +1701,20 @@ namespace viacode
         #region
         private void CloseProject()
         {
-            foreach (TabPage page in tab.TabPages)
+            
+            /****************************************************************/
+            IEnumerable<OpenFile> openlist =  nowproject.openlist.Intersect(alltexts);
+            foreach(OpenFile nowfile in openlist)
             {
-                file resfile = FindFile(page.Name);
-                if (resfile != null)
-                {
-                    nowtext = resfile;
-                    CloseFile( );
-                    tab.TabPages.Remove(page);
-                }
+                nowtext = nowfile;
+                CloseFile( );
             }
-            if (tab.SelectedTab != null)
-                nowtext = FindFile(tab.SelectedTab.Name);
             if (projects.Count == 0)
             {
                 isproject = false;
                 projectview.Visible = false;
                 SetSize(isproject);
             }
-
             projectview.Nodes.Remove(nowproject.info);
             SaveProjectConfig( );
         }
@@ -1779,6 +1773,7 @@ namespace viacode
                     }
                 }
                 nowtext = CreateWindow(filepath);
+                nowproject.openlist.Add(nowtext);
                 LoadFile(filepath);
 
                 TreeNode newfile = new TreeNode(filepath.Substring(filepath.LastIndexOf("\\") + 1));
@@ -1794,12 +1789,10 @@ namespace viacode
             }
             filedialog.Dispose( );
         }
-        /**/
         private void 新建文件ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string name = defaultname + defaultnum + "." + defaultname;
             ++defaultnum;
-
 
             string path = null;
             if (projectview.SelectedNode.Tag.Equals("fold"))
@@ -1809,6 +1802,7 @@ namespace viacode
             if (path == null)
                 return;
             nowtext = CreateWindow(name);
+            nowproject.openlist.Add(nowtext);
             TreeNode newfile = new TreeNode( );
             newfile.ImageIndex = 2;
             newfile.SelectedImageIndex = 2;
@@ -1889,30 +1883,13 @@ namespace viacode
         }
         #endregion
         /***************************************以下是项目功能函数***************************************************/
-        private file FindFile(string filepath, string filename)
+        private OpenFile FindFile(string filepath)
         {
-            file resfile = null;
+            OpenFile resfile = null;
 
             if (alltexts.Count > 0)
             {
-                foreach (file nowfile in alltexts)
-                {
-                    if (nowfile.Parent.Name.Equals(filepath) && nowfile.Parent.Text.Equals(filename))
-                    {
-                        resfile = nowfile;
-                        return resfile;
-                    }
-                }
-            }
-            return resfile;
-        }
-        private file FindFile(string filepath)
-        {
-            file resfile = null;
-
-            if (alltexts.Count > 0)
-            {
-                foreach (file nowfile in alltexts)
+                foreach (OpenFile nowfile in alltexts)
                 {
                     if (nowfile.Parent.Name.Equals(filepath))
                     {
@@ -1923,6 +1900,21 @@ namespace viacode
             }
             return resfile;
         }
+        
+        private OpenFile FindOpenFile(TabPage page)
+        {
+            OpenFile resfile = null;
+            foreach(OpenFile openfile in alltexts)
+            {
+                if (openfile.Parent.Equals(page))
+                {
+                    resfile = openfile;
+                    break;
+                }
+            }
+            return resfile;
+        }
+        
         /***************************************以下是文件XML保存函数************************************************/
         #region
         private void SaveApplicationConfig(int num)

@@ -7,12 +7,12 @@ using ScintillaNET;
 
 namespace viacode
 {
-    class file
+    class OpenFile
     {
         private bool _issave;
         private string _name;
         public TreeNode fileinfo;
-        public file(Scintilla _text)
+        public OpenFile(Scintilla _text)
         {
             filetext = _text;
         }
