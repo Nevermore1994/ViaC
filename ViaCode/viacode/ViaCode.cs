@@ -98,7 +98,8 @@ namespace viacode
             debugBox.Visible = false;
             debugBox.ReadOnly = true;
             debugBox.TextChanged += DebugBox_TextChanged;
-
+            debugBox.KeyUp += DebugBox_KeyUp;
+            debugBox.MouseUp += DebugBox_MouseUp;
             toolStripStatusLabel.ForeColor = Color.Black;
 
             alltexts = new List<OpenFile>( );
@@ -116,6 +117,35 @@ namespace viacode
 
         }
 
+        private void DebugBox_KeyUp(object sender, KeyEventArgs e)
+        {
+           if(e.Control && e.KeyCode == Keys.C)
+            {
+                if (debugBox.SelectedText.Length != 0)
+                    debugBox.Copy( );
+            }
+        }
+
+        private void DebugBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Right)
+            {
+                debugBox.ContextMenuStrip = debugtextMenuStrip;
+                debugBox.ContextMenuStrip.Show(Cursor.Position);
+            }
+        }
+
+        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            debugBox.Select(0, debugBox.TextLength);
+            debugBox.Copy( );
+        }
+
+        private void 清空ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            debugBox.Text = "";
+        }
+
         private void Tab_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -127,8 +157,7 @@ namespace viacode
             }
             else if (e.Button == MouseButtons.Right)
             {
-                Point pos = Cursor.Position;
-                tab.SelectedTab.ContextMenuStrip.Show(pos);
+                tab.SelectedTab.ContextMenuStrip.Show(Cursor.Position);
             }
         }
 
@@ -203,10 +232,14 @@ namespace viacode
         /*********************************以下界面函数***********************************/
         private void SetSize(bool isproject)  //重新绘制界面尺寸
         {
+            this.WindowState = FormWindowState.Normal;
+            int size_x = 940;
+            int point_x = 10;
+
             int local = 0;
             if (isproject)
             {
-                local = 100;
+                local = 150;
 
 
                 projectview.Size = new Size(local, 575);
@@ -216,11 +249,11 @@ namespace viacode
                 projectview.Visible = false;
 
             }
-            debugBox.Location = new Point(10 + local, 465);
-            debugBox.Size = new Size(940 - local, 160);
+            debugBox.Location = new Point(point_x + local, 465);
+            debugBox.Size = new Size(size_x - local, 160);
 
-            tab.Size = new Size(940 - local, 400);
-            tab.Location = new Point(10 + local, 55);
+            tab.Size = new Size(size_x - local, 400);
+            tab.Location = new Point(point_x + local, 55);
         }
 
         private void Set(int num)  //设置界面
@@ -328,34 +361,43 @@ namespace viacode
 
         private void Project_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            TreeNode node = ((TreeView)sender).SelectedNode;
+            TreeNode  nownode = ((TreeView)sender).SelectedNode;
             if (e.Button == MouseButtons.Right)
             {
 
                 Point pos = new Point(e.Node.Bounds.X + e.Node.Bounds.Width, e.Node.Bounds.Y + e.Node.Bounds.Height / 2);
-                if (node.Tag.Equals("project"))
+                if (nownode.Tag.Equals("project"))
                 {
                     foreach (Project pro in projects)
                     {
-                        if (pro.info.Equals(node))
+                        if (pro.info.Equals(nownode))
                         {
                             nowproject = pro;
                             break;
                         }
                     }
-                    node.ContextMenuStrip = projectMenuStrip;
+                    nownode.ContextMenuStrip = projectMenuStrip;
                 }
-                else if (node.Tag.Equals("fold"))
+                else if (nownode.Tag.Equals("fold"))
                 {
-                    node.ContextMenuStrip = foldMenuStrip;
+                    nownode.ContextMenuStrip = foldMenuStrip;
                 }
                 else
                 {
-                    selectnode = node;
-                    node.ContextMenuStrip = fileMenuStrip;
+                    selectnode = nownode;
+                    nownode.ContextMenuStrip = fileMenuStrip;
                 }
 
-                node.ContextMenuStrip.Show(pos);
+                nownode.ContextMenuStrip.Show(pos);
+            }
+            else
+            {
+                if(nownode.Tag.Equals("file"))
+                {
+                    OpenFile resfile = FindFile(nownode.Name);
+                    if (resfile != null)
+                        tab.SelectedTab = resfile.Parent;
+                }
             }
 
         }
@@ -1966,10 +2008,6 @@ namespace viacode
             }
             return resxml;
         }
-
-
         #endregion
-
-
     }
 }

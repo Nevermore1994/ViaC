@@ -125,6 +125,9 @@ namespace viacode
             this.关闭ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.保存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
+            this.debugtextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.复制ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.清空ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -132,6 +135,7 @@ namespace viacode
             this.projectMenuStrip.SuspendLayout();
             this.fileMenuStrip.SuspendLayout();
             this.tabMenuStrip.SuspendLayout();
+            this.debugtextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip
@@ -913,6 +917,32 @@ namespace viacode
             this.imageList.Images.SetKeyName(1, "close.jpg");
             this.imageList.Images.SetKeyName(2, "file.png");
             // 
+            // debugtextMenuStrip
+            // 
+            this.debugtextMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.debugtextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.复制ToolStripMenuItem,
+            this.清空ToolStripMenuItem});
+            this.debugtextMenuStrip.Name = "debugtextMenuStrip";
+            this.debugtextMenuStrip.Size = new System.Drawing.Size(203, 84);
+            // 
+            // 复制ToolStripMenuItem
+            // 
+            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
+            this.复制ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
+            this.复制ToolStripMenuItem.Text = "复制";
+            this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
+            // 
+            // 清空ToolStripMenuItem
+            // 
+            this.清空ToolStripMenuItem.Name = "清空ToolStripMenuItem";
+            this.清空ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
+            | System.Windows.Forms.Keys.C)));
+            this.清空ToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
+            this.清空ToolStripMenuItem.Text = "清空";
+            this.清空ToolStripMenuItem.Click += new System.EventHandler(this.清空ToolStripMenuItem_Click);
+            // 
             // ViaCode
             // 
             this.AllowDrop = true;
@@ -945,6 +975,7 @@ namespace viacode
             this.projectMenuStrip.ResumeLayout(false);
             this.fileMenuStrip.ResumeLayout(false);
             this.tabMenuStrip.ResumeLayout(false);
+            this.debugtextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1047,6 +1078,9 @@ namespace viacode
         private System.Windows.Forms.ToolStripMenuItem 关闭ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 保存ToolStripMenuItem;
         private System.Windows.Forms.ImageList imageList;
+        private System.Windows.Forms.ContextMenuStrip debugtextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem 复制ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 清空ToolStripMenuItem;
     }
 }
 
