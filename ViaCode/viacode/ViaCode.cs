@@ -21,8 +21,7 @@ namespace viacode
     {
 
         /// <summary>
-        /// Todo  头文件机制
-        /// Todo  
+        /// Todo  头文件完善
         /// </summary>
         private string ViaCodepath = null;
 
