@@ -1760,6 +1760,7 @@ namespace viacode
             projectview.Nodes.Remove(nowproject.info);
             SaveProjectConfig( );
         }
+
         private void 关闭项目ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             projects.Remove(nowproject);
@@ -1831,6 +1832,7 @@ namespace viacode
             }
             filedialog.Dispose( );
         }
+
         private void 新建文件ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string name = defaultname + defaultnum + "." + defaultname;
@@ -1925,6 +1927,7 @@ namespace viacode
         }
         #endregion
         /***************************************以下是项目功能函数***************************************************/
+        #region
         private OpenFile FindFile(string filepath)
         {
             OpenFile resfile = null;
@@ -1956,7 +1959,7 @@ namespace viacode
             }
             return resfile;
         }
-        
+        #endregion
         /***************************************以下是文件XML保存函数************************************************/
         #region
         private void SaveApplicationConfig(int num)
