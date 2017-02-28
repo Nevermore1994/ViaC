@@ -137,7 +137,6 @@ namespace viacode
 
         private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            debugBox.Select(0, debugBox.TextLength);
             debugBox.Copy( );
         }
 
@@ -801,7 +800,7 @@ namespace viacode
 
         private void OpenFile(object sender, EventArgs e)
         {
-            现有文件ToolStripMenuItem1_Click(null, null);
+           
         }
 
         private void 现有文件ToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1537,22 +1536,22 @@ namespace viacode
             }
             catch
             {
-                MessageBox.Show("请检查是否有文件名错误", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("请检查是否有文件名错误!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         private void 编译并运行ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             编译ToolStripMenuItem_Click(null, null);
-            if (generateres == 0)
+            if (generateres == false)
             {
-                DialogResult res = MessageBox.Show("生成失败，是否启动上次的生成", "ViaC Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult res = MessageBox.Show("生成失败，是否启动上次的生成?", "ViaC Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (res == DialogResult.Yes)
-                    generateres = 1;
+                    generateres = true;
             }
             /****************************启动进程的应用函数******************************************/
             #region
-            if (generateres == 1)
+            if (generateres == true && resname != null)
             {
                 Process[] ps = Process.GetProcesses( );
                 foreach (Process item in ps) //如果当前的进程已经在运行，那么应该将其Kill
@@ -1575,7 +1574,7 @@ namespace viacode
                 }
                 catch
                 {
-                    MessageBox.Show("启动应用失败,可能不存在", "viac警告");
+                    MessageBox.Show("启动应用失败,可能不存在!", "viac警告");
                 }
                 finally
                 {
@@ -1626,17 +1625,13 @@ namespace viacode
         /**********************************以下是关于编译模块****************************************************/
         private static System.Diagnostics.Process compiler = null; //cmd的进程
         private string resname = null; //产生的名字
-        private int generateres = 0;  //默认产生失败
+        private bool generateres = false;  //默认产生失败
         private string viacpath = "cd "; //编译器的路径
 
-        private string Compile(string path)
+        private string Require(string path)  //头文件机制
         {
-
             string headfile = null;
-
-            /*******************************编译前的处理，头文件机制***********************************/
             #region 
-
             try
             {
                 StreamReader sr;
@@ -1644,7 +1639,7 @@ namespace viacode
                     sr = new StreamReader(path, Encoding.ASCII);
                 else
                     sr = new StreamReader(path, Encoding.Unicode);
-                string line;
+                string line = null;
 
                 while ((line = sr.ReadLine( )) != null)
                 {
@@ -1681,19 +1676,72 @@ namespace viacode
             }
             #endregion
 
-            generateres = 0; //返回标志。如果是1的话，那么就是成功了
+            return headfile;
+        }
 
-            /**********************如果已存在了进程，则需要将其kill**************************/
-            Process[] ps = Process.GetProcesses( );
-            foreach (Process item in ps)
+        private bool CheckProjectFile(Project project)
+        {
+            StreamReader sr;
+            int maincount = 0;
+            foreach(string filepath in project.filelist)
             {
-                if (item.ProcessName == "viac")
+                if (codestyle.Equals("acsii"))
+                    sr = new StreamReader(filepath, Encoding.ASCII);
+                else
+                    sr = new StreamReader(filepath, Encoding.Unicode);
+                string filetext = sr.ReadToEnd( );
+                if(filetext.Contains("main"))
                 {
-                    item.Kill( );
+                    ++maincount;
+                }
+                if(maincount > 1)
+                {
+                    break;
                 }
             }
-            /********************得到文件路径**************************************/
-            string exeres = path.Substring(0, path.LastIndexOf('.') + 1);
+            if (maincount == 1)
+                return true;
+            else
+                return false;
+        }
+
+        private string Compile(string path)
+        {
+            string headfile = null;  // 头文件处理
+            generateres = false;
+            if(!isproject)/*单文件处理********/
+            {
+                headfile = Require(path); 
+            }
+            else/*****项目的处理******/
+            {
+                bool cancompile = CheckProjectFile(nowproject);
+                if(cancompile)
+                {
+                    StringBuilder filetemp = new StringBuilder( );
+                    headfile += " -lmsvcrt -lgdi32 -luser32 -lkernel32 -lcomdlg32" + " ";
+                    foreach(string filepath in nowproject.filelist)
+                    {
+                        filetemp.Append(filepath + " "); 
+                    }
+                    path = filetemp.ToString( );
+                }
+                else
+                {
+                    MessageBox.Show("程序入口错误，请检查项目文件！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return null;
+                }
+            }
+            /*****************得到文件路径***********************************/
+            string exeres = null;
+            if (!isproject)
+            {
+                exeres = path.Substring(0, path.LastIndexOf('.') + 1);
+            }
+            else
+            {
+                exeres = nowproject.Name + ".";
+            }
             exeres += "exe";
             string[] argv = new string[5];
             argv[0] = "viac";
@@ -1703,7 +1751,7 @@ namespace viacode
             argv[4] = path;
 
 
-            /************************************以下是输入至CMD进程中的参数*******************************************/
+            /**************************以下是输入至CMD进程中的参数****************************************/
             #region
             string command = argv[0] + " " + argv[1] + " " + argv[2] + " " + argv[3] + " " + argv[4];
             compiler.StartInfo.FileName = "cmd.exe";
@@ -1726,7 +1774,7 @@ namespace viacode
 
             if (output.Contains("编译成功"))
             {
-                generateres = 1;  //生成成功
+                generateres = true;  //生成成功
             }
             else
             {
