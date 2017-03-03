@@ -254,6 +254,13 @@ namespace viacode
             tab.Location = new Point(point_x + local, 55);
         }
 
+        private void SetSkinTool(bool x, bool y, bool z)
+        {
+            skyToolStripMenuItem.Checked = x;
+            blackToolStripMenuItem.Checked = y;
+            grayToolStripMenuItem.Checked = z;
+        }
+
         private void Set(int num)  //设置界面
         {
             config = num;
@@ -269,23 +276,17 @@ namespace viacode
             if (res[0] == 1)
             {
                 skin = "sky.ssk";
-                skyToolStripMenuItem.Checked = true;
-                blackToolStripMenuItem.Checked = false;
-                grayToolStripMenuItem.Checked = false;
+                SetSkinTool(true, false, false);
             }
             else if (res[1] == 1)
             {
                 skin = "black.ssk";
-                skyToolStripMenuItem.Checked = false;
-                blackToolStripMenuItem.Checked = true;
-                grayToolStripMenuItem.Checked = false;
+                SetSkinTool(false, true, false);
             }
             else
             {
                 skin = "blue.ssk";
-                skyToolStripMenuItem.Checked = false;
-                blackToolStripMenuItem.Checked = false;
-                grayToolStripMenuItem.Checked = true;
+                SetSkinTool(false, false, true);
             }
         }
         /*********************************控件响应函数******************************************/
@@ -301,7 +302,22 @@ namespace viacode
             {
                 if (!File.Exists(filename))
                 {
-                    MessageBox.Show("文件不存在！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                   DialogResult res =  MessageBox.Show("文件不存在！是否删除该文件路径？", "ViaC Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if(res == DialogResult.Yes)
+                    {
+                        foreach(TreeNode foldnode in nowproject.info.Nodes)
+                        {
+                            foreach(TreeNode filenode in foldnode.Nodes)
+                            {
+                                if(filenode.Name.Equals(filename))
+                                {
+                                    filenode.Remove();
+                                    nowproject.filelist.Remove(filename);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     return;
                 }
                 else
@@ -1471,9 +1487,7 @@ namespace viacode
         private void skyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             skin = "sky.ssk";
-            skyToolStripMenuItem.Checked = true;
-            blackToolStripMenuItem.Checked = false;
-            grayToolStripMenuItem.Checked = false;
+            SetSkinTool(true, false, false);
             ViaCskinEngine.SkinFile = skinpath + skin;
             config = 100;
             SaveApplicationConfig(config);
@@ -1482,9 +1496,7 @@ namespace viacode
         private void blackToolStripMenuItem_Click(object sender, EventArgs e)
         {
             skin = "black.ssk";
-            skyToolStripMenuItem.Checked = false;
-            blackToolStripMenuItem.Checked = true;
-            grayToolStripMenuItem.Checked = false;
+            SetSkinTool(false, true, false);
             ViaCskinEngine.SkinFile = skinpath + skin;
             config = 010;
             SaveApplicationConfig(config);
@@ -1493,9 +1505,7 @@ namespace viacode
         private void grayToolStripMenuItem_Click(object sender, EventArgs e)
         {
             skin = "blue.ssk";
-            skyToolStripMenuItem.Checked = false;
-            blackToolStripMenuItem.Checked = false;
-            grayToolStripMenuItem.Checked = true;
+            SetSkinTool(false, false, true);
             ViaCskinEngine.SkinFile = skinpath + skin;
             config = 001;
             SaveApplicationConfig(config);
@@ -1534,22 +1544,30 @@ namespace viacode
         private void 编译ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+           
             try
-            {
+             {
                 saveToolStripMenuItem_Click(null, null);
-                if(!isproject)
+                if (!isproject)
                 {
                     resname = Compile(nowtext.filetext.Parent.Name);
                 }
                 else
                 {
+                    if (nowproject.openlist.Count > 0)
+                    {
+                        foreach (OpenFile file in nowproject.openlist)
+                        {
+                            SaveFile(file);
+                        }
+                    }
                     resname = Compile(null);
                 }
             }
-            catch
-            {
-                MessageBox.Show("请检查是否有文件名错误!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+             catch
+             {
+                 MessageBox.Show("请检查是否有文件名错误ss!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+             }
         }
 
         private void 编译并运行ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1683,11 +1701,11 @@ namespace viacode
 
                     }
                 }
-                sr.Close( ); //记得释放资源
+                sr.Dispose(); //记得释放资源
             }
             catch
             {
-                MessageBox.Show("请先保存文件", "viac warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("请先保存文件!", "viac warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             #endregion
 
@@ -1914,11 +1932,12 @@ namespace viacode
             if (path == null)
                 return;
             nowtext = CreateWindow(name);
+            nowtext.Name = path + "\\" + name;
             nowproject.openlist.Add(nowtext);
             TreeNode newfile = new TreeNode( );
             newfile.ImageIndex = 2;
             newfile.SelectedImageIndex = 2;
-            newfile.Name = path + "\\" + name;
+            newfile.Name = nowtext.Name;
             newfile.Tag = "file";
             newfile.Text = name;
             nowtext.fileinfo = newfile;
@@ -1946,6 +1965,7 @@ namespace viacode
             TreeNode nownode = projectview.SelectedNode;
             if (nownode.Tag.Equals("file"))
             {
+                nowproject.filelist.Remove(nownode.Name);
                 TreeNode node = nownode.Parent;
                 node.Nodes.Remove(nownode);
             }
@@ -1990,6 +2010,7 @@ namespace viacode
                     MessageBox.Show("文件不存在或是文件正在被使用！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 node.Nodes.Remove(nownode);
+                nowproject.filelist.Remove(nownode.Name);
             }
             SaveProjectConfig( );
         }
