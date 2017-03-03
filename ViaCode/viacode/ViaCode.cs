@@ -574,7 +574,8 @@ namespace viacode
             if (nowtext.Issave == true)
             {
                 nowtext.Issave = false;
-                nowtext.Parent.Text += "*";
+                if(!nowtext.Parent.Text.Contains("*"))
+                    nowtext.Parent.Text += "*";
             }
         }
 
@@ -657,7 +658,8 @@ namespace viacode
             SetNowtext( );
             if (nowtext.Issave == true)
             {
-                nowtext.Parent.Text += "*";
+                if (!nowtext.Parent.Text.Contains("*"))
+                    nowtext.Parent.Text += "*";
                 nowtext.Issave = false;
             }
             GetLine( );
@@ -971,7 +973,8 @@ namespace viacode
                 {
                     TabPage page = (TabPage)nowtext.Parent;
                     nowtext.Issave = false;
-                    page.Text += "*";
+                    if(!page.Text.Contains("*"))
+                        page.Text += "*";
                 }
             }
 
@@ -987,7 +990,8 @@ namespace viacode
                 {
                     TabPage page = (TabPage)nowtext.Parent;
                     nowtext.Issave = false;
-                    page.Text += "*";
+                    if (!page.Text.Contains("*"))
+                        page.Text += "*";
                 }
             }
         }
@@ -1002,7 +1006,8 @@ namespace viacode
                 {
                     TabPage page = (TabPage)nowtext.Parent;
                     nowtext.Issave = false;
-                    page.Text += "*";
+                    if(!page.Text.Contains("*"))
+                        page.Text += "*";
                 }
             }
 
@@ -1018,7 +1023,8 @@ namespace viacode
                 {
                     TabPage page = (TabPage)nowtext.Parent;
                     nowtext.Issave = false;
-                    page.Text += "*";
+                    if (!page.Text.Contains("*"))
+                        page.Text += "*";
                 }
             }
 
@@ -1531,7 +1537,14 @@ namespace viacode
             try
             {
                 saveToolStripMenuItem_Click(null, null);
-                resname = Compile(nowtext.filetext.Parent.Name);
+                if(!isproject)
+                {
+                    resname = Compile(nowtext.filetext.Parent.Name);
+                }
+                else
+                {
+                    resname = Compile(null);
+                }
             }
             catch
             {
@@ -1630,6 +1643,9 @@ namespace viacode
         private string Require(string path)  //头文件机制
         {
             string headfile = null;
+            if (path == null)
+                return headfile;
+            
             #region 
             try
             {
@@ -1710,7 +1726,12 @@ namespace viacode
             generateres = false;
             if(!isproject)/*单文件处理********/
             {
-                headfile = Require(path); 
+                headfile = Require(path);
+                if (headfile == null)
+                {
+                    MessageBox.Show("头文件未找到！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return null;
+                }
             }
             else/*****项目的处理******/
             {
