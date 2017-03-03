@@ -577,8 +577,6 @@ namespace viacode
             var currentPos = nowtext.filetext.CurrentPosition;
             var wordStartPos = nowtext.filetext.WordStartPosition(currentPos, true);
 
-
-
             var lenEntered = currentPos - wordStartPos;
             if (lenEntered > 0)
             {
@@ -736,7 +734,7 @@ namespace viacode
             tabPage.Text = name;
             if (isnew == -1)
             {
-                tabPage.Name = "null";
+                tabPage.Name = "new";
                 tabPage.Tag = Environment.CurrentDirectory + name;
 
             }
@@ -850,6 +848,37 @@ namespace viacode
             openFileDialog.Dispose( );
         }
 
+        private bool SaveFile(OpenFile file)
+        {
+            if (isproject)
+            {
+                SaveProjectConfig( );
+            }
+            if (file != null && !file.Parent.Name.Equals("new"))
+            {
+                TempBox.Text = file.filetext.Text;
+                if (codestyle.Equals("acsii"))
+                    TempBox.SaveFile(file.Parent.Name, RichTextBoxStreamType.PlainText);
+                else
+                    TempBox.SaveFile(file.Parent.Name, RichTextBoxStreamType.UnicodePlainText);
+                TabPage page = (TabPage)file.Parent;
+                string str = page.Text;
+                int ischange = str.IndexOf('*');
+                if (ischange > -1)
+                {
+                    page.Text = str.Substring(0, ischange);
+                }
+                file.Issave = true;
+                return true;
+            }
+            else if (file != null)
+            {
+                MessageBox.Show(file.fileinfo.Text + "文件尚未设置路径！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return false;
+        }
+
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetNowtext( );
@@ -861,7 +890,7 @@ namespace viacode
             {
                 SaveProjectConfig( );
             }
-            if (nowtext != null && !nowtext.Parent.Name.Equals("null"))
+            if (nowtext != null && !nowtext.Parent.Name.Equals("new"))
             {
                 TempBox.Text = nowtext.filetext.Text;
                 if (codestyle.Equals("acsii"))
@@ -913,14 +942,6 @@ namespace viacode
                     }
                 }
                 nowtext.Issave = true;
-            }
-            else if (isproject)
-            {
-                SetNowtext( );
-                TreeNode parent = nowtext.fileinfo.Parent;
-                parent.Nodes.Remove(nowtext.fileinfo);
-
-                SaveProjectConfig( );
             }
             saveFileDialog.Dispose( );
         }
@@ -1543,8 +1564,6 @@ namespace viacode
 
         private void 编译ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-           
             try
              {
                 saveToolStripMenuItem_Click(null, null);
@@ -1558,7 +1577,9 @@ namespace viacode
                     {
                         foreach (OpenFile file in nowproject.openlist)
                         {
-                            SaveFile(file);
+                            bool res = SaveFile(file);
+                            if (!res)
+                                return;
                         }
                     }
                     resname = Compile(null);
@@ -1566,7 +1587,7 @@ namespace viacode
             }
              catch
              {
-                 MessageBox.Show("请检查是否有文件名错误ss!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                 MessageBox.Show("请检查是否有文件名错误!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
              }
         }
 
@@ -1723,6 +1744,7 @@ namespace viacode
                 else
                     sr = new StreamReader(filepath, Encoding.Unicode);
                 string filetext = sr.ReadToEnd( );
+                sr.Dispose( );
                 if(filetext.Contains("main"))
                 {
                     ++maincount;
