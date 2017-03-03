@@ -28,7 +28,7 @@ namespace viacode
             info.Name = dirpath + "\\"+ projectname;
             info.Text = projectname.Substring(0, projectname.LastIndexOf('.')); //未包含后缀
         }
-        public TreeNode info
+        public TreeNode info  //存储节点信息
         {
             get
             {
