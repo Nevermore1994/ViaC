@@ -815,7 +815,7 @@ namespace viacode
 
         private void OpenFile(object sender, EventArgs e)
         {
-           
+            现有文件ToolStripMenuItem1_Click(null, null);
         }
 
         private void 现有文件ToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1745,16 +1745,18 @@ namespace viacode
                     sr = new StreamReader(filepath, Encoding.Unicode);
                 string filetext = sr.ReadToEnd( );
                 sr.Dispose( );
-                if(filetext.Contains("main"))
+                while(filetext.Contains("main"))
                 {
                     ++maincount;
+                    filetext = filetext.Substring(filetext.IndexOf("main") + 1);
                 }
-                if(maincount > 1)
+                if(maincount > 2)
                 {
                     break;
                 }
             }
-            if (maincount == 1)
+            MessageBox.Show(maincount + "");
+            if (maincount <= 2)
                 return true;
             else
                 return false;
