@@ -1755,7 +1755,6 @@ namespace viacode
                     break;
                 }
             }
-            MessageBox.Show(maincount + "");
             if (maincount <= 2)
                 return true;
             else
