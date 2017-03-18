@@ -1601,17 +1601,11 @@ namespace viacode
                     generateres = true;
             }
             /****************************启动进程的应用函数******************************************/
-            #region
+            #region 
+            //暂且不提示关闭当前的进程
             if (generateres == true && resname != null)
             {
-                Process[] ps = Process.GetProcesses( );
-                foreach (Process item in ps) //如果当前的进程已经在运行，那么应该将其Kill
-                {
-                    if (item.ProcessName == resname)
-                    {
-                        item.Kill( );
-                    }
-                }
+                
                 System.Diagnostics.Process resexe = new Process( );
                 try
                 {
@@ -1621,7 +1615,7 @@ namespace viacode
                     resexe.StartInfo.RedirectStandardOutput = false;
                     resexe.Start( );
                     //等待当前的程序运行完毕
-                    resexe.WaitForExit( );
+                    //resexe.WaitForExit( );
                 }
                 catch
                 {
@@ -1629,7 +1623,7 @@ namespace viacode
                 }
                 finally
                 {
-                    resexe.Close( );
+                    //resexe.Close( );
                 }
 
             }
@@ -1797,11 +1791,21 @@ namespace viacode
             string exeres = null;
             if (!isproject)
             {
-                exeres = path.Substring(0, path.LastIndexOf('.') + 1);
+                exeres = path.Substring(0, path.LastIndexOf('.') + 1); 
             }
             else
             {
                 exeres = nowproject.Name + ".";
+            }
+            string exename = exeres.Substring(exeres.LastIndexOf("\\") + 1);
+            exename = exename.Substring(0, exename.LastIndexOf("."));
+            Process[] ps = Process.GetProcesses( );
+            foreach (Process item in ps) //如果当前的进程已经在运行，那么应该将其Kill
+            {
+                if (item.ProcessName == exename)
+                {
+                    item.Kill( );
+                }
             }
             exeres += "exe";
             string[] argv = new string[5];
