@@ -1658,7 +1658,7 @@ namespace viacode
             if (nowtext != null)
             {
                 int line = nowtext.filetext.CurrentLine + 1;
-                int row = nowtext.filetext.GetColumn(nowtext.filetext.CurrentPosition);
+                int row = nowtext.filetext.GetColumn(nowtext.filetext.CurrentPosition) + 1;
                 this.toolStripStatusLabel.Text = "状态" + "   " + "行:" + line + "      列:" + row;
             }
 
