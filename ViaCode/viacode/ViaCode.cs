@@ -192,7 +192,6 @@ namespace viacode
             if (projectview.Nodes.Count == 0)
                 SetSize(isproject);
 
-
             Project newpro = new Project(filepath, false);
 
             nowproject = newpro;
@@ -207,6 +206,7 @@ namespace viacode
                 fold.SelectedImageIndex = 1;
                 fold.Tag = "fold";
                 fold.Text = foldnode.Name;
+                fold.Name = ((XmlElement)foldnode).GetAttribute("path");
                 foreach (XmlNode filenode in foldnode.ChildNodes)
                 {
                     string tempname = filenode.Name;
@@ -239,8 +239,7 @@ namespace viacode
             {
                 local = 150;
 
-
-                projectview.Size = new Size(local, 575);
+                projectview.Size = new Size(local, 570);
                 projectview.Location = new Point(5, 55);
                 projectview.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom;
                 projectview.Enabled = true;
@@ -939,14 +938,19 @@ namespace viacode
                 //项目里名字也要改变
                 if (isproject)
                 {
+                   
                     if(nowtext.fileinfo !=  null)
                     {
+                        nowproject.filelist.Remove(nowtext.fileinfo.Name); //删除以前的名字
                         nowtext.fileinfo.Text = str;
                         nowtext.fileinfo.Name = FileName;
+                        nowproject.filelist.Add(nowtext.fileinfo.Name);
                         SaveProjectConfig( );
+                        
                     }
                 }
                 nowtext.Issave = true;
+                
             }
             saveFileDialog.Dispose( );
         }
@@ -993,16 +997,56 @@ namespace viacode
 
         private void ToolBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SetNowtext( );
-            if (nowtext != null)
-                toolStrip.Visible = toolBarToolStripMenuItem.Checked;
+            toolStrip.Visible = toolBarToolStripMenuItem.Checked;
+            int local = 25;
+            if (toolStrip.Visible == false)
+            {
+                if(isproject)
+                {
+                    projectview.Location = new Point(projectview.Location.X, projectview.Location.Y - local);
+                    projectview.Size = new Size(projectview.Width, projectview.Height + local);
+                } 
+                tab.Location = new Point(tab.Location.X, tab.Location.Y - local);
+                tab.Size = new Size(tab.Width, tab.Height + local);
+            }
+            else
+            {
+                if (isproject)
+                {
+                    projectview.Location = new Point(projectview.Location.X, projectview.Location.Y + local);
+                    projectview.Size = new Size(projectview.Width, projectview.Height + local);
+                }  
+                tab.Location = new Point(tab.Location.X, tab.Location.Y + local);
+                tab.Size = new Size(tab.Width, tab.Height - local);
+            }
+           
         }
 
         private void StatusBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetNowtext( );
             if (nowtext != null)
+            {
                 statusStrip.Visible = statusBarToolStripMenuItem.Checked;
+                int local = 20;
+                if (statusStrip.Visible == false)
+                {
+                    if (isproject)
+                    {
+                        projectview.Size = new Size(projectview.Width, projectview.Height + local);
+                    }
+                    debugBox.Size = new Size(debugBox.Width, debugBox.Height + local );
+                }
+                else
+                {
+                    if (isproject)
+                    {
+                        projectview.Size = new Size(projectview.Width, projectview.Height - local);
+                    }
+                    debugBox.Size = new Size(debugBox.Width, debugBox.Height - local);
+                }
+            }
+               
         }
 
         private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1569,31 +1613,32 @@ namespace viacode
 
         private void 编译ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
-             {
-                saveToolStripMenuItem_Click(null, null);
-                if (!isproject)
+            saveToolStripMenuItem_Click(null, null);
+            if (!isproject)
+            {
+                resname = Compile(nowtext.filetext.Parent.Name);
+            }
+            else
+            {
+                if (nowproject.openlist.Count > 0)
                 {
-                    resname = Compile(nowtext.filetext.Parent.Name);
-                }
-                else
-                {
-                    if (nowproject.openlist.Count > 0)
+                    foreach (OpenFile file in nowproject.openlist)
                     {
-                        foreach (OpenFile file in nowproject.openlist)
-                        {
-                            bool res = SaveFile(file);
-                            if (!res)
-                                return;
-                        }
+                        bool res = SaveFile(file);
+                        if (!res)
+                            return;
                     }
-                    resname = Compile(null);
                 }
+                resname = Compile(null);
+            }
+          /*  try
+             {
+               
             }
              catch
              {
                  MessageBox.Show("请检查是否有文件名错误!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-             }
+             }*/
         }
 
         private void 编译并运行ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1914,7 +1959,18 @@ namespace viacode
         {
             TreeNode nownode = projectview.SelectedNode;
             TreeNode node = nownode.Parent;
-            node.Nodes.Remove(nownode);
+            MessageBox.Show(nownode.Name);
+            if(!Directory.Exists(nownode.Name))
+            {
+                MessageBox.Show("文件夹不存在！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                DirectoryInfo fold = new DirectoryInfo(nownode.Name);
+                node.Nodes.Remove(nownode);
+                fold.Delete(true);
+                SaveProjectConfig( );
+            }
         }
 
         private void 现有文件ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2109,10 +2165,11 @@ namespace viacode
                 List<XElement> allxml = new List<XElement>( );
                 for (int i = 0; i < nownode.Nodes.Count; ++i)
                 {
-                    allxml.Add(new XElement(nownode.Nodes[i].Text, GetXel(nownode.Nodes[i].Nodes)));
+                    XElement tempment = new XElement(nownode.Nodes[i].Text + "", GetXel(nownode.Nodes[i].Nodes));
+                    tempment.SetAttributeValue("path", nownode.Nodes[i].Name);
+                    allxml.Add(tempment);
                 }
                 XDocument doc = new XDocument(new XElement("viac" + nownode.Text + ".viacproject", allxml));
-
                 doc.Save(nownode.Name);
 
             }
