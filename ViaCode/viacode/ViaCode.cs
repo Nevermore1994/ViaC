@@ -914,6 +914,11 @@ namespace viacode
 
         private void SaveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if(nowtext == null)
+            {
+                MessageBox.Show("未打开任何文件！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             SaveFileDialog saveFileDialog = new SaveFileDialog( );
             if (isproject)
                 saveFileDialog.InitialDirectory = nowproject.dirpath;
