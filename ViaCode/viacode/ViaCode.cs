@@ -51,8 +51,8 @@ namespace viacode
 
 
         //定义的版本
-        private float releaseversion = 0.1078f;
-        private float debugversion = 0.1079f;
+        private float releaseversion = 0.1092f;
+        private float debugversion = 0.1091f;
 
         //当前使用的版本
         private float version;
@@ -1033,7 +1033,7 @@ namespace viacode
                 {
                     if (isproject)
                     {
-                        projectview.Size = new Size(projectview.Width, projectview.Height + local);
+                        projectview.Size = new Size(projectview.Width, projectview.Height + local );
                     }
                     debugBox.Size = new Size(debugBox.Width, debugBox.Height + local );
                 }
@@ -1613,32 +1613,33 @@ namespace viacode
 
         private void 编译ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveToolStripMenuItem_Click(null, null);
-            if (!isproject)
+           
+            try
             {
-                resname = Compile(nowtext.filetext.Parent.Name);
-            }
-            else
-            {
-                if (nowproject.openlist.Count > 0)
+                saveToolStripMenuItem_Click(null, null);
+                if (!isproject)
                 {
-                    foreach (OpenFile file in nowproject.openlist)
-                    {
-                        bool res = SaveFile(file);
-                        if (!res)
-                            return;
-                    }
+                    resname = Compile(nowtext.filetext.Parent.Name);
                 }
-                resname = Compile(null);
-            }
-          /*  try
-             {
-               
+                else
+                {
+                    if (nowproject.openlist.Count > 0)
+                    {
+                        foreach (OpenFile file in nowproject.openlist)
+                        {
+                            bool res = SaveFile(file);
+                            if (!res)
+                                return;
+                        }
+                    }
+                    if(nowproject.filelist.Count > 0)
+                        resname = Compile(null);
+                }
             }
              catch
              {
                  MessageBox.Show("请检查是否有文件名错误!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-             }*/
+             }
         }
 
         private void 编译并运行ToolStripMenuItem_Click(object sender, EventArgs e)
