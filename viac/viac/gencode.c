@@ -16,12 +16,11 @@ Operand* optop;
 
 void GenByte(const char c)
 {
-	int ind1;
-	ind1 = ind + 1;
-	if (ind1 > sec_text->data_allocated)
-		SectionRealloc(sec_text, ind1);
+	int ind_add = ind + 1;
+	if (ind_add > sec_text->data_allocated)
+		SectionRealloc(sec_text, ind_add);
 	sec_text->data[ind] = c;
-	ind = ind1;
+	ind = ind_add;
 }
 
 void GenPrefix(const char opcode) //Éú³ÉÖ¸ÁîÇ°×º
@@ -63,13 +62,13 @@ void BackPatch(int top, const int a) //»ØÌîº¯Êı,°ÑtÎªÁ´Ê×µÄ´ı¶¨Ìø×ªµØÖ·ÌîÈëÏà¶Ôµ
 
 int MakeList(int add)  //¼ÇÂ¼´ı¶¨Ìø×ªµØÖ·µÄÖ¸ÁîÁ´ addÇ°Ò»Ìø×ªµØÖ·
 {
-	int ind1;
-	ind1 = ind + 4;
+	int ind_add;
+	ind_add = ind + 4;
 	if (ind > sec_text->data_allocated)
-		SectionRealloc(sec_text, ind1);
+		SectionRealloc(sec_text, ind_add);
 	*(int*)(sec_text->data + ind) = add;
 	add = ind;
-	ind = ind1;
+	ind = ind_add;
 	return add;
 }
 

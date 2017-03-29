@@ -59,7 +59,7 @@ pTkWord TkwordInsert(const char* p)
 		Error("语法分析器中有指针未初始化");
 
 	int keyno = ElfHash(p);
-	
+
 	pTkWord ptw = NULL;
 	ptw = TkwordFind(p, keyno);
 
@@ -181,7 +181,7 @@ void Preprocess(void)
 		}
 		else if (ch == '/')
 		{
-			 GetCh();
+			GetCh();
 			if (ch == '*')
 			{
 				ParseComment();
@@ -208,7 +208,7 @@ void Preprocess(void)
 
 void ParseComment_2(void)
 {
-	 GetCh();
+	GetCh();
 	while (1)
 	{
 		if (ch == '\n')
@@ -222,11 +222,11 @@ void ParseComment_2(void)
 		}
 		else
 		{
-			 GetCh();
+			GetCh();
 		}
 
 	}
-	 GetCh();
+	GetCh();
 }
 
 
@@ -240,19 +240,19 @@ void ParseComment(void)
 			if (ch == '\n' || ch == '*' || ch == CH_EOF)
 				break;
 			else
-				 GetCh();
+				GetCh();
 		};
 		if (ch == '\n')
 		{
 			linenum++;
-			 GetCh();
+			GetCh();
 		}
 		else if (ch == '*')
 		{
-			 GetCh();
+			GetCh();
 			if (ch == '/')
 			{
-				 GetCh();
+				GetCh();
 				return;                              //注释完成		
 			}
 		}
@@ -270,7 +270,7 @@ void SkipWhiteSpace(void)
 	{
 		if (ch == '\r')
 		{
-			 GetCh();
+			GetCh();
 			if (ch != '\n')
 				return;
 			linenum++;
@@ -279,7 +279,7 @@ void SkipWhiteSpace(void)
 			printf("%c", ch);
 		else
 			printf("%c", ch);  //决定是否打印源码中的换行
-		 GetCh();
+		GetCh();
 	}
 }
 
@@ -301,11 +301,11 @@ void ParseIdentifier(void)
 {
 	StringReset(&tkstr);
 	StringChcat(&tkstr, ch);
-	 GetCh();
+	GetCh();
 	while (IsNoDigit(ch) || IsDigit(ch))
 	{
 		StringChcat(&tkstr, ch);
-		 GetCh();
+		GetCh();
 	}
 	StringChcat(&tkstr, '\0');
 }
@@ -319,7 +319,7 @@ void ParseNum(void)
 	{
 		StringChcat(&tkstr, ch);
 		StringChcat(&sourcestr, ch);
-		 GetCh();
+		GetCh();
 	} while (IsDigit(ch));
 	if (ch == '.')
 	{
@@ -340,7 +340,7 @@ void ParseString(const char sep)
 	StringReset(&tkstr);
 	StringReset(&sourcestr);
 	StringChcat(&sourcestr, sep);
-	 GetCh();
+	GetCh();
 	while (1)
 	{
 		if (ch == sep)
@@ -348,7 +348,7 @@ void ParseString(const char sep)
 		else if (ch == '\\')
 		{
 			StringChcat(&sourcestr, ch);
-			 GetCh();
+			GetCh();
 			switch (ch)
 			{
 				case '0':
@@ -398,19 +398,19 @@ void ParseString(const char sep)
 			}
 			StringChcat(&tkstr, c);
 			StringChcat(&sourcestr, ch);
-			 GetCh();
+			GetCh();
 		}
 		else
 		{
 			StringChcat(&tkstr, ch);
 			StringChcat(&sourcestr, ch);
-			 GetCh();
+			GetCh();
 		}
 	}
 	StringChcat(&tkstr, '\0');
 	StringChcat(&sourcestr, sep);
 	StringChcat(&sourcestr, '\0');
-	 GetCh();
+	GetCh();
 }
 
 
@@ -462,7 +462,7 @@ void GetToken(void)
 			if (ch == '>')
 			{
 				token = TK_POINTSTO;
-				 GetCh();
+				GetCh();
 			}
 			else
 				token = TK_MINUS;
@@ -482,11 +482,11 @@ void GetToken(void)
 		}
 		case '=':
 		{
-			 GetCh();
+			GetCh();
 			if (ch == '=')
 			{
 				token = TK_EQ;
-				 GetCh();
+				GetCh();
 			}
 			else
 			{
@@ -496,11 +496,11 @@ void GetToken(void)
 		}
 		case '!':
 		{
-			 GetCh();
+			GetCh();
 			if (ch == '=')
 			{
 				token = TK_NEQ;
-				 GetCh();
+				GetCh();
 			}
 			else
 			{
@@ -512,10 +512,10 @@ void GetToken(void)
 		case '<':
 		{
 			GetCh();
-		   if (ch == '=')
+			if (ch == '=')
 			{
 				token = TK_LEQ;
-				 GetCh();
+				GetCh();
 			}
 			else
 				token = TK_LT;
@@ -523,11 +523,11 @@ void GetToken(void)
 		}
 		case '>':
 		{
-			 GetCh();
-		    if (ch == '=')
+			GetCh();
+			if (ch == '=')
 			{
 				token = TK_GEQ;
-				 GetCh();
+				GetCh();
 			}
 			else
 				token = TK_GT;
@@ -536,10 +536,10 @@ void GetToken(void)
 		}
 		case '.':
 		{
-			 GetCh();
+			GetCh();
 			if (ch == '.')
 			{
-				 GetCh();
+				GetCh();
 				if (ch == '.')
 				{
 					token = TK_ELLIPSIS;
@@ -548,7 +548,7 @@ void GetToken(void)
 				{
 					Error("拼写错误");
 				}
-				 GetCh();
+				GetCh();
 			}
 			else
 			{
@@ -558,8 +558,8 @@ void GetToken(void)
 		}
 		case '&':
 		{
-		     token = TK_AND;
-			 GetCh();
+			token = TK_AND;
+			GetCh();
 			break;
 		}
 		case ';':
@@ -571,56 +571,56 @@ void GetToken(void)
 		case '(':
 		{
 			token = TK_OPENPA;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case ')':
 		{
 			token = TK_CLOSEPA;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case '[':
 		{
 			token = TK_OPENBR;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case ']':
 		{
 			token = TK_CLOSEBR;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case '{':
 		{
 			token = TK_BEGIN;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case '}':
 		{
 			token = TK_END;
-			 GetCh();
+			GetCh();
 			break;
 		}
-		
+
 		case '\n':
 		{
 			token = TK_SPACE;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case ',':
 		{
 			token = TK_COMMA;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case '*':
 		{
 			token = TK_STAR;
-			 GetCh();
+			GetCh();
 			break;
 		}
 		case '\"':
@@ -644,7 +644,7 @@ void GetToken(void)
 		default:
 		{
 			Error("未能识别的操作符%c", ch);
-			 GetCh();
+			GetCh();
 			break;
 		}
 	}
