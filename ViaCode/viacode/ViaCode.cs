@@ -84,8 +84,10 @@ namespace viacode
             version = debugversion;
 
             Source( );
+           
             skinpath = ViaCodepath + "\\skins\\";
             ViaCskinEngine.SkinFile = skinpath + skin;
+            SetDefaultName( );
 
             SetSize(isproject);
             tab.Visible = false;
@@ -177,6 +179,22 @@ namespace viacode
             fontcolor = Color.FromName(configcolor);
             defaultname = ((XmlElement)nodelist[2]).GetAttribute("name");
             version = float.Parse(((XmlElement)nodelist[3]).GetAttribute("version"));
+        }
+
+        private void SetDefaultName()
+        {
+            if (defaultname.Equals("c"))
+            {
+                SetTool(1);
+            }
+            else if (defaultname.Equals("viac"))
+            {
+                SetTool(2);
+            }
+            else
+            {
+                SetTool(3);
+            }
         }
 
         private void LoadProject(string filepath)
@@ -1581,21 +1599,41 @@ namespace viacode
             SaveApplicationConfig(config);
         }
 
+        private void SetToolStripMenuItem(bool t1, bool t2, bool t3)
+        {
+            cToolStripMenuItem.Checked = t1;
+            viacToolStripMenuItem.Checked = t2;
+            hToolStripMenuItem.Checked = t3;
+        }
+
+        private void SetTool(int x)
+        {
+           if(x == 1)
+                SetToolStripMenuItem(true, false, false);
+           else if( x == 2)
+                SetToolStripMenuItem(false, true, false);
+           else
+                SetToolStripMenuItem(false, false, true);
+        }
+
         private void cToolStripMenuItem_Click(object sender, EventArgs e)
         {
             defaultname = "c";
+            SetTool(1);
             SaveApplicationConfig(config);
         }
 
         private void viacToolStripMenuItem_Click(object sender, EventArgs e)
         {
             defaultname = "viac";
+            SetTool(2);
             SaveApplicationConfig(config);
         }
 
         private void hToolStripMenuItem_Click(object sender, EventArgs e)
         {
             defaultname = "h";
+            SetTool(3);
             SaveApplicationConfig(config);
         }
 
