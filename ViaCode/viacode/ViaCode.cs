@@ -523,7 +523,7 @@ namespace viacode
 
         #endregion
         //编辑器模板
-        private const string templatestr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" + "    res = main();\n" + "    printf(\"\\n输入任意字符后结束...\\n\");\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
+        private const string templatestr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" +"    int codestart, codeend;\n"+"    codestart = clock();\n"+ "    res = main();\n" + "    codeend = clock();\n" + "    printf(\"\\n程序运行时间为%d ms \\n输入任意字符后结束...\\n\",codeend - codestart);\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
 
 
         /***************************************以下是Scintilla有关的函数*********************************/
@@ -1942,7 +1942,7 @@ namespace viacode
             return exeres;
         }
 
-        /*************************************以下关于项目模块函数***********************************************/
+        /*************************************以下关于项目模块******************************************/
         #region
         private void CloseProject()
         {
