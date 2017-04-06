@@ -1935,7 +1935,8 @@ namespace viacode
                 output += "编译失败";
             }
 
-            debugBox.Text = output;
+            string substr = "exit";
+            debugBox.Text = output.Substring(output.IndexOf(substr) + substr.Length);
             #endregion
 
             return exeres;
