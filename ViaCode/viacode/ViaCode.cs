@@ -1934,7 +1934,7 @@ namespace viacode
             string command = "tcc " + path;
             compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
             compiler.StandardInput.AutoFlush = true;  //立即输出
-            debugBox.Text = compiler.StandardOutput.ReadToEnd( );
+            debugBox.Text = "ViaC稳定版\n" + compiler.StandardOutput.ReadToEnd( );
 
             exeres = ViaCodepath + "\\tcc\\" + exeres;
             generateres = true;
@@ -2033,7 +2033,7 @@ namespace viacode
             }
 
             string substr = "exit";
-            debugBox.Text = output.Substring(output.IndexOf(substr) + substr.Length);
+            debugBox.Text = "ViaC开发版" + output.Substring(output.IndexOf(substr) + substr.Length);
             #endregion
 
             return exeres;
