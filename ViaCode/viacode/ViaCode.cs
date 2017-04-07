@@ -47,7 +47,7 @@ namespace viacode
         //皮肤路径
         private string skinpath = null;
         //文档属性
-        private const string fileclass = "ViaC文件(*.viac)|*.viac|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
+        private const string fileclass = "ViaC文件(*.viac)|*.viac|C文件(*.c)|*.c|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
 
 
         //定义的版本
@@ -84,11 +84,11 @@ namespace viacode
             version = debugversion;
             SetVersion( );
             Source( );
-            SetTemplateStr( );
 
             skinpath = ViaCodepath + "\\skins\\";
             ViaCskinEngine.SkinFile = skinpath + skin;
             SetDefaultName( );
+            SetTemplateStr( );
 
             SetSize(isproject);
             tab.Visible = false;
@@ -96,7 +96,6 @@ namespace viacode
             tab.MouseDoubleClick += Tab_DoubleClick;
             tab.MouseClick += Tab_MouseClick;
 
-            debugBox.Text = "ViaC编译器" + version;
             debugBox.Visible = false;
             debugBox.ReadOnly = true;
             debugBox.TextChanged += DebugBox_TextChanged;
@@ -117,6 +116,13 @@ namespace viacode
             projectview.NodeMouseDoubleClick += Project_NodeMouseDoubleClick;
             this.Controls.Add(projectview);
 
+        }
+        private void SetDebugText()
+        {
+            if (version == releaseversion)
+                debugBox.Text = "ViaC编译器稳定版";
+            else
+                debugBox.Text = "ViaC编译器开发版";
         }
 
         private void DebugBox_KeyUp(object sender, KeyEventArgs e)
@@ -531,9 +537,18 @@ namespace viacode
         private void SetTemplateStr()
         {
             if (defaultname == "viac")
+            {
                 templatestr = viacstr;
+                version = debugversion;
+                SetVersion( );
+            }
             else
+            {
                 templatestr = cstr;
+                version = releaseversion;
+                SetVersion( );
+            }
+            SetDebugText( );
         }
 
         /***************************************以下是Scintilla有关的函数*********************************/
@@ -966,7 +981,6 @@ namespace viacode
                 //项目里名字也要改变
                 if (isproject)
                 {
-                   
                     if(nowtext.fileinfo !=  null)
                     {
                         nowproject.filelist.Remove(nowtext.fileinfo.Name); //删除以前的名字
@@ -974,7 +988,6 @@ namespace viacode
                         nowtext.fileinfo.Name = FileName;
                         nowproject.filelist.Add(nowtext.fileinfo.Name);
                         SaveProjectConfig( );
-                        
                     }
                 }
                 nowtext.Issave = true;
@@ -1687,7 +1700,22 @@ namespace viacode
             try
             {
                 saveToolStripMenuItem_Click(null, null);
-                if (version == 1)
+                if(!File.Exists(nowtext.filetext.Parent.Name))
+                {
+                    MessageBox.Show("未保存文件！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (nowtext.filetext.Parent.Name.Contains(".viac"))
+                {
+                    version = debugversion;
+                    SetVersion( );
+                }
+                else
+                {
+                    version = releaseversion;
+                    SetVersion( );
+                }
+                if (version == debugversion)
                 {
                     if (!isproject)
                     {
@@ -1708,13 +1736,13 @@ namespace viacode
                             resname = CompileOfDebug(null);
                     }
                 }
-                else if(isproject && version == 0)
+                else if(isproject && version == releaseversion)
                 {
                     MessageBox.Show("C文件版本不支持项目编译", "ViacWarning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 else
                 {
-                    CompileOfRelease(nowtext.filetext.Parent.Name);
+                  resname =  CompileOfRelease(nowtext.filetext.Parent.Name);
                 }
             }
              catch
@@ -1886,9 +1914,13 @@ namespace viacode
             else
                 return false;
         }
-
-        private void CompileOfRelease(string path)
+        private string CompileOfRelease(string path)
         {
+            string exeres = null;
+            exeres = path.Substring(0, path.LastIndexOf('.') + 1);
+            exeres = exeres.Substring(exeres.LastIndexOf("\\") + 1);
+            exeres += "exe";
+            
             compiler.StartInfo.FileName = "cmd.exe";
             compiler.StartInfo.UseShellExecute = false;
             compiler.StartInfo.RedirectStandardInput = true;
@@ -1897,13 +1929,17 @@ namespace viacode
             compiler.StartInfo.CreateNoWindow = true;
             compiler.Start( );
 
-            viacpath = "cd " + ViaCodepath + "\\tcc";
-            compiler.StandardInput.WriteLine(viacpath);  //open path
-            string command = "tcc -run " + path;
+            string tccpath = "cd " + ViaCodepath + "\\tcc";
+            compiler.StandardInput.WriteLine(tccpath);  //open path
+            string command = "tcc " + path;
             compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
             compiler.StandardInput.AutoFlush = true;  //立即输出
             debugBox.Text = compiler.StandardOutput.ReadToEnd( );
-            compiler.Close( );            
+
+            exeres = ViaCodepath + "\\tcc\\" + exeres;
+            generateres = true;
+            compiler.Close( );
+            return exeres;
         }
         private string CompileOfDebug(string path)
         {
