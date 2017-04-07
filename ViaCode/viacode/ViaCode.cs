@@ -82,13 +82,11 @@ namespace viacode
             ViaCodepath = Directory.GetCurrentDirectory( );
 
             version = debugversion;
-            SetVersion( );
             Source( );
 
             skinpath = ViaCodepath + "\\skins\\";
             ViaCskinEngine.SkinFile = skinpath + skin;
             SetDefaultName( );
-            SetTemplateStr( );
 
             SetSize(isproject);
             tab.Visible = false;
@@ -202,6 +200,7 @@ namespace viacode
             {
                 SetTool(3);
             }
+            SetTemplateStr( );
         }
 
         private void LoadProject(string filepath)
@@ -1682,16 +1681,16 @@ namespace viacode
         }
         private void 稳定版ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("当前版本:" + releaseversion, "ViaC Help", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            version = releaseversion;
-            SetVersion( );
+            MessageBox.Show("当前版本:" + "稳定版", "ViaC Help", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            defaultname = "c";
+            SetDefaultName( );
         }
 
         private void 开发版ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("当前版本:" + debugversion, "ViaC Help", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            version = debugversion;
-            SetVersion( );
+            MessageBox.Show("当前版本:" + "开发版", "ViaC Help", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            defaultname = "viac";
+            SetDefaultName( );
         }
 
         private void 编译ToolStripMenuItem_Click(object sender, EventArgs e)
