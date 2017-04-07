@@ -51,8 +51,8 @@ namespace viacode
 
 
         //定义的版本
-        private float releaseversion = 0.1092f;
-        private float debugversion = 0.1091f;
+        private int releaseversion = 0;
+        private int debugversion = 1;
 
         //当前使用的版本
         private float version;
@@ -82,9 +82,10 @@ namespace viacode
             ViaCodepath = Directory.GetCurrentDirectory( );
 
             version = debugversion;
-
+            SetVersion( );
             Source( );
-           
+            SetTemplateStr( );
+
             skinpath = ViaCodepath + "\\skins\\";
             ViaCskinEngine.SkinFile = skinpath + skin;
             SetDefaultName( );
@@ -523,8 +524,17 @@ namespace viacode
 
         #endregion
         //编辑器模板
-        private const string templatestr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" +"    int codestart, codeend;\n"+"    codestart = clock();\n"+ "    res = main();\n" + "    codeend = clock();\n" + "    printf(\"\\n程序运行时间为%d ms \\n输入任意字符后结束...\\n\",codeend - codestart);\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
+        private string templatestr = null;
+        private const string viacstr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" +"    int codestart, codeend;\n"+"    codestart = clock();\n"+ "    res = main();\n" + "    codeend = clock();\n" + "    printf(\"\\n程序运行时间为%d ms \\n输入任意字符后结束...\\n\",codeend - codestart);\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
+        private const string cstr = "#include<stdio.h> \n" + "int main(int argc, char* agrv[])\n" + "{\n" + "    return 0;\n" + "}\n";
 
+        private void SetTemplateStr()
+        {
+            if (defaultname == "viac")
+                templatestr = viacstr;
+            else
+                templatestr = cstr;
+        }
 
         /***************************************以下是Scintilla有关的函数*********************************/
         #region
@@ -1619,6 +1629,9 @@ namespace viacode
         private void cToolStripMenuItem_Click(object sender, EventArgs e)
         {
             defaultname = "c";
+            version = releaseversion;
+            SetVersion( );
+            SetTemplateStr( );
             SetTool(1);
             SaveApplicationConfig(config);
         }
@@ -1626,6 +1639,9 @@ namespace viacode
         private void viacToolStripMenuItem_Click(object sender, EventArgs e)
         {
             defaultname = "viac";
+            version = debugversion;
+            SetVersion( );
+            SetTemplateStr( );
             SetTool(2);
             SaveApplicationConfig(config);
         }
@@ -1637,16 +1653,32 @@ namespace viacode
             SaveApplicationConfig(config);
         }
 
+        private void SetVersion()
+        {
+            if(version == 1)
+            {
+                开发版ToolStripMenuItem.Checked = true;
+                稳定版ToolStripMenuItem.Checked = false;
+            }
+            else
+            {
+                开发版ToolStripMenuItem.Checked = false;
+                稳定版ToolStripMenuItem.Checked = true;
+            }
+            
+        }
         private void 稳定版ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("当前版本:" + releaseversion, "ViaC Help", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             version = releaseversion;
+            SetVersion( );
         }
 
         private void 开发版ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("当前版本:" + debugversion, "ViaC Help", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             version = debugversion;
+            SetVersion( );
         }
 
         private void 编译ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1655,23 +1687,34 @@ namespace viacode
             try
             {
                 saveToolStripMenuItem_Click(null, null);
-                if (!isproject)
+                if (version == 1)
                 {
-                    resname = Compile(nowtext.filetext.Parent.Name);
+                    if (!isproject)
+                    {
+                        resname = CompileOfDebug(nowtext.filetext.Parent.Name);
+                    }
+                    else
+                    {
+                        if (nowproject.openlist.Count > 0)
+                        {
+                            foreach (OpenFile file in nowproject.openlist)
+                            {
+                                bool res = SaveFile(file);
+                                if (!res)
+                                    return;
+                            }
+                        }
+                        if (nowproject.filelist.Count > 0)
+                            resname = CompileOfDebug(null);
+                    }
+                }
+                else if(isproject && version == 0)
+                {
+                    MessageBox.Show("C文件版本不支持项目编译", "ViacWarning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 else
                 {
-                    if (nowproject.openlist.Count > 0)
-                    {
-                        foreach (OpenFile file in nowproject.openlist)
-                        {
-                            bool res = SaveFile(file);
-                            if (!res)
-                                return;
-                        }
-                    }
-                    if(nowproject.filelist.Count > 0)
-                        resname = Compile(null);
+                    CompileOfRelease(nowtext.filetext.Parent.Name);
                 }
             }
              catch
@@ -1831,7 +1874,7 @@ namespace viacode
                 while(filetext.Contains("main"))
                 {
                     ++maincount;
-                    filetext = filetext.Substring(filetext.IndexOf("main") + 1);
+                    filetext = filetext.Substring(filetext.IndexOf("main") + 4);
                 }
                 if(maincount > 2)
                 {
@@ -1844,7 +1887,25 @@ namespace viacode
                 return false;
         }
 
-        private string Compile(string path)
+        private void CompileOfRelease(string path)
+        {
+            compiler.StartInfo.FileName = "cmd.exe";
+            compiler.StartInfo.UseShellExecute = false;
+            compiler.StartInfo.RedirectStandardInput = true;
+            compiler.StartInfo.RedirectStandardOutput = true;
+            compiler.StartInfo.RedirectStandardError = true;
+            compiler.StartInfo.CreateNoWindow = true;
+            compiler.Start( );
+
+            viacpath = "cd " + ViaCodepath + "\\tcc";
+            compiler.StandardInput.WriteLine(viacpath);  //open path
+            string command = "tcc -run " + path;
+            compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
+            compiler.StandardInput.AutoFlush = true;  //立即输出
+            debugBox.Text = compiler.StandardOutput.ReadToEnd( );
+            compiler.Close( );            
+        }
+        private string CompileOfDebug(string path)
         {
             string headfile = null;  // 头文件处理
             generateres = false;
@@ -1863,7 +1924,7 @@ namespace viacode
                 if(cancompile)
                 {
                     StringBuilder filetemp = new StringBuilder( );
-                    headfile += " -lmsvcrt -lgdi32 -luser32 -lkernel32 -lcomdlg32" + " ";
+                    headfile = " -lmsvcrt -lgdi32 -luser32 -lkernel32 -lcomdlg32 ";
                     foreach(string filepath in nowproject.filelist)
                     {
                         filetemp.Append(filepath + " "); 
