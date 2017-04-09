@@ -1789,7 +1789,7 @@ namespace viacode
                 }
                 else
                 {
-                  resname =  CompileOfRelease(nowtext.filetext.Parent.Name);
+                    resname =  CompileOfRelease(nowtext.filetext.Parent.Name);
                 }
             }
              catch
@@ -1965,7 +1965,6 @@ namespace viacode
         {
             string exeres = null;
             exeres = path.Substring(0, path.LastIndexOf('.') + 1);
-            exeres = exeres.Substring(exeres.LastIndexOf("\\") + 1);
             exeres += "exe";
             
             compiler.StartInfo.FileName = "cmd.exe";
@@ -1978,12 +1977,11 @@ namespace viacode
 
             string tccpath = "cd " + ViaCodepath + "\\tcc";
             compiler.StandardInput.WriteLine(tccpath);  //open path
-            string command = "tcc " + path;
+            string command = "tcc " + path + " -o " + exeres;
             compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
             compiler.StandardInput.AutoFlush = true;  //立即输出
             debugBox.Text = "ViaC稳定版\n" + compiler.StandardOutput.ReadToEnd( );
 
-            exeres = ViaCodepath + "\\tcc\\" + exeres;
             generateres = true;
             compiler.Close( );
             return exeres;
@@ -2374,7 +2372,6 @@ namespace viacode
             return resxml;
         }
         #endregion
-
      
     }
 }
