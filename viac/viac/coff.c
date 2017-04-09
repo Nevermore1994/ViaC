@@ -281,7 +281,7 @@ void WriteObj(const char* name)
 	fh->Machine = IMAGE_FILE_MACHINE_I386; 
 	fh->NumberOfSections = nsec_obj;
 	fh->PointerToSymbolTable = sec_symtab->sh.PointerToRawData;
-	fh->NumberOfSymbols = sec_symtab->sh.SizeOfRawData/sizeof(CoffSym);
+	fh->NumberOfSymbols = sec_symtab->sh.SizeOfRawData / sizeof(CoffSym);
 	fwrite(fh, 1, sizeof(IMAGE_FILE_HEADER), fout); 
 	for (i = 0; i < nsec_obj; ++i)
 	{
