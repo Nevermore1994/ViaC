@@ -158,6 +158,7 @@ namespace viacode
                 if (alltexts.Count > 0)
                 {
                     SetNowtext( );
+                    
                 }
             }
             else if (e.Button == MouseButtons.Right)
@@ -317,6 +318,16 @@ namespace viacode
         private void SetNowtext()  //严格要求路径和名字均要匹配
         {
             nowtext = FindOpenFile(tab.SelectedTab);
+            if (nowtext == null)
+                return;
+            if(nowtext.filetext.Parent.Text.Contains(".viac"))
+            {
+                version = debugversion;
+            }
+            else
+            {
+                version = releaseversion;
+            }
         }
 
         private void LoadFile(string filename)
@@ -527,11 +538,18 @@ namespace viacode
             }
         }
 
+
         #endregion
         //编辑器模板
         private string templatestr = null;
         private const string viacstr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" +"    int codestart, codeend;\n"+"    codestart = clock();\n"+ "    res = main();\n" + "    codeend = clock();\n" + "    printf(\"\\n程序运行时间为%d ms \\n输入任意字符后结束...\\n\",codeend - codestart);\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
         private const string cstr = "#include<stdio.h> \n" + "int main(int argc, char* agrv[])\n" + "{\n" + "    return 0;\n" + "}\n";
+        private const string viacpromptstr =
+            "break case char continue do else end false for if int require return sizeof struct void";
+
+        private const string cpromptstr = 
+            "auto break case char const continue default do double else enum extern float for goto if int long register return short signed sizeof staic struct switch typedef union unsigned void volatile while";
+        string tempstr;  // 智能提示字符串
 
         private void SetTemplateStr()
         {
@@ -596,9 +614,18 @@ namespace viacode
 
 
             scintilla.Lexer = Lexer.Cpp;
-            Console.WriteLine(scintilla.DescribeKeywordSets( ));
-            scintilla.SetKeywords(0, "break case continue do end else false for if null return sizeof require");
-            scintilla.SetKeywords(1, "char const double enum int string struct void");
+            //Console.WriteLine(scintilla.DescribeKeywordSets( ));
+            string promptstr;
+            if (version == releaseversion)
+            {
+                promptstr = cpromptstr;
+            }
+            else
+            {
+                promptstr = viacpromptstr;
+            }
+            scintilla.SetKeywords(0, promptstr);
+          //  scintilla.SetKeywords(1, promptstr_2);
         }
 
         private void Scintilla_KeyUp(object sender, KeyEventArgs e)
@@ -611,20 +638,41 @@ namespace viacode
             GetLine( );
         }
 
-        private void Scintilla_CharAdded(object sender, CharAddedEventArgs e)
+        //智能提示
+        private void 智能提示ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Intellisense( );
+        }
+
+        private void Intellisense()
         {
             SetNowtext( );
-
-            var currentPos = nowtext.filetext.CurrentPosition;
-            var wordStartPos = nowtext.filetext.WordStartPosition(currentPos, true);
-
-            var lenEntered = currentPos - wordStartPos;
-            if (lenEntered > 0)
+            if(nowtext != null)
             {
-                nowtext.filetext.AutoCShow(lenEntered, "break case continue default do end else false for if return require sizeof switch true");
+                if (version == releaseversion)
+                {
+                    tempstr = cpromptstr;
+                }
+                else
+                {
+                    tempstr = viacpromptstr;
+                }
+                var currentPos = nowtext.filetext.CurrentPosition;
+                var wordStartPos = nowtext.filetext.WordStartPosition(currentPos, true);
+                var lenEntered = currentPos - wordStartPos;
+                if (lenEntered > 0)
+                {
+                    nowtext.filetext.AutoCShow(lenEntered, tempstr);
+                }
             }
+           
+        }
+
+        private void Scintilla_CharAdded(object sender, CharAddedEventArgs e)
+        {
+            Intellisense( );
+
             GetLine( );
-            Scintilla text = (Scintilla)sender;
 
             if (nowtext.Issave == true)
             {
@@ -2326,5 +2374,7 @@ namespace viacode
             return resxml;
         }
         #endregion
+
+     
     }
 }
