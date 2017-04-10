@@ -12,10 +12,10 @@ typedef struct String
 }String;
 /******动态字符串函数***********/
 void StringInit(String* pstr, const int initsize);		//初始化动态字符串
-void StringFree(String* pstr);					//释放动态字符串
-void StringReset(String* pstr);
-void StringChcat(String* pstr, const int ch);
-void StringRealloc(String* pstr, const int newsize);
+void StringFree(String* pstr);							//释放动态字符串
+void StringReset(String* pstr);							//动态字符串的重置
+void StringChcat(String* pstr, const int ch);			//动态字符串连接
+void StringRealloc(String* pstr, const int newsize);	//动态字符串分配空间
 
 
 #endif

@@ -4,8 +4,8 @@
 #define 	SYM_H_
 
 /*******************SYM*************************/
-Stack GSYM; //全局符号栈
-Stack LSYM; //局部符号栈
+Stack G_Sym; //全局符号栈
+Stack L_Sym; //局部符号栈
 
 
 typedef struct Type

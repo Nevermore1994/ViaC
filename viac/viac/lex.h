@@ -85,9 +85,9 @@ typedef struct TkWord
 
 #define CH_EOF (-1)						//文件尾部标识
 
-TkWord* TkwordInsert(const char* p);
-TkWord* TkwordDirectInsert(TkWord* pWord);
-TkWord* TkwordFind(const char* p, const int key);
+TkWord* TkwordInsert(const char* p);					//单词表插入函数(需要先查找是否存在)
+TkWord* TkwordDirectInsert(TkWord* pWord);				//单词表直接插入函数
+TkWord* TkwordFind(const char* p, const int key);		//单词表查找函数
 
 
 void GetCh(void);

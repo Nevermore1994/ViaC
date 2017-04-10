@@ -40,7 +40,7 @@ Symbol* SymDirectPush(Stack *ss, const int v, const Type *type, const int c)
 	return p;
 }
 
-Symbol *SymPush(const int v, const Type *type, const int r, const int c)
+Symbol* SymPush(const int v, const Type *type, const int r, const int c)
 {
 	if (type == NULL )
 		Error("symbol中指针未初始化");
@@ -48,13 +48,13 @@ Symbol *SymPush(const int v, const Type *type, const int r, const int c)
 	TkWord *ts;
 	Stack *ss;
 
-	if (StackIsEmpty(&LSYM) == 0)
+	if (StackIsEmpty(&L_Sym) == 0)
 	{
-		ss = &LSYM;
+		ss = &L_Sym;
 	}
 	else
 	{
-		ss = &GSYM;
+		ss = &G_Sym;
 	}
 	ps = SymDirectPush(ss, v, type, c);
 	ps->r = r;
@@ -79,7 +79,7 @@ Symbol* FuncSymPush(const int v, const Type *type)
 {
 	Symbol*  psym = NULL;
 	Symbol** ppsym = NULL;
-	psym = SymDirectPush(&GSYM, v, type, 0);
+	psym = SymDirectPush(&G_Sym, v, type, 0);
 
 	ppsym = &((TkWord*)tktable.data[v])->sym_id;
 	// 同名符号，函数符号放在最后-> ->...s
@@ -90,7 +90,7 @@ Symbol* FuncSymPush(const int v, const Type *type)
 	return psym;
 }
 
-Symbol *VarSymPut(const Type *type, const int r, const int v, const int addr)
+Symbol* VarSymPut(const Type *type, const int r, const int v, const int addr)
 {
 	if (type == NULL)
 		Error("symbol中有指针未初始化"); 

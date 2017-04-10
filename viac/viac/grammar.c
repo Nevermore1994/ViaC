@@ -471,14 +471,14 @@ void Funcbody(Symbol *sym)
 	ind = sec_text->data_offset;
 	CoffSymAddUpdate(sym, ind, sec_text->index, CST_FUNC, IMAGE_SYM_CLASS_EXTERNAL);
 	/* 放一匿名符号在局部符号表中 */
-	SymDirectPush(&LSYM, ViaC_ANOM, &int_type, 0);
+	SymDirectPush(&L_Sym, ViaC_ANOM, &int_type, 0);
 	GenProlog(&sym->type);
 	rsym = 0;
 	CompoundStatement(NULL, NULL);
 	BackPatch(rsym, ind);
 	GenEpilog();
 	sec_text->data_offset = ind;
-	SymPop(&LSYM, NULL); /* 清空局部符号栈*/
+	SymPop(&L_Sym, NULL); /* 清空局部符号栈*/
 }
 
 int IsTypeSpecifier(const int id)
@@ -547,7 +547,7 @@ void Statement(int* bsym, int* csym)
 void CompoundStatement(int* bsym, int* csym)
 {
 	Symbol* ps = NULL;
-	ps = (Symbol*)StackGetTop(&LSYM);
+	ps = (Symbol*)StackGetTop(&L_Sym);
 
 	syntax_state = SNTX_LF_HT;
 	++syntax_level;
@@ -561,7 +561,7 @@ void CompoundStatement(int* bsym, int* csym)
 	{
 		Statement(bsym, csym);
 	}
-	SymPop(&LSYM, ps);
+	SymPop(&L_Sym, ps);
 	syntax_state = SNTX_LF_HT;
 	GetToken();
 }

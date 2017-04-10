@@ -39,8 +39,8 @@ void Init(void)
 	syntax_state = SNTX_NUL;
 	syntax_level = 0;
 
-	StackInit(&LSYM, 8);
-	StackInit(&GSYM, 8);
+	StackInit(&L_Sym, 8);
+	StackInit(&G_Sym, 8);
 	sym_sec_rdata = SecSymPut(".rdata", 0);
 
 
@@ -58,9 +58,9 @@ void Init(void)
 
 void Cleanup(void)
 {
-	SymPop(&GSYM, NULL);
-	StackDestroy(&LSYM);
-	StackDestroy(&GSYM);
+	SymPop(&G_Sym, NULL);
+	StackDestroy(&L_Sym);
+	StackDestroy(&G_Sym);
 	FreeSection();
 	int i;
 	for (i = TK_IDENT; i < tktable.count; ++i)
