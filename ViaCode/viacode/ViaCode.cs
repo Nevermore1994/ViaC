@@ -1,4 +1,28 @@
-﻿using System;
+﻿/***************************************
+The MIT License(MIT)
+
+Copyright(c) 2017, Away, https://github.com/as981242002
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*****************************************/
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -68,7 +92,7 @@ namespace viacode
         //当前打开的项目
         private Project nowproject;
         //当前选择的文件node
-        private TreeNode selectnode = null;
+       // private TreeNode selectnode = null;
 
         public ViaCode()
         {
@@ -90,9 +114,9 @@ namespace viacode
 
             SetSize(isproject);
             tab.Visible = false;
-            tab.Click += Tab_Click;
             tab.MouseDoubleClick += Tab_DoubleClick;
             tab.MouseClick += Tab_MouseClick;
+            tab.Selected += Tab_Selected;
 
             debugBox.Visible = false;
             debugBox.ReadOnly = true;
@@ -110,11 +134,63 @@ namespace viacode
             projectview.Visible = false;
             projectview.StateImageList = imageList;
             projectview.ImageList = imageList;
+            projectview.AfterSelect += Projectview_AfterSelect;
             projectview.NodeMouseClick += Project_NodeMouseClick;
             projectview.NodeMouseDoubleClick += Project_NodeMouseDoubleClick;
-            this.Controls.Add(projectview);
+            Controls.Add(projectview);
 
         }
+
+        private void Tab_Selected(object sender, TabControlEventArgs e)
+        {
+           if (alltexts.Count > 0)
+            {
+                SetNowtext( );
+                if(nowtext != null)
+                {
+                    if (isproject && nowtext.fileinfo != null)
+                    {
+                        projectview.SelectedNode = nowtext.fileinfo;
+                    }
+                        
+                }
+            }
+        }
+
+        private Project FindProject(TreeNode node)
+        {
+            Project respro = null;
+            foreach (Project pro in projects)
+            {
+                if (pro.info.Equals(node))
+                {
+                    respro = pro;
+                    break;
+                }
+            }
+            return respro;
+        }
+
+        private void Projectview_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            TreeNode nownode = ((TreeView)sender).SelectedNode;
+            if (nownode.Tag.Equals("project"))
+            {
+                nowproject = FindProject(nownode);
+            }
+            else if(nownode.Tag.Equals("fold"))
+            {
+                nowproject = FindProject(nownode.Parent);
+            }
+            else if (nownode.Tag.Equals("file"))
+            {
+                OpenFile resfile = FindFile(nownode.Name);
+                if (resfile != null)
+                    tab.SelectedTab = resfile.Parent;
+                nowproject = FindProject(nownode.Parent.Parent);
+            }
+        }
+
         private void SetDebugText()
         {
             if (version == releaseversion)
@@ -153,15 +229,7 @@ namespace viacode
 
         private void Tab_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
-                if (alltexts.Count > 0)
-                {
-                    SetNowtext( );
-                    
-                }
-            }
-            else if (e.Button == MouseButtons.Right)
+           if (e.Button == MouseButtons.Right)
             {
                 tab.SelectedTab.ContextMenuStrip.Show(Cursor.Position);
             }
@@ -218,6 +286,7 @@ namespace viacode
                 SetSize(isproject);
 
             Project newpro = new Project(filepath, false);
+            projects.Add(newpro);
 
             nowproject = newpro;
             projectview.Nodes.Add(nowproject.info);
@@ -250,7 +319,7 @@ namespace viacode
             nowproject.info.ExpandAll( );
 
             projectview.Visible = true;
-            projects.Add(nowproject);
+           
         }
         /*********************************以下界面函数***********************************/
         private void SetSize(bool isproject)  //重新绘制界面尺寸
@@ -381,7 +450,7 @@ namespace viacode
                 }
                 else
                 {
-                    nowtext = CreateWindow(nownode.Name);
+                    nowtext = CreateWindow(nownode.Name, nownode);
                     nowtext.Parent.Name = nownode.Name;
                     LoadFile(nownode.Name);
 
@@ -397,7 +466,7 @@ namespace viacode
 
                 projects.Remove(nowproject);
                 projectview.Nodes.Remove(nowproject.info);
-
+                CloseProject( );
                 if (projects.Count == 0)
                 {
                     isproject = false;
@@ -432,22 +501,12 @@ namespace viacode
                 }
                 else
                 {
-                    selectnode = nownode;
+                   // selectnode = nownode;
                     nownode.ContextMenuStrip = fileMenuStrip;
                 }
 
                 nownode.ContextMenuStrip.Show(pos);
             }
-            else
-            {
-                if(nownode.Tag.Equals("file"))
-                {
-                    OpenFile resfile = FindFile(nownode.Name);
-                    if (resfile != null)
-                        tab.SelectedTab = resfile.Parent;
-                }
-            }
-
         }
 
         private void Project_MouseClick(object sender, MouseEventArgs e)
@@ -461,22 +520,11 @@ namespace viacode
             debugBox.ScrollToCaret( );
         }
 
-        private void Tab_Click(object sender, EventArgs e)
-        {
-            if (alltexts.Count > 0)
-            {
-                TabPage selectpage = tab.SelectedTab;
-                if (selectpage != null)
-                {
-                    SetNowtext( );
-                }
-            }
-
-        }
-
+      
         private void CloseFile()
         {
             SetNowtext( );
+            TabPage selectpage = tab.SelectedTab;
             if (nowtext == null)
             {
                 MessageBox.Show("未打开任何文件!", "ViaC Warning");
@@ -491,7 +539,7 @@ namespace viacode
                 }
                 else if (isproject && diares == DialogResult.No)
                 {
-                    if (nowtext.Name != null)
+                    if (nowtext.Name != null && nowtext.fileinfo.Parent != null)
                     {
                         TreeNode parent = nowtext.fileinfo.Parent;
                         parent.Nodes.Remove(nowtext.fileinfo);
@@ -504,11 +552,11 @@ namespace viacode
 
             if (tab.TabCount > 0 && alltexts.Count > 0)
             {
-                if (tab.SelectedTab != null)
+                if (selectpage != null)
                 {
-                    alltexts.Remove(FindFile(tab.SelectedTab.Name));
+                    alltexts.Remove(FindFile(selectpage.Name));
                 }
-                tab.TabPages.Remove(tab.SelectedTab);//remove语句应该放在最后
+                tab.TabPages.Remove(selectpage);//remove语句应该放在最后
             }
 
 
@@ -516,7 +564,6 @@ namespace viacode
             {
                 tab.Visible = false;
                 debugBox.Visible = false;
-
                 alltexts.Clear( );
             }
             else
@@ -614,7 +661,6 @@ namespace viacode
 
 
             scintilla.Lexer = Lexer.Cpp;
-            //Console.WriteLine(scintilla.DescribeKeywordSets( ));
             string promptstr;
             if (version == releaseversion)
             {
@@ -625,7 +671,6 @@ namespace viacode
                 promptstr = viacpromptstr;
             }
             scintilla.SetKeywords(0, promptstr);
-          //  scintilla.SetKeywords(1, promptstr_2);
         }
 
         private void Scintilla_KeyUp(object sender, KeyEventArgs e)
@@ -671,15 +716,8 @@ namespace viacode
         private void Scintilla_CharAdded(object sender, CharAddedEventArgs e)
         {
             Intellisense( );
-
             GetLine( );
-
-            if (nowtext.Issave == true)
-            {
-                nowtext.Issave = false;
-                if(!nowtext.Parent.Text.Contains("*"))
-                    nowtext.Parent.Text += "*";
-            }
+            SetStar(nowtext);
         }
 
         private bool IsBrace(int c)
@@ -759,12 +797,7 @@ namespace viacode
             text.Margins[0].Width = text.TextWidth(Style.LineNumber, new string('9', maxLineNumberCharLength + 1)) + padding;
             text.Tag = maxLineNumberCharLength;
             SetNowtext( );
-            if (nowtext.Issave == true)
-            {
-                if (!nowtext.Parent.Text.Contains("*"))
-                    nowtext.Parent.Text += "*";
-                nowtext.Issave = false;
-            }
+            SetStar(nowtext);
             GetLine( );
         }
         #endregion
@@ -809,7 +842,7 @@ namespace viacode
             SaveProjectConfig( );
         }
 
-        private OpenFile CreateWindow(string filename)
+        private OpenFile CreateWindow(string filename,  TreeNode node = null)
         {
             int isnew = filename.LastIndexOf('\\');
             string name = filename.Substring(isnew + 1);
@@ -818,7 +851,10 @@ namespace viacode
             InitScintilla(Myediter);
 
             nowtext = new OpenFile(Myediter);
+            nowtext.fileinfo = node;
             nowtext.Issave = true;
+            alltexts.Add(nowtext);
+
             TabPage tabPage = new TabPage( );
             tabPage.Text = name;
             if (isnew == -1)
@@ -841,15 +877,12 @@ namespace viacode
             tabPage.Show( );
             tabPage.AutoScroll = true;
 
-
             tab.Controls.Add(tabPage);
             tab.SelectedTab = tabPage;
             tab.Visible = true;
             debugBox.Visible = true;
 
-            alltexts.Add(nowtext);
-
-            nowtext.filetext.Text = templatestr;
+            nowtext.filetext.Text = templatestr; //所有属性全部配置好之后才开始添加模板
             return nowtext;
         }
 
@@ -1137,19 +1170,24 @@ namespace viacode
                
         }
 
+        private void SetStar(OpenFile file)
+        {
+            if (file.Issave == true)
+            {
+                TabPage page = file.Parent;
+                file.Issave = false;
+                if (!page.Text.Contains("*"))
+                    page.Text += "*";
+            }
+        }
+
         private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.Paste( );
-                if (nowtext.Issave == true)
-                {
-                    TabPage page = (TabPage)nowtext.Parent;
-                    nowtext.Issave = false;
-                    if(!page.Text.Contains("*"))
-                        page.Text += "*";
-                }
+                SetStar(nowtext);
             }
 
         }
@@ -1160,29 +1198,25 @@ namespace viacode
             if (nowtext != null)
             {
                 nowtext.filetext.Copy( );
-                if (nowtext.Issave == true)
-                {
-                    TabPage page = (TabPage)nowtext.Parent;
-                    nowtext.Issave = false;
-                    if (!page.Text.Contains("*"))
-                        page.Text += "*";
-                }
+                SetStar(nowtext);
             }
         }
-
+        private void redoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetNowtext( );
+            if(nowtext != null)
+            {
+                nowtext.filetext.Redo( );
+                SetStar(nowtext);
+            }
+        }
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SetNowtext( );
             if (nowtext != null)
             {
                 nowtext.filetext.Undo( );
-                if (nowtext.Issave == true)
-                {
-                    TabPage page = (TabPage)nowtext.Parent;
-                    nowtext.Issave = false;
-                    if(!page.Text.Contains("*"))
-                        page.Text += "*";
-                }
+                SetStar(nowtext);
             }
 
         }
@@ -1193,13 +1227,7 @@ namespace viacode
             if (nowtext != null)
             {
                 nowtext.filetext.Cut( );
-                if (nowtext.Issave == true)
-                {
-                    TabPage page = (TabPage)nowtext.Parent;
-                    nowtext.Issave = false;
-                    if (!page.Text.Contains("*"))
-                        page.Text += "*";
-                }
+                SetStar(nowtext);
             }
 
         }
@@ -2092,8 +2120,7 @@ namespace viacode
         #region
         private void CloseProject()
         {
-            
-            /****************************************************************/
+            projectview.Nodes.Remove(nowproject.info);
             IEnumerable<OpenFile> openlist =  nowproject.openlist.Intersect(alltexts);
             foreach(OpenFile nowfile in openlist)
             {
@@ -2106,7 +2133,6 @@ namespace viacode
                 projectview.Visible = false;
                 SetSize(isproject);
             }
-            projectview.Nodes.Remove(nowproject.info);
             SaveProjectConfig( );
         }
 
@@ -2175,19 +2201,20 @@ namespace viacode
                         return;  //已经在项目中的不能重复添加
                     }
                 }
-                nowtext = CreateWindow(filepath);
-                nowproject.openlist.Add(nowtext);
-                LoadFile(filepath);
-
                 TreeNode newfile = new TreeNode(filepath.Substring(filepath.LastIndexOf("\\") + 1));
                 newfile.ImageIndex = 2;
                 newfile.SelectedImageIndex = 2;
                 newfile.Name = filepath;
                 newfile.Tag = "file";
-                nowtext.fileinfo = newfile;
-                projectview.SelectedNode.Nodes.Add(newfile);
+                
 
+                nowtext = CreateWindow(filepath, newfile);
+                nowproject.openlist.Add(nowtext);
+                LoadFile(filepath);
+
+                projectview.SelectedNode.Nodes.Add(newfile);
                 nowproject.filelist.Add(newfile.Name);
+
                 SaveProjectConfig( );
             }
             filedialog.Dispose( );
@@ -2205,18 +2232,21 @@ namespace viacode
             }
             if (path == null)
                 return;
-            nowtext = CreateWindow(name);
-            nowtext.Name = path + "\\" + name;
-            nowproject.openlist.Add(nowtext);
+
             TreeNode newfile = new TreeNode( );
             newfile.ImageIndex = 2;
             newfile.SelectedImageIndex = 2;
-            newfile.Name = nowtext.Name;
+            newfile.Name = path + "\\" + name;
             newfile.Tag = "file";
             newfile.Text = name;
-            nowtext.fileinfo = newfile;
+           
+
+            nowtext = CreateWindow(name, newfile);
+            nowtext.Name = newfile.Name;
+            nowproject.openlist.Add(nowtext);
 
             projectview.SelectedNode.Nodes.Add(newfile);
+
             projectview.SelectedNode = newfile;
 
             nowproject.filelist.Add(newfile.Name);
@@ -2376,6 +2406,7 @@ namespace viacode
             return resxml;
         }
         #endregion
-     
+
+       
     }
 }
