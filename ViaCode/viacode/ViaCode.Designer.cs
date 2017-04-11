@@ -57,6 +57,7 @@ namespace viacode
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.重复ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.查找ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.智能提示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.toolBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,7 +129,6 @@ namespace viacode
             this.debugtextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.复制ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.清空ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.智能提示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -305,6 +305,7 @@ namespace viacode
             this.redoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
             this.redoToolStripMenuItem.Size = new System.Drawing.Size(196, 26);
             this.redoToolStripMenuItem.Text = "回退(&R)";
+            this.redoToolStripMenuItem.Click += new System.EventHandler(this.redoToolStripMenuItem_Click);
             // 
             // toolStripSeparator6
             // 
@@ -369,6 +370,14 @@ namespace viacode
             this.查找ToolStripMenuItem.Size = new System.Drawing.Size(196, 26);
             this.查找ToolStripMenuItem.Text = "查找";
             this.查找ToolStripMenuItem.Click += new System.EventHandler(this.查找ToolStripMenuItem_Click);
+            // 
+            // 智能提示ToolStripMenuItem
+            // 
+            this.智能提示ToolStripMenuItem.Name = "智能提示ToolStripMenuItem";
+            this.智能提示ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.J)));
+            this.智能提示ToolStripMenuItem.Size = new System.Drawing.Size(196, 26);
+            this.智能提示ToolStripMenuItem.Text = "智能提示";
+            this.智能提示ToolStripMenuItem.Click += new System.EventHandler(this.智能提示ToolStripMenuItem_Click);
             // 
             // viewMenu
             // 
@@ -944,14 +953,6 @@ namespace viacode
             this.清空ToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
             this.清空ToolStripMenuItem.Text = "清空";
             this.清空ToolStripMenuItem.Click += new System.EventHandler(this.清空ToolStripMenuItem_Click);
-            // 
-            // 智能提示ToolStripMenuItem
-            // 
-            this.智能提示ToolStripMenuItem.Name = "智能提示ToolStripMenuItem";
-            this.智能提示ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.J)));
-            this.智能提示ToolStripMenuItem.Size = new System.Drawing.Size(196, 26);
-            this.智能提示ToolStripMenuItem.Text = "智能提示";
-            this.智能提示ToolStripMenuItem.Click += new System.EventHandler(this.智能提示ToolStripMenuItem_Click);
             // 
             // ViaCode
             // 
