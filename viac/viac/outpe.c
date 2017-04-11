@@ -135,7 +135,7 @@ int LoadObjFile(const char* fname)
 	int nsec_obj;
 	nsec_obj = fh.NumberOfSections;
 	Section** ppsec = (Section**)sections.data;
-
+	
 	int i;
 	for (i = 0; i < nsec_obj; ++i)
 	{
@@ -153,7 +153,7 @@ int LoadObjFile(const char* fname)
 		if (!strcmp(ppsec[i]->sh.Name, ".symtab"))
 		{
 			cfsyms = MallocInit(ppsec[i]->sh.SizeOfRawData);
-			fseek(fobj, SEEK_SET, ppsec[i]->sh.PointerToRawData);
+			fseek(fobj, ppsec[i]->sh.PointerToRawData, SEEK_SET);
 			fread(cfsyms, 1, ppsec[i]->sh.SizeOfRawData, fobj);
 			nsym = (ppsec[i]->sh.SizeOfRawData) / sizeof(CoffSym);
 			continue;
@@ -161,16 +161,18 @@ int LoadObjFile(const char* fname)
 		if (!strcmp(ppsec[i]->sh.Name, ".strtab"))
 		{
 			strs = MallocInit(ppsec[i]->sh.SizeOfRawData);
-			fseek(fobj, SEEK_SET, ppsec[i]->sh.PointerToRawData);
+			fseek(fobj, ppsec[i]->sh.PointerToRawData, SEEK_SET);
 			fread(strs, 1, ppsec[i]->sh.SizeOfRawData, fobj);
 			continue;
 		}
 		if (!strcmp(ppsec[i]->sh.Name, ".dynsym") || !strcmp(ppsec[i]->sh.Name, ".dynstr"))
 			continue;
-		fseek(fobj, SEEK_SET, ppsec[i]->sh.PointerToRawData);
+		fseek(fobj, ppsec[i]->sh.PointerToRawData, SEEK_SET);
 		ptr = SectionPtrAdd(ppsec[i], ppsec[i]->sh.SizeOfRawData);
 		fread(ptr, 1, ppsec[i]->sh.SizeOfRawData, fobj);
+		
 	}
+	
 	int* replace_sym = MallocInit(sizeof(int) * nsym);
 	char* csname = NULL;
 	int cfsym_index = 0;
@@ -183,6 +185,7 @@ int LoadObjFile(const char* fname)
 	}
 	CoffReloc* rel = (CoffReloc*)(sec_rel->data + cur_rel_offset);
 	CoffReloc* rel_end = (CoffReloc*)(sec_rel->data + sec_rel->data_offset);
+	
 	for (; rel < rel_end; ++rel)
 	{
 		cfsym_index = rel->cfsym;
@@ -635,7 +638,7 @@ int PeWrite(PEInfo* pe)
 	nt_header.OptionalHeader.SizeOfHeaders = sizeofheaders;
 
 	nt_header.OptionalHeader.Subsystem = subsystem;
-	fseek(fp, SEEK_SET, 0);
+	fseek(fp, 0, SEEK_SET);
 	fwrite(&dos_header, 1, sizeof(dos_header), fp);
 	fwrite(&dos_stub, 1, sizeof(dos_stub), fp);
 	fwrite(&nt_header, 1, sizeof(nt_header), fp);

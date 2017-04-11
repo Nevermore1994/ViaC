@@ -277,7 +277,7 @@ void WriteObj(const char* name)
 		sec->sh.SizeOfRawData = sec->data_offset;
 		file_offset += sec->data_offset;
 	}
-	fseek(fout, SEEK_SET, 0); 
+	fseek(fout, 0, SEEK_SET); 
 	fh->Machine = IMAGE_FILE_MACHINE_I386; 
 	fh->NumberOfSections = nsec_obj;
 	fh->PointerToSymbolTable = sec_symtab->sh.PointerToRawData;
