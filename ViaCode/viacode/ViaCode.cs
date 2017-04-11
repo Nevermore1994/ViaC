@@ -2038,6 +2038,7 @@ namespace viacode
                     item.Kill( );
                 }
             }
+            string objres = exeres + "obj";
             exeres += "exe";
             string[] argv = new string[5];
             argv[0] = "viac";
@@ -2049,7 +2050,8 @@ namespace viacode
 
             /**************************以下是输入至CMD进程中的参数****************************************/
             #region
-            string command = argv[0] + " " + argv[1] + " " + argv[2] + " " + argv[3] + " " + argv[4];
+            string commandbyexe = argv[0] + " " + argv[1] + " " + argv[2] + " " + argv[3] + " " + argv[4];
+            string commandbyobj = argv[0] + " " + argv[2] + " " + objres + " " + "-c" + " " + argv[4];
             compiler.StartInfo.FileName = "cmd.exe";
             compiler.StartInfo.UseShellExecute = false;
             compiler.StartInfo.RedirectStandardInput = true;
@@ -2061,14 +2063,16 @@ namespace viacode
             viacpath = "cd " + ViaCodepath;
             compiler.StandardInput.WriteLine(viacpath);  //open path
 
-            compiler.StandardInput.WriteLine(command + " &exit");  //必须跟exit，否则会导致命令无法执行
+            compiler.StandardInput.WriteLine(commandbyobj);  
+            compiler.StandardInput.WriteLine(commandbyexe + " &exit");  //最后一行命令必须跟exit，否则会导致命令无法执行
             compiler.StandardInput.AutoFlush = true;  //立即输出
 
             compiler.WaitForExit( );
             string output = compiler.StandardOutput.ReadToEnd( );
             compiler.Close( ); //释放资源
 
-            if (output.Contains("编译成功"))
+            string flagstr = "编译成功";
+            if (output.Contains(flagstr))
             {
                 generateres = true;  //生成成功
             }
@@ -2078,9 +2082,9 @@ namespace viacode
             }
 
             string substr = "exit";
-            debugBox.Text = "ViaC开发版" + output.Substring(output.IndexOf(substr) + substr.Length);
+            debugBox.Text = output.Substring(output.IndexOf(flagstr) + flagstr.Length);
+            debugBox.Text = "ViaC开发版" + debugBox.Text.Substring(debugBox.Text.IndexOf(substr) + substr.Length);
             #endregion
-
             return exeres;
         }
 
