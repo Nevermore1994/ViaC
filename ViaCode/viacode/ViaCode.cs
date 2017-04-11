@@ -905,6 +905,11 @@ namespace viacode
             nowtext = CreateWindow(name);
         }
 
+        private void newWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            newToolStripButton_Click(null, null);
+        }
+
         private void 文件ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string name = defaultname + defaultnum + "." + defaultname;
@@ -937,7 +942,7 @@ namespace viacode
 
         private void OpenFile(object sender, EventArgs e)
         {
-            现有文件ToolStripMenuItem1_Click(null, null);
+            
         }
 
         private void 现有文件ToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1642,6 +1647,7 @@ namespace viacode
         private void CloseAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             tab.TabPages.Clear( );
+            tab.Visible = false;
         }
 
         private void 字体设置ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2405,8 +2411,9 @@ namespace viacode
             }
             return resxml;
         }
+
         #endregion
 
-       
+        
     }
 }
