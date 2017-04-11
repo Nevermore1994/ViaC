@@ -47,53 +47,53 @@ IMAGE_NT_HEADERS32 nt_header = {
 		/* IMAGE_FILE_HEADER FileHeader */
 		0x014C,		/*WORD    Machine; 运行平台*/
 		0x0003,		/*WORD    NumberOfSections; 文件的节数目 */
-	0x00000000, /*DWORD   TimeDateStamp; 文件的创建日期和时间*/
-	0x00000000, /*DWORD   PointerToSymbolTable; 指向符号表(用于调试)*/
-	0x00000000, /*DWORD   NumberOfSymbols; 符号表中的符号数量（用于调试）*/
-	0x00E0,		/*WORD    SizeOfOptionalHeader; IMAGE_OPTIONAL_HEADER32结构的长度*/
-	0x030F		/*WORD    Characteristics; 文件属性*/
+		0x00000000, /*DWORD   TimeDateStamp; 文件的创建日期和时间*/
+		0x00000000, /*DWORD   PointerToSymbolTable; 指向符号表(用于调试)*/
+		0x00000000, /*DWORD   NumberOfSymbols; 符号表中的符号数量（用于调试）*/
+		0x00E0,		/*WORD    SizeOfOptionalHeader; IMAGE_OPTIONAL_HEADER32结构的长度*/
+		0x030F		/*WORD    Characteristics; 文件属性*/
 	},
 	{
 		/* IMAGE_OPTIONAL_HEADER OptionalHeader */
 		/* 标准域. */
 		0x010B, /*WORD    Magic; */
 		0x06, /*BYTE    MajorLinkerVersion; 链接器主版本号*/
-	0x00, /*BYTE    MinorLinkerVersion; 链接器次版本号*/
-	0x00000000, /*DWORD   SizeOfCode; 所有含代码段的总大小*/
-	0x00000000, /*DWORD   SizeOfInitializedData; 所有已初始化数据段的总大小*/
-	0x00000000, /*DWORD   SizeOfUninitializedData; 所有含有未初始化数据段的大小*/
-	0x00000000, /*DWORD   AddressOfEntryPoint; 程序执行入口的相对虚拟地址*/
-	0x00000000, /*DWORD   BaseOfCode; 代码段的起始RVA*/
-	0x00000000, /*DWORD   BaseOfData; 代码段的起始RVA*/
+		0x00, /*BYTE    MinorLinkerVersion; 链接器次版本号*/
+		0x00000000, /*DWORD   SizeOfCode; 所有含代码段的总大小*/
+		0x00000000, /*DWORD   SizeOfInitializedData; 所有已初始化数据段的总大小*/
+		0x00000000, /*DWORD   SizeOfUninitializedData; 所有含有未初始化数据段的大小*/
+		0x00000000, /*DWORD   AddressOfEntryPoint; 程序执行入口的相对虚拟地址*/
+		0x00000000, /*DWORD   BaseOfCode; 代码段的起始RVA*/
+		0x00000000, /*DWORD   BaseOfData; 代码段的起始RVA*/
 
 				/* NT附加域 */
-	0x00400000, /*DWORD   ImageBase; 程序的建议装载地址 讲一下Windows内存结构，如果大于0x80000000会有什么后果*/
-	0x00001000, /*DWORD   SectionAlignment; 内存中段的对齐粒度*/
-	0x00000200, /*DWORD   FileAlignment; 文件中段的对齐粒度*/
-	0x0004, /*WORD    MajorOperatingSystemVersion; 操作系统的主版本号*/
-	0x0000, /*WORD    MinorOperatingSystemVersion; 操作系统的次版本号*/
-	0x0000, /*WORD    MajorImageVersion; 程序的主版本号*/
-	0x0000, /*WORD    MinorImageVersion; 程序的次版本号*/
-	0x0004, /*WORD    MajorSubsystemVersion; 子系统的主版本号*/
-	0x0000, /*WORD    MinorSubsystemVersion; 子系统的次版本号*/
-	0x00000000, /*DWORD   Win32VersionValue; 保留，设为0*/
-	0x00000000, /*DWORD   SizeOfImage; 内存中整个PE映像尺寸*/
-	0x00000200, /*DWORD   SizeOfHeaders; 所有头+节表的大小*/
-	0x00000000, /*DWORD   CheckSum; 校验和*/
-	0x0003, /*WORD    Subsystem; 文件的子系统*/
-	0x0000, /*WORD    DllCharacteristics; */
-	0x00100000, /*DWORD   SizeOfStackReserve; 初始化时堆栈大小*/
-	0x00001000, /*DWORD   SizeOfStackCommit; 初始化时实际提交的堆栈大小*/
-	0x00100000, /*DWORD   SizeOfHeapReserve; 初始化时保留的堆大小*/
-	0x00001000, /*DWORD   SizeOfHeapCommit; 初始化时实际提交的堆大小*/
-	0x00000000, /*DWORD   LoaderFlags; 保留，设为0*/
-	0x00000010, /*DWORD   NumberOfRvaAndSizes; 下面的数据目录结构的数量*/
+		0x00400000, /*DWORD  */
+		0x00001000, /*DWORD   SectionAlignment; 内存中段的对齐粒度*/
+		0x00000200, /*DWORD   FileAlignment; 文件中段的对齐粒度*/
+		0x0004, /*WORD    MajorOperatingSystemVersion; 操作系统的主版本号*/
+		0x0000, /*WORD    MinorOperatingSystemVersion; 操作系统的次版本号*/
+		0x0000, /*WORD    MajorImageVersion; 程序的主版本号*/
+		0x0000, /*WORD    MinorImageVersion; 程序的次版本号*/
+		0x0004, /*WORD    MajorSubsystemVersion; 子系统的主版本号*/
+		0x0000, /*WORD    MinorSubsystemVersion; 子系统的次版本号*/
+		0x00000000, /*DWORD   Win32VersionValue; 保留，设为0*/
+		0x00000000, /*DWORD   SizeOfImage; 内存中整个PE映像尺寸*/
+		0x00000200, /*DWORD   SizeOfHeaders; 所有头+节表的大小*/
+		0x00000000, /*DWORD   CheckSum; 校验和*/
+		0x0003, /*WORD    Subsystem; 文件的子系统*/
+		0x0000, /*WORD    DllCharacteristics; */
+		0x00100000, /*DWORD   SizeOfStackReserve; 初始化时堆栈大小*/
+		0x00001000, /*DWORD   SizeOfStackCommit; 初始化时实际提交的堆栈大小*/
+		0x00100000, /*DWORD   SizeOfHeapReserve; 初始化时保留的堆大小*/
+		0x00001000, /*DWORD   SizeOfHeapCommit; 初始化时实际提交的堆大小*/
+		0x00000000, /*DWORD   LoaderFlags; 保留，设为0*/
+		0x00000010, /*DWORD   NumberOfRvaAndSizes; 下面的数据目录结构的数量*/
 
-				/* IMAGE_DATA_DIRECTORY DataDirectory[16]; 数据目录*/
-	{
-		{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
-		{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 }
-	}
+		/* IMAGE_DATA_DIRECTORY DataDirectory[16]; 数据目录*/
+		{
+			{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+			{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },{ 0,0 }
+		}
 	}
 };
 

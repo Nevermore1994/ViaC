@@ -29,13 +29,12 @@ int main(const int argc, char** argv)
 			Compile(filename);
 		else if (!strcmp(ext, "c") || !strcmp(ext, "C"))
 			Compile(filename);
-		else
-			printf("编译失败，不支持的类型");
-		if (!strcmp(ext, "obj"))
+		else if (!strcmp(ext, "obj"))
 		{
 			LoadObjFile(filename);
 		}
-			
+		else
+			printf("编译失败，不支持的类型");
 	}
 	if (outtype == OUTPUT_OBJ)
 	{
