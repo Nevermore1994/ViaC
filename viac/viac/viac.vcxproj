@@ -158,7 +158,7 @@
     <ClCompile Include="stack.c" />
     <ClCompile Include="string.c" />
     <ClCompile Include="symbol.c" />
-    <ClCompile Include="test.c" />
+    <ClCompile Include="main.c" />
     <ClCompile Include="viac.c" />
   </ItemGroup>
   <ItemGroup>

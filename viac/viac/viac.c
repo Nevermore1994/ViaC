@@ -14,7 +14,7 @@ char* outfile = NULL;		//输出文件名
 int outtype;          //输出文件类型
 float ViaCVersion = 1.00; //编译器版本
 
-						  /****************内存初始化函数***************/
+/****************内存初始化函数***************/
 void* MallocInit(const int size)
 {
 	void* ptr = NULL;
