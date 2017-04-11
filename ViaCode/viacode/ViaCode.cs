@@ -1855,18 +1855,11 @@ namespace viacode
                     resexe.StartInfo.RedirectStandardInput = false;
                     resexe.StartInfo.RedirectStandardOutput = false;
                     resexe.Start( );
-                    //等待当前的程序运行完毕
-                    //resexe.WaitForExit( );
                 }
                 catch
                 {
                     MessageBox.Show("启动应用失败,可能不存在!", "viac警告");
                 }
-                finally
-                {
-                    //resexe.Close( );
-                }
-
             }
             #endregion
 
@@ -2060,7 +2053,7 @@ namespace viacode
             }
             else
             {
-                exeres = nowproject.Name + ".";
+                exeres = nowproject.dirpath + "\\" + nowproject.Name+ ".";
             }
             string exename = exeres.Substring(exeres.LastIndexOf("\\") + 1);
             exename = exename.Substring(0, exename.LastIndexOf("."));
