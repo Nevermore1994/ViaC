@@ -760,13 +760,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E92F36C19E23CCDC90C02E88C7C3A2BA"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A54258B402609A63893A0449A816A080"
+        "OwnerKey" = "8:_BD9186A92C8F77DFC97AB0E73B557D50"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -778,7 +772,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_BD9186A92C8F77DFC97AB0E73B557D50"
+        "OwnerKey" = "8:_A54258B402609A63893A0449A816A080"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_E92F36C19E23CCDC90C02E88C7C3A2BA"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -2403,11 +2403,6 @@
             "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
                 "ScatterAssemblies"
                 {
-                    "_A12232648326546F3184C86A4D35AB37"
-                    {
-                    "Name" = "8:System.Net.Http.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:System.Net.Http.dll"
             "TargetName" = "8:"
@@ -2554,11 +2549,6 @@
             "AssemblyAsmDisplayName" = "8:ScintillaNET, Version=3.5.10.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_A54258B402609A63893A0449A816A080"
-                    {
-                    "Name" = "8:ScintillaNET.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:ScintillaNET.dll"
             "TargetName" = "8:"
@@ -2745,11 +2735,6 @@
             "AssemblyAsmDisplayName" = "8:Microsoft.VisualStudio.DebuggerVisualizers, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_BD9186A92C8F77DFC97AB0E73B557D50"
-                    {
-                    "Name" = "8:Microsoft.VisualStudio.DebuggerVisualizers.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:Microsoft.VisualStudio.DebuggerVisualizers.dll"
             "TargetName" = "8:"
@@ -3176,11 +3161,6 @@
             "AssemblyAsmDisplayName" = "8:IrisSkin4, Version=2006.3.22.45, Culture=neutral, PublicKeyToken=127be25a6db25e07, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_E92F36C19E23CCDC90C02E88C7C3A2BA"
-                    {
-                    "Name" = "8:IrisSkin4.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:IrisSkin4.dll"
             "TargetName" = "8:"
@@ -3548,15 +3528,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ViaC编译器"
-        "ProductCode" = "8:{1278803D-70D4-4644-B40A-1D47D45E1719}"
-        "PackageCode" = "8:{5F59E221-766B-42BB-90B3-7DD3D65B215C}"
+        "ProductCode" = "8:{5F4E4ACD-CD57-4739-8EBE-A48BFBF9F481}"
+        "PackageCode" = "8:{3C738966-3ED5-4786-9D47-BCA1930D8639}"
         "UpgradeCode" = "8:{65643538-ABFE-4FDD-9EE5-C7462A77E832}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.2"
+        "ProductVersion" = "8:1.2.0"
         "Manufacturer" = "8:Away(tanping)"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
