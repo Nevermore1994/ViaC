@@ -342,9 +342,15 @@ namespace viacode
             }
             debugBox.Location = new Point(point_x + local, 465);
             debugBox.Size = new Size(size_x - local, 160);
+            debugBox.Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
 
             tab.Size = new Size(size_x - local, 400);
+            if (关闭调试框ToolStripMenuItem.Checked == true)
+            {
+                tab.Height = tab.Size.Height + debugBox.Size.Height;
+            }
             tab.Location = new Point(point_x + local, 55);
+            tab.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
         }
 
         private void SetSkinTool(bool x, bool y, bool z)
@@ -501,7 +507,6 @@ namespace viacode
                 }
                 else
                 {
-                   // selectnode = nownode;
                     nownode.ContextMenuStrip = fileMenuStrip;
                 }
 
@@ -879,7 +884,8 @@ namespace viacode
             tab.Controls.Add(tabPage);
             tab.SelectedTab = tabPage;
             tab.Visible = true;
-            debugBox.Visible = true;
+            if(!关闭调试框ToolStripMenuItem.Checked)
+                debugBox.Visible = true;
 
             newtext.filetext.Text = templatestr; //所有属性全部配置好之后才开始添加模板
             return newtext;
@@ -1175,7 +1181,21 @@ namespace viacode
             }
                
         }
-
+        private void 关闭调试框ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            关闭调试框ToolStripMenuItem.Checked = !关闭调试框ToolStripMenuItem.Checked;
+            if (关闭调试框ToolStripMenuItem.Checked == false)
+            {
+                debugBox.Visible = true;
+                tab.Height = tab.Size.Height - debugBox.Size.Height;
+            }
+            else
+            {
+                debugBox.Visible = false;
+                tab.Height = tab.Size.Height + debugBox.Size.Height;
+            }
+            tab.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+        }
         private void SetStar(OpenFile file)
         {
             if (file.Issave == true)
@@ -1648,7 +1668,9 @@ namespace viacode
         private void CloseAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             tab.TabPages.Clear( );
+            alltexts.Clear( );
             tab.Visible = false;
+            debugBox.Visible = false;
         }
 
         private void 字体设置ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1864,11 +1886,6 @@ namespace viacode
             }
             #endregion
 
-        }
-
-        private void 调试ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("调试");
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2431,8 +2448,10 @@ namespace viacode
         }
 
 
+
+
         #endregion
 
-      
+        
     }
 }
