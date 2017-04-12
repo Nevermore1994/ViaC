@@ -123,6 +123,8 @@ namespace viacode
             this.debugtextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.复制ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.清空ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.在文件浏览器中浏览ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.文件位置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -540,14 +542,14 @@ namespace viacode
             // newWindowToolStripMenuItem
             // 
             this.newWindowToolStripMenuItem.Name = "newWindowToolStripMenuItem";
-            this.newWindowToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.newWindowToolStripMenuItem.Size = new System.Drawing.Size(166, 26);
             this.newWindowToolStripMenuItem.Text = "新建窗口(&N)";
             this.newWindowToolStripMenuItem.Click += new System.EventHandler(this.newWindowToolStripMenuItem_Click);
             // 
             // closeAllToolStripMenuItem
             // 
             this.closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
-            this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(166, 26);
             this.closeAllToolStripMenuItem.Text = "全部关闭(&L)";
             this.closeAllToolStripMenuItem.Click += new System.EventHandler(this.CloseAllToolStripMenuItem_Click);
             // 
@@ -566,18 +568,18 @@ namespace viacode
             this.indexToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("indexToolStripMenuItem.Image")));
             this.indexToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black;
             this.indexToolStripMenuItem.Name = "indexToolStripMenuItem";
-            this.indexToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
+            this.indexToolStripMenuItem.Size = new System.Drawing.Size(167, 26);
             this.indexToolStripMenuItem.Text = "索引(&I)";
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(194, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(164, 6);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(197, 26);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(167, 26);
             this.aboutToolStripMenuItem.Text = "关于(&A) ... ...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -757,7 +759,7 @@ namespace viacode
             this.新建文件ToolStripMenuItem,
             this.现有文件ToolStripMenuItem});
             this.添加文件ToolStripMenuItem.Name = "添加文件ToolStripMenuItem";
-            this.添加文件ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
+            this.添加文件ToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
             this.添加文件ToolStripMenuItem.Text = "添加文件";
             // 
             // 新建文件ToolStripMenuItem
@@ -777,7 +779,7 @@ namespace viacode
             // 删除文件夹ToolStripMenuItem
             // 
             this.删除文件夹ToolStripMenuItem.Name = "删除文件夹ToolStripMenuItem";
-            this.删除文件夹ToolStripMenuItem.Size = new System.Drawing.Size(159, 26);
+            this.删除文件夹ToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
             this.删除文件夹ToolStripMenuItem.Text = "删除文件夹";
             this.删除文件夹ToolStripMenuItem.Click += new System.EventHandler(this.删除文件夹ToolStripMenuItem_Click);
             // 
@@ -786,9 +788,10 @@ namespace viacode
             this.projectMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.projectMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.关闭项目ToolStripMenuItem,
-            this.添加文件夹ToolStripMenuItem});
+            this.添加文件夹ToolStripMenuItem,
+            this.在文件浏览器中浏览ToolStripMenuItem});
             this.projectMenuStrip.Name = "projectMenuStrip";
-            this.projectMenuStrip.Size = new System.Drawing.Size(160, 56);
+            this.projectMenuStrip.Size = new System.Drawing.Size(220, 82);
             // 
             // 关闭项目ToolStripMenuItem
             // 
@@ -848,9 +851,10 @@ namespace viacode
             this.tabMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.tabMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.关闭ToolStripMenuItem,
-            this.保存ToolStripMenuItem});
+            this.保存ToolStripMenuItem,
+            this.文件位置ToolStripMenuItem});
             this.tabMenuStrip.Name = "tabMenuStrip";
-            this.tabMenuStrip.Size = new System.Drawing.Size(115, 56);
+            this.tabMenuStrip.Size = new System.Drawing.Size(182, 110);
             // 
             // 关闭ToolStripMenuItem
             // 
@@ -899,6 +903,20 @@ namespace viacode
             this.清空ToolStripMenuItem.Size = new System.Drawing.Size(202, 26);
             this.清空ToolStripMenuItem.Text = "清空";
             this.清空ToolStripMenuItem.Click += new System.EventHandler(this.清空ToolStripMenuItem_Click);
+            // 
+            // 在文件浏览器中浏览ToolStripMenuItem
+            // 
+            this.在文件浏览器中浏览ToolStripMenuItem.Name = "在文件浏览器中浏览ToolStripMenuItem";
+            this.在文件浏览器中浏览ToolStripMenuItem.Size = new System.Drawing.Size(219, 26);
+            this.在文件浏览器中浏览ToolStripMenuItem.Text = "在文件浏览器中浏览";
+            this.在文件浏览器中浏览ToolStripMenuItem.Click += new System.EventHandler(this.在文件浏览器中浏览ToolStripMenuItem_Click);
+            // 
+            // 文件位置ToolStripMenuItem
+            // 
+            this.文件位置ToolStripMenuItem.Name = "文件位置ToolStripMenuItem";
+            this.文件位置ToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.文件位置ToolStripMenuItem.Text = "文件位置";
+            this.文件位置ToolStripMenuItem.Click += new System.EventHandler(this.文件位置ToolStripMenuItem_Click);
             // 
             // ViaCode
             // 
@@ -1033,6 +1051,8 @@ namespace viacode
         private System.Windows.Forms.ToolStripMenuItem 复制ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 清空ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 智能提示ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 在文件浏览器中浏览ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 文件位置ToolStripMenuItem;
     }
 }
 

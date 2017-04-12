@@ -527,10 +527,10 @@ namespace viacode
             TabPage selectpage = tab.SelectedTab;
             if (nowtext == null)
             {
-                MessageBox.Show("未打开任何文件!", "ViaC Warning");
+                MessageBox.Show("未打开任何文件s!", "ViaC Warning");
                 return;
             }
-            if (nowtext.Issave == false)
+           if (nowtext.Issave == false)
             {
                 DialogResult diares = MessageBox.Show("是否保存修改？", "ViaC编译器提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (diares == DialogResult.Yes)
@@ -554,11 +554,10 @@ namespace viacode
             {
                 if (selectpage != null)
                 {
-                    alltexts.Remove(FindFile(selectpage.Name));
+                    alltexts.Remove(FindOpenFile(selectpage));
                 }
                 tab.TabPages.Remove(selectpage);//remove语句应该放在最后
             }
-
 
             if (tab.TabCount == 0)
             {
@@ -580,8 +579,7 @@ namespace viacode
                 CloseFile( );
             else
             {
-                Point pos = Cursor.Position;
-                tab.SelectedTab.ContextMenuStrip.Show(pos);
+                tab.SelectedTab.ContextMenuStrip.Show(Cursor.Position);
             }
         }
 
@@ -717,7 +715,8 @@ namespace viacode
         {
             Intellisense( );
             GetLine( );
-            SetStar(nowtext);
+            if(nowtext != null)
+                SetStar(nowtext);
         }
 
         private bool IsBrace(int c)
@@ -797,7 +796,8 @@ namespace viacode
             text.Margins[0].Width = text.TextWidth(Style.LineNumber, new string('9', maxLineNumberCharLength + 1)) + padding;
             text.Tag = maxLineNumberCharLength;
             SetNowtext( );
-            SetStar(nowtext);
+            if(nowtext!=null)
+                SetStar(nowtext);
             GetLine( );
         }
         #endregion
@@ -850,10 +850,10 @@ namespace viacode
             Scintilla Myediter = new Scintilla( );
             InitScintilla(Myediter);
 
-            nowtext = new OpenFile(Myediter);
-            nowtext.fileinfo = node;
-            nowtext.Issave = true;
-            alltexts.Add(nowtext);
+            OpenFile newtext = new OpenFile(Myediter);
+            newtext.fileinfo = node;
+            newtext.Issave = true;
+            alltexts.Add(newtext);
 
             TabPage tabPage = new TabPage( );
             tabPage.Text = name;
@@ -861,7 +861,6 @@ namespace viacode
             {
                 tabPage.Name = "new";
                 tabPage.Tag = Environment.CurrentDirectory + name;
-
             }
             else
             {
@@ -871,8 +870,8 @@ namespace viacode
             tabPage.ContextMenuStrip = tabMenuStrip;
             tabPage.MouseClick += TabPage_MouseClick;
 
-            tabPage.Controls.Add(nowtext.filetext);
-            nowtext.Parent = tabPage;   //需要设置
+            tabPage.Controls.Add(newtext.filetext);
+            newtext.Parent = tabPage;   //需要设置
 
             tabPage.Show( );
             tabPage.AutoScroll = true;
@@ -882,15 +881,17 @@ namespace viacode
             tab.Visible = true;
             debugBox.Visible = true;
 
-            nowtext.filetext.Text = templatestr; //所有属性全部配置好之后才开始添加模板
-            return nowtext;
+            newtext.filetext.Text = templatestr; //所有属性全部配置好之后才开始添加模板
+            return newtext;
         }
 
         private void TabPage_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                Point pos = new Point(e.X, e.Y);
+                MessageBox.Show("page");
+                Point pos = new Point(tab.SelectedTab.Bounds.X +tab.SelectedTab.Bounds.Width, 
+                    tab.SelectedTab.Bounds.Y + tab.SelectedTab.Height /2 );
                 tab.SelectedTab.ContextMenuStrip.Show(pos);
             }
         }
@@ -942,7 +943,7 @@ namespace viacode
 
         private void OpenFile(object sender, EventArgs e)
         {
-            
+            现有文件ToolStripMenuItem1_Click(null, null);
         }
 
         private void 现有文件ToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -2317,22 +2318,46 @@ namespace viacode
             }
             SaveProjectConfig( );
         }
+
+        private void OpenExplorer(string path)
+        {
+            System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
+            psi.Arguments = "/e,/select," + path;
+            System.Diagnostics.Process.Start(psi);
+        }
+
+        private void 在文件浏览器中浏览ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenExplorer(projectview.SelectedNode.Name);
+        }
+
+        private void 文件位置ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TabPage page = tab.SelectedTab;
+            if (page.Name.Equals("new") || page.Name == null || page.Name.Equals(""))
+            {
+                MessageBox.Show("属于新建文件，尚未保存！", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+            else
+            {
+                OpenExplorer(page.Name);
+            }
+        }
+
+
         #endregion
         /***************************************以下是项目功能函数***************************************************/
         #region
         private OpenFile FindFile(string filepath)
         {
             OpenFile resfile = null;
-
-            if (alltexts.Count > 0)
+            foreach (OpenFile file in alltexts)
             {
-                foreach (OpenFile nowfile in alltexts)
+                if (file.Parent.Name.Equals(filepath))
                 {
-                    if (nowfile.Parent.Name.Equals(filepath))
-                    {
-                        resfile = nowfile;
-                        return resfile;
-                    }
+                    resfile = file;
+                    return resfile;
                 }
             }
             return resfile;
@@ -2405,8 +2430,9 @@ namespace viacode
             return resxml;
         }
 
+
         #endregion
 
-        
+      
     }
 }
