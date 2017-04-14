@@ -72,12 +72,9 @@ namespace viacode
         private string skinpath = null;
         //文档属性
         private const string fileclass = "ViaC文件(*.viac)|*.viac|C文件(*.c)|*.c|头文件(*.h)|*.h|文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
-
-
         //定义的版本
         private int releaseversion = 0;
         private int debugversion = 1;
-
         //当前使用的版本
         private float version;
 
@@ -1871,6 +1868,10 @@ namespace viacode
             {
                 
                 System.Diagnostics.Process resexe = new Process( );
+                if(!File.Exists(resname))
+                {
+                    MessageBox.Show("启动应用失败,可能不存在!", "viac警告");
+                }
                 try
                 {
                     resexe.StartInfo.FileName = resname;
@@ -2081,6 +2082,7 @@ namespace viacode
                 if (item.ProcessName == exename)
                 {
                     item.Kill( );
+                    break;
                 }
             }
             string objres = exeres + "obj";
@@ -2117,6 +2119,8 @@ namespace viacode
             compiler.Close( ); //释放资源
 
             string flagstr = "编译成功";
+            string substr = "exit";
+            output  = output.Substring(output.IndexOf(flagstr) + flagstr.Length);
             if (output.Contains(flagstr))
             {
                 generateres = true;  //生成成功
@@ -2126,8 +2130,7 @@ namespace viacode
                 output += "编译失败";
             }
 
-            string substr = "exit";
-            debugBox.Text = output.Substring(output.IndexOf(flagstr) + flagstr.Length);
+            debugBox.Text = output;
             debugBox.Text = "ViaC开发版" + debugBox.Text.Substring(debugBox.Text.IndexOf(substr) + substr.Length);
             #endregion
             return exeres;
