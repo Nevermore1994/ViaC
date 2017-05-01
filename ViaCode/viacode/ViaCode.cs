@@ -590,7 +590,7 @@ namespace viacode
         //编辑器模板
         private string templatestr = null;
         private const string viacstr = "#require\"io.viah\" \n" + "int main()\n" + "do\n" + "    return 0;\n" + "end\n" + "\n" + "void _entry()\n" + "do\n    int res;\n" +"    int codestart, codeend;\n"+"    codestart = clock();\n"+ "    res = main();\n" + "    codeend = clock();\n" + "    printf(\"\\n程序运行时间为%d ms \\n输入任意字符后结束...\\n\",codeend - codestart);\n" + "    getchar();\n" + "    exit(res);\n" + "end\n";
-        private const string cstr = "#include<stdio.h> \n" + "int main(int argc, char* agrv[])\n" + "{\n" + "    return 0;\n" + "}\n";
+        private const string cstr = "#include<stdio.h> \n" + "int main(int argc, char* argv[])\n" + "{\n" + "    return 0;\n" + "}\n";
         private const string viacpromptstr =
             "break case char continue do else end false for if int require return sizeof struct void";
 
@@ -1870,7 +1870,8 @@ namespace viacode
                 System.Diagnostics.Process resexe = new Process( );
                 if(!File.Exists(resname))
                 {
-                    MessageBox.Show("启动应用失败,可能不存在!", "viac警告");
+                    MessageBox.Show("未找到该应用!", "ViaC Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
                 try
                 {
@@ -2119,7 +2120,6 @@ namespace viacode
             compiler.Close( ); //释放资源
 
             string flagstr = "编译成功";
-            string substr = "exit";
             output  = output.Substring(output.IndexOf(flagstr) + flagstr.Length);
             if (output.Contains(flagstr))
             {
@@ -2129,7 +2129,7 @@ namespace viacode
             {
                 output += "编译失败";
             }
-
+            string substr = "exit";
             debugBox.Text = output;
             debugBox.Text = "ViaC开发版" + debugBox.Text.Substring(debugBox.Text.IndexOf(substr) + substr.Length);
             #endregion
