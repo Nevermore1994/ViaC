@@ -172,7 +172,6 @@ void Load(const int r, Operand* opd)	//操作数opd加载到寄存器r中
 	}
 }
 
-
 void Store(const int r, Operand* opd)  //将寄存器的中‘r’的值存入Opd
 {
 	if (opd == NULL)
@@ -216,7 +215,7 @@ int Load_1(const int rc, Operand* opd) //将栈顶的操作数加载到‘rc’寄存器中
 }
 
 void Load_2(const int lrc, const int rrc) //分别将栈顶的操作数加载带lrc，次栈顶加载到rrc
-{	
+{
 	Load_1(rrc, optop);
 	Load_1(lrc, &optop[-1]);
 }
@@ -758,7 +757,7 @@ void InitVariable(Type* ptype, Section* psec, const int c, const int v) //变量初
 			GenAddr32(optop->reg, optop->sym, optop->value);
 			OperandSwap();
 
-			GenOpcode_1(0x80);
+			GenOpcode_1(0x8D);
 			GenModrm(ADDR_OTHER, REG_EDI, ViaC_LOCAL, optop->sym, optop->value);
 
 			GenPrefix(0xf3);
