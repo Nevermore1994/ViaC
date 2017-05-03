@@ -774,6 +774,7 @@ void InitVariable(Type* ptype, Section* psec, const int c, const int v) //变量初
 		}
 	}
 }
+
 //分配存储空间
 Section* AllocateStorage(Type* ptype, const int reg, const int has_init, const int v, int* addr)
 {
