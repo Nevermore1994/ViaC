@@ -7,4 +7,6 @@ Viac语言compiler
 C89  编译器
 c#5.0 编辑器
 
-后续完成头文件机制
+![file test](https://raw.githubusercontent.com/as981242002/ViaC/master/viac/viac/test.gif)
+
+![Project test](https://raw.githubusercontent.com/as981242002/ViaC/master/viac/viac/projecttest.gif)
